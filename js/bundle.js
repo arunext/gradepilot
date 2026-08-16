@@ -790,14 +790,52 @@
     }
   }
 
+  // Helper to compress camera images before sending to Gemini API (avoids 413 Payload Too Large & timeouts)
+  async function compressImageForGemini(dataUrl, maxDim = 1500, quality = 0.85) {
+    if (!dataUrl || !dataUrl.startsWith('data:image')) return dataUrl;
+    if (dataUrl.startsWith('data:image/svg+xml')) return dataUrl;
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width <= maxDim && height <= maxDim && dataUrl.length < 1200000) {
+          return resolve(dataUrl);
+        }
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  }
+
   // --- 5. AI EVALUATION SERVICE (Proximity-Window Semantic Concept Resolver) ---
   class AiEvaluationService {
     constructor() {
-      this.apiKey = (localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim();
+      this.apiKey = this.loadApiKey();
     }
 
     loadApiKey() { 
       return (localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim(); 
+    }
+
+    getApiKey() {
+      return (this.apiKey || this.loadApiKey() || '').trim();
     }
 
     setApiKey(key) {
@@ -811,11 +849,12 @@
     }
 
     hasLiveApiKey() { 
-      return Boolean(this.apiKey && this.apiKey.length > 20); 
+      const k = this.getApiKey();
+      return Boolean(k && k.length > 10); 
     }
 
     async testApiKey(testKey) {
-      const keyToUse = (testKey || this.apiKey || '').trim();
+      const keyToUse = (testKey || this.getApiKey() || '').trim();
       if (!keyToUse) return { ok: false, error: 'API key is empty.' };
 
       try {
@@ -826,20 +865,27 @@
           if (validModels.length > 0) {
             return { ok: true, activeModel: validModels[0].name.replace(/^models\//, '') };
           }
+        } else {
+          const errText = await listRes.text();
+          return { ok: false, error: `Google API Error (${listRes.status}): ${errText.slice(0, 120)}` };
         }
-      } catch (e) {}
+      } catch (e) {
+        return { ok: false, error: e.message || 'Network error connecting to Google AI.' };
+      }
 
-      return { ok: true, activeModel: 'Gemini Cloud Vision' };
+      return { ok: true, activeModel: 'gemini-2.0-flash' };
     }
 
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
+      let geminiError = null;
 
       // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Sending photo to Google Gemini 2.0 Flash Vision...');
-          const visionResult = await this.evaluateWithGeminiVision({ imageSrc, rubric, progressCallback });
+          progressCallback('Optimizing photo & transcribing with Google Gemini 2.0 Vision...');
+          const compressedSrc = await compressImageForGemini(imageSrc);
+          const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
           if (visionResult) {
             return {
               ...visionResult,
@@ -847,19 +893,23 @@
             };
           }
         } catch (err) {
-          console.warn('Gemini Vision call failed, falling back to local resolver:', err);
+          console.warn('Gemini Vision call failed:', err);
+          geminiError = err.message || 'Gemini Vision call failed';
         }
       }
 
-      // 2. Local Fallback
+      // 2. Fallback
       progressCallback('Evaluating student answer sheet & criteria attachments...');
       await new Promise(r => setTimeout(r, 400));
-      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto });
+      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
     }
 
     async evaluateWithGeminiVision({ imageSrc, rubric, progressCallback }) {
       let base64Data = '';
       let mimeType = 'image/jpeg';
+      const activeKey = this.getApiKey();
+
+      if (!activeKey) throw new Error('API key is empty.');
 
       if (imageSrc.startsWith('data:image/svg+xml')) {
         const svgContent = decodeURIComponent(imageSrc.split(',')[1]);
@@ -879,7 +929,7 @@
 
       const prompt = `You are GradePilot AI, an expert exam evaluation assistant.
 Look at this student's handwritten exam paper image.
-1. Transcribe the entire handwritten text on the paper accurately.
+1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
 2. Evaluate the student's answer against the following question rubric and criteria.
 3. Determine for each key point if it is "hit" (full marks), "partial" (half marks), or "missed" (0 marks).
 4. Extract the exact quote from the student's text as evidence.
@@ -898,8 +948,8 @@ Respond ONLY with a JSON object in this exact schema:
   "feedbackSummary": "A concise 2-sentence summary of strengths and omissions.",
   "points": [
     {
-      "pointId": "pt-1",
-      "status": "hit" | "partial" | "missed",
+      "pointId": "${rubric.keyPoints[0]?.id || 'pt-1'}",
+      "status": "hit",
       "awardedMarks": 1.0,
       "evidenceQuote": "Exact quote from handwritten text",
       "justification": "Why these marks were awarded"
@@ -907,12 +957,13 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
+      // Try active vision models in order of capability
       const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash-8b'];
       let lastErr = null;
 
       for (const model of modelsToTry) {
         try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
           const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -932,7 +983,12 @@ Respond ONLY with a JSON object in this exact schema:
 
           if (!response.ok) {
             const errBody = await response.text();
-            lastErr = new Error(`${model} status ${response.status}: ${errBody}`);
+            let parsedErr = errBody;
+            try {
+              const errObj = JSON.parse(errBody);
+              parsedErr = errObj.error?.message || errBody;
+            } catch (e) {}
+            lastErr = new Error(`${model}: ${parsedErr}`);
             continue;
           }
 
@@ -949,7 +1005,7 @@ Respond ONLY with a JSON object in this exact schema:
                 pointText: kp.text,
                 weight: kp.weight,
                 status: found.status || 'partial',
-                awardedMarks: typeof found.awardedMarks === 'number' ? found.awardedMarks : (found.status === 'hit' ? kp.weight : found.status === 'partial' ? kp.weight * 0.5 : 0),
+                awardedMarks: typeof found.awardedMarks === 'number' ? Number(found.awardedMarks.toFixed(2)) : (found.status === 'hit' ? kp.weight : found.status === 'partial' ? Number((kp.weight * 0.5).toFixed(2)) : 0),
                 evidenceQuote: found.evidenceQuote || '(Detected in scan)',
                 justification: found.justification || ''
               };
@@ -971,7 +1027,7 @@ Respond ONLY with a JSON object in this exact schema:
             transcription: parsed.transcription || '(Handwriting transcribed by Gemini Vision)',
             suggestedScore: Number(calculatedTotal.toFixed(2)),
             maxMarks: rubric.maxMarks,
-            feedbackSummary: parsed.feedbackSummary || 'Graded with Gemini 2.0 Multimodal Vision.',
+            feedbackSummary: parsed.feedbackSummary || `Graded via Google Gemini Vision (${model}).`,
             points: pointsList,
             mode: 'gemini-live'
           };
@@ -1029,12 +1085,16 @@ Respond ONLY with a JSON object in this exact schema:
       return false;
     }
 
-    evaluateIntelligentLocal({ rawText, rubric, sampleMeta, isCustomPhoto }) {
+    evaluateIntelligentLocal({ rawText, rubric, sampleMeta, isCustomPhoto, geminiError }) {
       let studentText = rawText || sampleMeta?.rawText || '';
       const isCustom = Boolean(isCustomPhoto || sampleMeta?.isCustom);
 
       if (!studentText && isCustom) {
-        studentText = '(Custom exam photo captured. Please enter your free Gemini Vision API Key in Settings ⚙️ for automatic OCR reading, or tap "Edit Text" above to type the student answer.)';
+        if (geminiError) {
+          studentText = `(Google Gemini Vision returned: ${geminiError}.\nPlease verify your API Key in Settings ⚙️ or tap "Edit Text" above to transcribe manually.)`;
+        } else {
+          studentText = '(Custom exam photo captured. Please enter your free Gemini Vision API Key in Settings ⚙️ for automatic OCR reading, or tap "Edit Text" above to type the student answer.)';
+        }
       } else if (!studentText) {
         studentText = `A: The key boundaries of Axilla are:\n1) Anterior wall - pectoralis major\n2) Posterior wall - latissimus dorsi, subscapularis, teres major\n3) Medial wall.\n4) Lateral wall.`;
       }
