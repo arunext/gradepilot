@@ -833,9 +833,154 @@
     }
 
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
-      progressCallback('Transcribing handwriting & evaluating boundary attachments...');
+      const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
+
+      // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
+      if (this.hasLiveApiKey()) {
+        try {
+          progressCallback('Sending photo to Google Gemini 2.0 Flash Vision...');
+          const visionResult = await this.evaluateWithGeminiVision({ imageSrc, rubric, progressCallback });
+          if (visionResult) {
+            return {
+              ...visionResult,
+              mode: 'gemini-live'
+            };
+          }
+        } catch (err) {
+          console.warn('Gemini Vision call failed, falling back to local resolver:', err);
+        }
+      }
+
+      // 2. Local Fallback
+      progressCallback('Evaluating student answer sheet & criteria attachments...');
       await new Promise(r => setTimeout(r, 400));
-      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta });
+      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto });
+    }
+
+    async evaluateWithGeminiVision({ imageSrc, rubric, progressCallback }) {
+      let base64Data = '';
+      let mimeType = 'image/jpeg';
+
+      if (imageSrc.startsWith('data:image/svg+xml')) {
+        const svgContent = decodeURIComponent(imageSrc.split(',')[1]);
+        base64Data = btoa(unescape(encodeURIComponent(svgContent)));
+        mimeType = 'image/svg+xml';
+      } else if (imageSrc.startsWith('data:')) {
+        const match = imageSrc.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          base64Data = match[2];
+        } else {
+          base64Data = imageSrc.split(',')[1];
+        }
+      }
+
+      if (!base64Data) throw new Error('No image data found.');
+
+      const prompt = `You are GradePilot AI, an expert exam evaluation assistant.
+Look at this student's handwritten exam paper image.
+1. Transcribe the entire handwritten text on the paper accurately.
+2. Evaluate the student's answer against the following question rubric and criteria.
+3. Determine for each key point if it is "hit" (full marks), "partial" (half marks), or "missed" (0 marks).
+4. Extract the exact quote from the student's text as evidence.
+
+QUESTION: ${rubric.question}
+SUBJECT: ${rubric.subject || 'General'}
+MAXIMUM MARKS: ${rubric.maxMarks}
+
+RUBRIC KEY POINTS:
+${rubric.keyPoints.map((kp, idx) => `Point ${idx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
+
+Respond ONLY with a JSON object in this exact schema:
+{
+  "transcription": "The full transcribed text of the student answer...",
+  "suggestedScore": 3.5,
+  "feedbackSummary": "A concise 2-sentence summary of strengths and omissions.",
+  "points": [
+    {
+      "pointId": "pt-1",
+      "status": "hit" | "partial" | "missed",
+      "awardedMarks": 1.0,
+      "evidenceQuote": "Exact quote from handwritten text",
+      "justification": "Why these marks were awarded"
+    }
+  ]
+}`;
+
+      const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash-8b'];
+      let lastErr = null;
+
+      for (const model of modelsToTry) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  { inline_data: { mime_type: mimeType, data: base64Data } }
+                ]
+              }],
+              generationConfig: {
+                temperature: 0.1,
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+
+          if (!response.ok) {
+            const errBody = await response.text();
+            lastErr = new Error(`${model} status ${response.status}: ${errBody}`);
+            continue;
+          }
+
+          const resData = await response.json();
+          const candidateText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!candidateText) continue;
+
+          const parsed = JSON.parse(candidateText);
+          const pointsList = rubric.keyPoints.map(kp => {
+            const found = (parsed.points || []).find(p => p.pointId === kp.id);
+            if (found) {
+              return {
+                pointId: kp.id,
+                pointText: kp.text,
+                weight: kp.weight,
+                status: found.status || 'partial',
+                awardedMarks: typeof found.awardedMarks === 'number' ? found.awardedMarks : (found.status === 'hit' ? kp.weight : found.status === 'partial' ? kp.weight * 0.5 : 0),
+                evidenceQuote: found.evidenceQuote || '(Detected in scan)',
+                justification: found.justification || ''
+              };
+            }
+            return {
+              pointId: kp.id,
+              pointText: kp.text,
+              weight: kp.weight,
+              status: 'missed',
+              awardedMarks: 0,
+              evidenceQuote: '(Omitted)',
+              justification: 'Not detected in student scan'
+            };
+          });
+
+          const calculatedTotal = pointsList.reduce((sum, p) => sum + p.awardedMarks, 0);
+
+          return {
+            transcription: parsed.transcription || '(Handwriting transcribed by Gemini Vision)',
+            suggestedScore: Number(calculatedTotal.toFixed(2)),
+            maxMarks: rubric.maxMarks,
+            feedbackSummary: parsed.feedbackSummary || 'Graded with Gemini 2.0 Multimodal Vision.',
+            points: pointsList,
+            mode: 'gemini-live'
+          };
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+
+      throw lastErr || new Error('Gemini Vision failed across all model endpoints.');
     }
 
     // Medical Concept Dictionary & Semantic Matcher
@@ -884,9 +1029,13 @@
       return false;
     }
 
-    evaluateIntelligentLocal({ rawText, rubric, sampleMeta }) {
+    evaluateIntelligentLocal({ rawText, rubric, sampleMeta, isCustomPhoto }) {
       let studentText = rawText || sampleMeta?.rawText || '';
-      if (!studentText && sampleMeta?.isCustom) {
+      const isCustom = Boolean(isCustomPhoto || sampleMeta?.isCustom);
+
+      if (!studentText && isCustom) {
+        studentText = '(Custom exam photo captured. Please enter your free Gemini Vision API Key in Settings ⚙️ for automatic OCR reading, or tap "Edit Text" above to type the student answer.)';
+      } else if (!studentText) {
         studentText = `A: The key boundaries of Axilla are:\n1) Anterior wall - pectoralis major\n2) Posterior wall - latissimus dorsi, subscapularis, teres major\n3) Medial wall.\n4) Lateral wall.`;
       }
 

@@ -548,3 +548,51 @@
 .btn-accept-next:active {
   transform: translateY(0);
 }
+
+@media (max-width: 640px) {
+  .review-panel-inner {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .score-hero-card {
+    padding: 0.85rem;
+  }
+
+  .score-main-display {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .score-adjust-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .btn-chip {
+    flex: 1 1 28%;
+    text-align: center;
+    padding: 0.45rem 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  .criterion-card {
+    padding: 0.75rem;
+  }
+
+  .criterion-toggles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+  }
+
+  .btn-toggle-status {
+    padding: 0.55rem 0.2rem;
+    font-size: 0.68rem;
+    white-space: nowrap;
+    text-align: center;
+    justify-content: center;
+  }
+}
