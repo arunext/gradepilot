@@ -1,0 +1,232 @@
+/* AnatomiGrade AI - Rubric Setup & Editor Stylesheet */
+
+.rubric-builder-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.rubric-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.1rem;
+}
+
+.rubric-top-bar h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.preset-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+#btn-new-blank-rubric {
+  background: #0f766e !important;
+  color: white !important;
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+}
+
+#btn-new-blank-rubric:hover {
+  background: #115e59 !important;
+}
+
+#btn-save-custom-rubric {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+}
+
+#btn-save-custom-rubric:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.preset-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.preset-selector-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.preset-selector-group select {
+  max-width: 280px;
+  font-weight: 600;
+}
+
+/* Meta Grid */
+.rubric-meta-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.rubric-meta-grid .span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 640px) {
+  .rubric-meta-grid {
+    grid-template-columns: 1fr;
+  }
+  .rubric-meta-grid .span-2 {
+    grid-column: span 1;
+  }
+  .preset-action-bar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Weight Summary Bar */
+.weight-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.weight-summary-bar.balanced {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #065f46;
+}
+
+.weight-summary-bar.unbalanced {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  color: #92400e;
+}
+
+.status-badge-ok {
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-left: 6px;
+}
+
+.status-badge-warn {
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-left: 6px;
+}
+
+/* Keypoints List */
+.keypoints-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.keypoints-list-header h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.keypoints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.keypoint-item {
+  background: #f8fafc;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  transition: all 0.15s ease;
+}
+
+.keypoint-item:hover {
+  border-color: #cbd5e1;
+  background: white;
+}
+
+.keypoint-drag-handle {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-brand);
+  background: var(--color-brand-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.keypoint-inputs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.kp-keywords-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kp-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.kp-keywords-input {
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.5rem !important;
+}
+
+.keypoint-weight-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.keypoint-weight-wrap label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.kp-weight-input {
+  width: 70px;
+  font-weight: 700;
+  text-align: center;
+}
