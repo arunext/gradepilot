@@ -123,15 +123,88 @@
   overflow: hidden;
 }
 
+/* Upload Choice Options Grid */
+.upload-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.btn-upload-choice {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-upload-choice:hover, .btn-upload-choice:active {
+  border-color: var(--color-brand);
+  background: #f0fdfa;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-take-photo {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+}
+
+.btn-take-photo .upload-choice-icon {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.upload-choice-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.upload-choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.upload-choice-text strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.upload-choice-text span {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
 /* Dropzone */
 .dropzone {
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
   text-align: center;
   background: #f8fafc;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+.dropzone:hover {
+  border-color: var(--color-brand);
+  background: #f0fdfa;
 }
 
 .dropzone.drag-over {
@@ -144,20 +217,19 @@
 }
 
 .dropzone-icon {
-  font-size: 2rem;
-  margin-bottom: 0.4rem;
+  font-size: 1.75rem;
+  margin-bottom: 0.3rem;
 }
 
 .dropzone-title {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .dropzone-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
 }
 
 /* Camera Viewport */

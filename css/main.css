@@ -197,35 +197,37 @@ body {
   border-radius: var(--radius-full);
 }
 
-/* Main App Container */
+/* Main App/* Layout Containers */
 .main-container {
   flex: 1;
   max-width: 1560px;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem 1.25rem 2rem;
+  padding: 1rem 1.25rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* Section Header / Active Rubric Banner */
+/* Active Rubric Context Banner */
 .active-rubric-banner {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--color-brand);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  box-shadow: var(--shadow-sm);
+  gap: 1rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .banner-left {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
 .banner-subject-title {
@@ -233,44 +235,165 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-brand);
+  color: #5eead4;
 }
 
 .banner-question-text {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #f8fafc;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .banner-right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .banner-max-badge {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #1e293b;
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.12);
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
 }
 
-/* Split Workspace Layout for Grading */
+.btn-evaluate-hero {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: white;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.btn-evaluate-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.5);
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.btn-evaluate-hero:active {
+  transform: translateY(0);
+}
+
+/* Split Grading Workspace */
 .grading-workspace-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.15fr;
   gap: 1.25rem;
   align-items: start;
 }
 
+/* Mobile Media Queries */
 @media (max-width: 960px) {
+  .app-header {
+    padding: 0 0.85rem;
+    height: auto;
+    min-height: 58px;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .brand-group {
+    gap: 0.5rem;
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+
+  .brand-text h1 {
+    font-size: 1.05rem;
+  }
+
+  .header-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding: 0.2rem 0;
+    gap: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tab {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .header-right {
+    gap: 0.4rem;
+  }
+
+  .header-stat-pill {
+    display: none;
+  }
+
+  .header-api-badge {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .main-container {
+    padding: 0.75rem 0.75rem 3rem;
+    gap: 0.75rem;
+  }
+
+  .active-rubric-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.85rem;
+    gap: 0.75rem;
+  }
+
+  .banner-question-text {
+    white-space: normal;
+    font-size: 0.88rem;
+  }
+
+  .banner-right {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .banner-right select {
+    flex: 1 1 100%;
+    font-size: 0.85rem;
+  }
+
+  .btn-evaluate-hero {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+
   .grading-workspace-grid {
     grid-template-columns: 1fr;
-  }
-  .app-header {
     padding: 0 0.75rem;
   }
   .brand-text h1 {

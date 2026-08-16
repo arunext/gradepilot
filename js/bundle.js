@@ -1,4 +1,5 @@
-// AnatomiGrade AI - Bulletproof Concept & Relation Extractor Bundle
+// GradePilot AI - Universal Handwritten Exam Grading Platform
+// Multimodal Vision OCR & Intelligent Semantic Concept Resolver
 (function() {
   'use strict';
 
@@ -231,7 +232,7 @@
 
     loadStoredRubric() {
       try {
-        const stored = localStorage.getItem('anatomigrade_current_rubric');
+        const stored = localStorage.getItem('gradepilot_current_rubric') || localStorage.getItem('anatomigrade_current_rubric');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return null;
@@ -239,18 +240,18 @@
 
     loadCustomRubrics() {
       try {
-        const stored = localStorage.getItem('anatomigrade_custom_rubrics');
+        const stored = localStorage.getItem('gradepilot_custom_rubrics') || localStorage.getItem('anatomigrade_custom_rubrics');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return [];
     }
 
     saveCustomRubrics() {
-      try { localStorage.setItem('anatomigrade_custom_rubrics', JSON.stringify(this.customRubrics)); } catch (e) {}
+      try { localStorage.setItem('gradepilot_custom_rubrics', JSON.stringify(this.customRubrics)); } catch (e) {}
     }
 
     saveToStorage() {
-      try { localStorage.setItem('anatomigrade_current_rubric', JSON.stringify(this.currentRubric)); } catch (e) {}
+      try { localStorage.setItem('gradepilot_current_rubric', JSON.stringify(this.currentRubric)); } catch (e) {}
     }
 
     getAllRubrics() { return [...PRESET_RUBRICS, ...this.customRubrics]; }
@@ -430,13 +431,32 @@
           </div>
 
           <div class="capture-mode-pane hidden" id="pane-upload">
-            <div class="dropzone" id="paper-dropzone">
+            <div class="upload-options-grid">
+              <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
               <input type="file" id="file-input" accept="image/*" class="file-input-hidden" />
+              
+              <button type="button" class="btn-upload-choice btn-take-photo" id="btn-take-photo-direct">
+                <span class="upload-choice-icon">📸</span>
+                <div class="upload-choice-text">
+                  <strong>Take Photo (Camera)</strong>
+                  <span>Snap answer sheet directly</span>
+                </div>
+              </button>
+
+              <button type="button" class="btn-upload-choice btn-browse-gallery" id="btn-browse-file">
+                <span class="upload-choice-icon">📁</span>
+                <div class="upload-choice-text">
+                  <strong>Upload from Device</strong>
+                  <span>Choose JPG, PNG, HEIC</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="dropzone" id="paper-dropzone" style="margin-top: 0.75rem;">
               <div class="dropzone-content">
                 <div class="dropzone-icon">📤</div>
-                <div class="dropzone-title">Drop student's handwritten answer sheet here</div>
-                <div class="dropzone-subtitle">or browse from device (JPG, PNG, HEIC)</div>
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-file">Browse File</button>
+                <div class="dropzone-title">Or Drop / Tap to Upload Paper</div>
+                <div class="dropzone-subtitle">Supports instant evaluation on upload</div>
               </div>
             </div>
           </div>
@@ -519,13 +539,26 @@
       });
 
       const fileInput = this.container.querySelector('#file-input');
+      const cameraInput = this.container.querySelector('#camera-file-input');
       const btnBrowse = this.container.querySelector('#btn-browse-file');
+      const btnTakePhoto = this.container.querySelector('#btn-take-photo-direct');
       const dropzone = this.container.querySelector('#paper-dropzone');
 
       if (btnBrowse && fileInput) btnBrowse.addEventListener('click', () => fileInput.click());
+      if (btnTakePhoto && cameraInput) btnTakePhoto.addEventListener('click', () => cameraInput.click());
       if (fileInput) fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
+      if (cameraInput) cameraInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
 
       if (dropzone) {
+        dropzone.addEventListener('click', (e) => {
+          if (e.target !== btnBrowse && e.target !== btnTakePhoto) {
+            if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+              cameraInput?.click();
+            } else {
+              fileInput?.click();
+            }
+          }
+        });
         dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
         dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
         dropzone.addEventListener('drop', (e) => {
@@ -760,18 +793,19 @@
   // --- 5. AI EVALUATION SERVICE (Proximity-Window Semantic Concept Resolver) ---
   class AiEvaluationService {
     constructor() {
-      this.apiKey = (localStorage.getItem('anatomigrade_gemini_api_key') || '').trim();
+      this.apiKey = (localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim();
     }
 
     loadApiKey() { 
-      return (localStorage.getItem('anatomigrade_gemini_api_key') || '').trim(); 
+      return (localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim(); 
     }
 
     setApiKey(key) {
       this.apiKey = (key || '').trim();
       if (this.apiKey) {
-        localStorage.setItem('anatomigrade_gemini_api_key', this.apiKey);
+        localStorage.setItem('gradepilot_gemini_api_key', this.apiKey);
       } else {
+        localStorage.removeItem('gradepilot_gemini_api_key');
         localStorage.removeItem('anatomigrade_gemini_api_key');
       }
     }
@@ -1262,17 +1296,17 @@
 
     loadRecords() {
       try {
-        const stored = localStorage.getItem('anatomigrade_gradebook_records');
+        const stored = localStorage.getItem('gradepilot_gradebook_records') || localStorage.getItem('anatomigrade_gradebook_records');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return [
-        { id: 'g1', studentName: 'Rohan Gupta', rollNo: 'MED-2024-001', subject: 'Human Anatomy', question: 'Boundaries of Axilla', finalScore: 5.0, aiScore: 5.0, maxMarks: 5.0, isOverridden: false, professorRemarks: 'All walls & attachments complete', timestamp: '11:42 AM', date: '2026-08-16' },
-        { id: 'g2', studentName: 'Pooja Verma', rollNo: 'MED-2024-002', subject: 'Human Anatomy', question: 'Boundaries of Axilla', finalScore: 2.50, aiScore: 2.50, maxMarks: 5.0, isOverridden: false, professorRemarks: 'Pt 2 full, partial for walls 1,3,4', timestamp: '11:46 AM', date: '2026-08-16' }
+        { id: 'g1', studentName: 'Rohan Gupta', rollNo: 'STU-2024-001', subject: 'Human Anatomy', question: 'Boundaries of Axilla', finalScore: 5.0, aiScore: 5.0, maxMarks: 5.0, isOverridden: false, professorRemarks: 'All walls & attachments complete', timestamp: '11:42 AM', date: '2026-08-16' },
+        { id: 'g2', studentName: 'Pooja Verma', rollNo: 'STU-2024-002', subject: 'Human Anatomy', question: 'Boundaries of Axilla', finalScore: 2.50, aiScore: 2.50, maxMarks: 5.0, isOverridden: false, professorRemarks: 'Pt 2 full, partial for walls 1,3,4', timestamp: '11:46 AM', date: '2026-08-16' }
       ];
     }
 
     saveRecords() {
-      try { localStorage.setItem('anatomigrade_gradebook_records', JSON.stringify(this.records)); } catch (e) {}
+      try { localStorage.setItem('gradepilot_gradebook_records', JSON.stringify(this.records)); } catch (e) {}
     }
 
     addRecord(rec) {
@@ -1408,7 +1442,7 @@
       const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
       const link = document.createElement('a');
       link.href = encodeURI(csv);
-      link.download = `AnatomiGrade_${new Date().toISOString().slice(0,10)}.csv`;
+      link.download = `GradePilot_${new Date().toISOString().slice(0,10)}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1621,7 +1655,7 @@
       c.innerHTML = `
         <div class="evaluation-loading-card">
           <div class="loading-pulse-ring"></div>
-          <div class="loading-title">AnatomiGrade AI Evaluating</div>
+          <div class="loading-title">GradePilot AI Evaluating</div>
           <div style="font-size: 0.85rem; color: #0f766e; font-weight: 600; margin-top: -6px;">${customStatus || 'Processing...'}</div>
           <div class="loading-steps-list">
             <div class="step-item active"><span class="step-dot"></span> Transcribing handwritten terminology...</div>
@@ -1707,7 +1741,7 @@
           <div class="rubric-meta-grid">
             <div class="form-group">
               <label for="input-rubric-subject">Subject / Course Name:</label>
-              <input type="text" id="input-rubric-subject" class="input-control" value="${rubric.subject}" placeholder="e.g. Upper Limb Anatomy..." />
+              <input type="text" id="input-rubric-subject" class="input-control" value="${rubric.subject}" placeholder="e.g. Upper Limb Anatomy, Biology, History..." />
             </div>
             <div class="form-group">
               <label for="input-rubric-maxmarks">Maximum Marks:</label>
@@ -1829,8 +1863,12 @@
 
   // Self-boot on load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { window.anatomiGradeApp = new App(); });
+    document.addEventListener('DOMContentLoaded', () => {
+      window.gradePilotApp = new App();
+      window.anatomiGradeApp = window.gradePilotApp;
+    });
   } else {
-    window.anatomiGradeApp = new App();
+    window.gradePilotApp = new App();
+    window.anatomiGradeApp = window.gradePilotApp;
   }
 })();
