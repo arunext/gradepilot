@@ -780,45 +780,6 @@
       return { ok: true, activeModel: 'gemini-2.0-flash' };
     }
 
-    async getAvailableVisionModels(activeKey) {
-      try {
-        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${activeKey}`);
-        if (listRes.ok) {
-          const listData = await listRes.json();
-          const valid = (listData.models || [])
-            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-            .map(m => m.name.replace(/^models\//, ''));
-          
-          const priorityNames = [
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest',
-            'gemini-2.0-flash',
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-pro',
-            'gemini-1.5-pro-latest',
-            'gemini-2.5-flash-preview',
-            'gemini-2.5-pro-preview'
-          ];
-
-          const sorted = [];
-          for (const target of priorityNames) {
-            if (valid.includes(target) && !sorted.includes(target)) {
-              sorted.push(target);
-            }
-          }
-          for (const m of valid) {
-            if (!sorted.includes(m) && !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen')) {
-              sorted.push(m);
-            }
-          }
-          if (sorted.length > 0) return sorted;
-        }
-      } catch (e) {
-        console.warn('Model discovery failed:', e);
-      }
-      return ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-    }
-
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
       let geminiError = null;
@@ -826,7 +787,7 @@
       // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Optimizing photo & connecting to Google Gemini Vision...');
+          progressCallback('Transcribing handwriting with Google Gemini AI...');
           const compressedSrc = await compressImageForGemini(imageSrc);
           const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
           if (visionResult) {
@@ -843,7 +804,7 @@
 
       // 2. Fallback
       progressCallback('Evaluating student answer sheet & criteria attachments...');
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 200));
       return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
     }
 
@@ -898,13 +859,12 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-      // Dynamically discover exact authorized models for this key from Google ModelService
-      const modelsToTry = await this.getAvailableVisionModels(activeKey);
+      // Call primary fast model directly (gemini-1.5-flash / gemini-2.0-flash)
+      const primaryModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
       let lastErr = null;
 
-      for (const model of modelsToTry) {
+      for (const model of primaryModels) {
         try {
-          progressCallback(`Transcribing & grading with Google ${model}...`);
           const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
           const response = await fetch(endpoint, {
             method: 'POST',
@@ -930,7 +890,11 @@ Respond ONLY with a JSON object in this exact schema:
               const errObj = JSON.parse(errBody);
               parsedErr = errObj.error?.message || errBody;
             } catch (e) {}
-            lastErr = new Error(`${model}: ${parsedErr}`);
+            lastErr = new Error(`${model} (${response.status}): ${parsedErr}`);
+            if (response.status === 429) {
+              // Rate limited on this model, try next immediately
+              continue;
+            }
             continue;
           }
 
@@ -983,7 +947,7 @@ Respond ONLY with a JSON object in this exact schema:
         }
       }
 
-      throw lastErr || new Error('Gemini Vision failed across all model endpoints.');
+      throw lastErr || new Error('Gemini Vision request timed out.');
     }
 
     // Medical Concept Dictionary & Semantic Matcher
