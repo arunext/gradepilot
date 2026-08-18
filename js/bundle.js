@@ -780,6 +780,36 @@
       return { ok: true, activeModel: 'gemini-2.0-flash' };
     }
 
+    async getWorkingModels(activeKey) {
+      if (this.cachedModels && this.cachedModels.length > 0) return this.cachedModels;
+
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${activeKey}`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const valid = (listData.models || [])
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''))
+            .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
+
+          // Sort: Flash models first (fastest, cheapest), then Pro models
+          const flash = valid.filter(m => m.includes('flash'));
+          const pro = valid.filter(m => m.includes('pro') && !m.includes('flash'));
+          const rest = valid.filter(m => !m.includes('flash') && !m.includes('pro'));
+
+          const sorted = [...flash, ...pro, ...rest];
+          if (sorted.length > 0) {
+            this.cachedModels = sorted;
+            return sorted;
+          }
+        }
+      } catch (e) {
+        console.warn('Model list query failed:', e);
+      }
+
+      return ['gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+    }
+
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
       let geminiError = null;
@@ -859,11 +889,10 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-      // Call primary fast model directly (gemini-1.5-flash / gemini-2.0-flash)
-      const primaryModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+      const modelsToTry = await this.getWorkingModels(activeKey);
       let lastErr = null;
 
-      for (const model of primaryModels) {
+      for (const model of modelsToTry) {
         try {
           const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
           const response = await fetch(endpoint, {
