@@ -379,17 +379,17 @@
     }
   }
 
-  // Helper to compress camera images before sending to Gemini API
+  // Helper to convert and compress ANY image (including SVG and high-res camera shots) to clean JPEG for Gemini Vision
   async function compressImageForGemini(dataUrl, maxDim = 1500, quality = 0.85) {
-    if (!dataUrl || !dataUrl.startsWith('data:image')) return dataUrl;
-    if (dataUrl.startsWith('data:image/svg+xml')) return dataUrl;
+    if (!dataUrl) return dataUrl;
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        let { width, height } = img;
-        if (width <= maxDim && height <= maxDim && dataUrl.length < 1200000) {
-          return resolve(dataUrl);
-        }
+        let width = img.naturalWidth || img.width || 1200;
+        let height = img.naturalHeight || img.height || 1600;
+
+        if (width <= 0 || height <= 0) { width = 1200; height = 1600; }
+
         if (width > height) {
           if (width > maxDim) {
             height = Math.round((height * maxDim) / width);
@@ -401,11 +401,17 @@
             height = maxDim;
           }
         }
+
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+
+        // Solid white background (vital for SVGs with transparent layers)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
+
         resolve(canvas.toDataURL('image/jpeg', quality));
       };
       img.onerror = () => resolve(dataUrl);
@@ -783,22 +789,26 @@
             .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
             .map(m => m.name.replace(/^models\//, ''));
           
-          const preferredOrder = [
+          const priorityNames = [
             'gemini-1.5-flash',
             'gemini-1.5-flash-latest',
             'gemini-2.0-flash',
             'gemini-2.0-flash-exp',
             'gemini-1.5-pro',
-            'gemini-1.5-pro-latest'
+            'gemini-1.5-pro-latest',
+            'gemini-2.5-flash-preview',
+            'gemini-2.5-pro-preview'
           ];
+
           const sorted = [];
-          for (const pref of preferredOrder) {
-            const found = valid.find(m => m === pref || m.startsWith(pref));
-            if (found && !sorted.includes(found)) sorted.push(found);
+          for (const target of priorityNames) {
+            if (valid.includes(target) && !sorted.includes(target)) {
+              sorted.push(target);
+            }
           }
-          for (const v of valid) {
-            if (!sorted.includes(v) && !v.includes('embedding') && !v.includes('aqa') && !v.includes('imagen')) {
-              sorted.push(v);
+          for (const m of valid) {
+            if (!sorted.includes(m) && !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen')) {
+              sorted.push(m);
             }
           }
           if (sorted.length > 0) return sorted;
@@ -806,7 +816,7 @@
       } catch (e) {
         console.warn('Model discovery failed:', e);
       }
-      return ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+      return ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
     }
 
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
@@ -838,24 +848,22 @@
     }
 
     async evaluateWithGeminiVision({ imageSrc, rubric, progressCallback }) {
-      let base64Data = '';
-      let mimeType = 'image/jpeg';
       const activeKey = this.getApiKey();
-
       if (!activeKey) throw new Error('API key is empty.');
 
-      if (imageSrc.startsWith('data:image/svg+xml')) {
-        const svgContent = decodeURIComponent(imageSrc.split(',')[1]);
-        base64Data = btoa(unescape(encodeURIComponent(svgContent)));
-        mimeType = 'image/svg+xml';
-      } else if (imageSrc.startsWith('data:')) {
-        const match = imageSrc.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-        if (match) {
-          mimeType = match[1];
-          base64Data = match[2];
-        } else {
-          base64Data = imageSrc.split(',')[1];
+      let base64Data = '';
+      let mimeType = 'image/jpeg';
+
+      const commaIdx = imageSrc.indexOf(',');
+      if (commaIdx >= 0) {
+        const meta = imageSrc.substring(0, commaIdx);
+        base64Data = imageSrc.substring(commaIdx + 1).replace(/[\r\n\s]+/g, '');
+        const m = meta.match(/data:([^;]+)/);
+        if (m && m[1] && !m[1].includes('svg')) {
+          mimeType = m[1];
         }
+      } else {
+        base64Data = imageSrc.replace(/[\r\n\s]+/g, '');
       }
 
       if (!base64Data) throw new Error('No image data found.');
