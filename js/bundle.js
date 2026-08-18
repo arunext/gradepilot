@@ -855,7 +855,15 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-      const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash-8b'];
+      // Try supported production vision models
+      const modelsToTry = [
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-pro',
+        'gemini-1.5-pro-latest'
+      ];
       let lastErr = null;
 
       for (const model of modelsToTry) {
@@ -872,8 +880,7 @@ Respond ONLY with a JSON object in this exact schema:
                 ]
               }],
               generationConfig: {
-                temperature: 0.1,
-                responseMimeType: 'application/json'
+                temperature: 0.1
               }
             })
           });
@@ -893,7 +900,12 @@ Respond ONLY with a JSON object in this exact schema:
           const candidateText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
           if (!candidateText) continue;
 
-          const parsed = JSON.parse(candidateText);
+          let cleanedJson = candidateText.trim();
+          if (cleanedJson.includes('```')) {
+            cleanedJson = cleanedJson.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+          }
+
+          const parsed = JSON.parse(cleanedJson);
           const pointsList = rubric.keyPoints.map(kp => {
             const found = (parsed.points || []).find(p => p.pointId === kp.id);
             if (found) {
