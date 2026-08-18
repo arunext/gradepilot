@@ -774,6 +774,41 @@
       return { ok: true, activeModel: 'gemini-2.0-flash' };
     }
 
+    async getAvailableVisionModels(activeKey) {
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${activeKey}`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const valid = (listData.models || [])
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+          
+          const preferredOrder = [
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-exp',
+            'gemini-1.5-pro',
+            'gemini-1.5-pro-latest'
+          ];
+          const sorted = [];
+          for (const pref of preferredOrder) {
+            const found = valid.find(m => m === pref || m.startsWith(pref));
+            if (found && !sorted.includes(found)) sorted.push(found);
+          }
+          for (const v of valid) {
+            if (!sorted.includes(v) && !v.includes('embedding') && !v.includes('aqa') && !v.includes('imagen')) {
+              sorted.push(v);
+            }
+          }
+          if (sorted.length > 0) return sorted;
+        }
+      } catch (e) {
+        console.warn('Model discovery failed:', e);
+      }
+      return ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+    }
+
     async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
       let geminiError = null;
@@ -781,7 +816,7 @@
       // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Optimizing photo & transcribing with Google Gemini 2.0 Vision...');
+          progressCallback('Optimizing photo & connecting to Google Gemini Vision...');
           const compressedSrc = await compressImageForGemini(imageSrc);
           const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
           if (visionResult) {
@@ -855,28 +890,23 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-      // Try supported production vision models
-      const modelsToTry = [
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-latest',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-exp',
-        'gemini-1.5-pro',
-        'gemini-1.5-pro-latest'
-      ];
+      // Dynamically discover exact authorized models for this key from Google ModelService
+      const modelsToTry = await this.getAvailableVisionModels(activeKey);
       let lastErr = null;
 
       for (const model of modelsToTry) {
         try {
+          progressCallback(`Transcribing & grading with Google ${model}...`);
           const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
           const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{
+                role: 'user',
                 parts: [
                   { text: prompt },
-                  { inline_data: { mime_type: mimeType, data: base64Data } }
+                  { inlineData: { mimeType: mimeType, data: base64Data } }
                 ]
               }],
               generationConfig: {
