@@ -1,23 +1,23 @@
 // GradePilot AI - Universal Handwritten Exam Grading Platform
-// Multimodal Vision OCR & Intelligent Semantic Concept Resolver
+// Multimodal Vision OCR & Intelligent Semantic Concept Resolver (Somhi Design System)
 (function() {
   'use strict';
 
   // --- 1. SVG ICONS ---
   const icons = {
-    camera: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
-    upload: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
-    sparkles: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>`,
-    check: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-    checkCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-    x: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-    plus: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
-    trash: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+    camera: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
+    upload: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+    sparkles: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3 1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>`,
+    check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    checkCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    x: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    plus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    trash: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
     fileText: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
     barChart: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
-    download: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
-    edit: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-    zap: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+    download: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+    edit: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    zap: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
   };
 
   function renderIcon(name, customClass = '') {
@@ -82,7 +82,7 @@
         <g transform="translate(100, 30)">
           <text x="0" y="20" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#0f172a">FACULTY OF MEDICINE - INTERNAL ASSESSMENT</text>
           <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
-          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#0f766e">${escapeXml(rollNo)}</tspan></text>
+          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
           <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Date: 16-Aug-2026</text>
           <circle cx="560" cy="40" r="30" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-12, 560, 40)"/>
           <text x="532" y="38" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#dc2626" transform="rotate(-12, 560, 40)">DEPARTMENT OF</text>
@@ -98,7 +98,7 @@
     {
       id: 'sample-axilla-paper',
       studentName: 'Pooja Verma',
-      rollNo: 'MED-2024-001',
+      rollNo: 'STU-2024-001',
       subject: 'Human Anatomy - Upper Limb',
       questionTitle: 'Boundaries of Axilla: Anterior, Posterior, Medial, and Lateral walls.',
       maxScore: 5.0,
@@ -114,7 +114,7 @@
     {
       id: 'sample-axilla-full',
       studentName: 'Rohan Gupta',
-      rollNo: 'MED-2024-002',
+      rollNo: 'STU-2024-002',
       subject: 'Human Anatomy - Upper Limb',
       questionTitle: 'Boundaries of Axilla: Anterior, Posterior, Medial, and Lateral walls.',
       maxScore: 5.0,
@@ -131,7 +131,7 @@
     {
       id: 'sample-bp',
       studentName: 'Anya Sharma',
-      rollNo: 'MED-2024-003',
+      rollNo: 'STU-2024-003',
       subject: 'Human Anatomy - Upper Limb',
       questionTitle: 'Describe the formation, relations, branches, and applied anatomy of the Brachial Plexus.',
       maxScore: 10.0,
@@ -149,7 +149,7 @@
     {
       id: 'sample-cardiac',
       studentName: 'Rahul Verma',
-      rollNo: 'MED-2024-004',
+      rollNo: 'STU-2024-004',
       subject: 'Physiology & Anatomy of CVS',
       questionTitle: 'Explain the events of the Cardiac Cycle with emphasis on ventricular phases and valve mechanics.',
       maxScore: 5.0,
@@ -268,16 +268,13 @@
       const newId = 'custom-' + Date.now().toString(36);
       this.currentRubric = {
         id: newId,
-        subject: 'Human Anatomy - Theory',
-        question: 'Boundaries of Axilla: Anterior, Posterior, Medial, and Lateral walls, Apex and Base.',
+        subject: 'Course / Subject Name',
+        question: 'Enter question title or prompt here...',
         maxMarks: 5.0,
         isCustom: true,
         keyPoints: [
-          { id: 'pt-1', text: 'anterior wall -pectoralis major, pectoralis minor, subclavius', weight: 1.00, keywords: ['anterior wall', 'pectoralis major', 'pectoralis minor', 'subclavius'] },
-          { id: 'pt-2', text: 'posterior wall -latissimus dorsi, subscapularis, teres major', weight: 1.00, keywords: ['posterior wall', 'latissimus dorsi', 'subscapularis', 'teres major'] },
-          { id: 'pt-3', text: 'medial wall -serratus anterior, upper 4 ribs', weight: 1.00, keywords: ['medial wall', 'serratus anterior', 'upper 4 ribs', 'ribs'] },
-          { id: 'pt-4', text: 'lateral wall -short head of biceps, coracobrachialis', weight: 1.00, keywords: ['lateral wall', 'short head of biceps', 'coracobrachialis', 'biceps'] },
-          { id: 'pt-5', text: 'apex -clavicle, scapula, first rib; base -skin, axillary fascia', weight: 1.00, keywords: ['apex', 'clavicle', 'first rib', 'base', 'skin'] }
+          { id: 'pt-1', text: 'First key point / expected concept', weight: 2.50, keywords: [] },
+          { id: 'pt-2', text: 'Second key point / expected concept', weight: 2.50, keywords: [] }
         ]
       };
       this.notify();
@@ -321,7 +318,7 @@
       const newId = 'point-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
       this.currentRubric.keyPoints.push({
         id: newId,
-        text: text || 'New key criteria / anatomical boundary...',
+        text: text || 'New key criteria / concept point...',
         weight: parseFloat(weight) || 1.0,
         keywords: keywords
       });
@@ -382,415 +379,7 @@
     }
   }
 
-  // --- 4. PAPER CAPTURE & VIEWER ---
-  class PaperCapture {
-    constructor(options = {}) {
-      this.container = options.container;
-      this.onCaptureCallback = options.onCapture || (() => {});
-      this.currentImageSrc = null;
-      this.currentMeta = null;
-      this.stream = null;
-      this.zoom = 1;
-      this.rotation = 0;
-      this.panX = 0;
-      this.panY = 0;
-      this.isDragging = false;
-      this.filters = { contrast: 100, brightness: 100, grayscale: false };
-      this.init();
-    }
-
-    init() {
-      this.renderUI();
-      this.attachEvents();
-      this.loadSample('sample-axilla-paper');
-    }
-
-    renderUI() {
-      if (!this.container) return;
-      this.container.innerHTML = `
-        <div class="capture-panel">
-          <div class="capture-tabs">
-            <button type="button" class="tab-btn active" data-mode="presets">📄 Sample Papers (4)</button>
-            <button type="button" class="tab-btn" data-mode="upload">📁 Upload Image</button>
-            <button type="button" class="tab-btn" data-mode="camera">📷 Mobile Camera</button>
-          </div>
-
-          <div class="capture-mode-pane" id="pane-presets">
-            <div class="presets-scroll-grid">
-              ${SAMPLE_PAPERS.map(s => `
-                <div class="preset-card ${s.id === 'sample-axilla-paper' ? 'selected' : ''}" data-sample-id="${s.id}">
-                  <div class="preset-card-header">
-                    <span class="badge-student">${s.rollNo}</span>
-                    <span class="badge-expected">Est. ${s.expectedScore}/${s.maxScore}</span>
-                  </div>
-                  <div class="preset-student-name">${s.studentName}</div>
-                  <div class="preset-desc">${s.description}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="capture-mode-pane hidden" id="pane-upload">
-            <div class="upload-options-grid">
-              <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
-              <input type="file" id="file-input" accept="image/*" class="file-input-hidden" />
-              
-              <button type="button" class="btn-upload-choice btn-take-photo" id="btn-take-photo-direct">
-                <span class="upload-choice-icon">📸</span>
-                <div class="upload-choice-text">
-                  <strong>Take Photo (Camera)</strong>
-                  <span>Snap answer sheet directly</span>
-                </div>
-              </button>
-
-              <button type="button" class="btn-upload-choice btn-browse-gallery" id="btn-browse-file">
-                <span class="upload-choice-icon">📁</span>
-                <div class="upload-choice-text">
-                  <strong>Upload from Device</strong>
-                  <span>Choose JPG, PNG, HEIC</span>
-                </div>
-              </button>
-            </div>
-
-            <div class="dropzone" id="paper-dropzone" style="margin-top: 0.75rem;">
-              <div class="dropzone-content">
-                <div class="dropzone-icon">📤</div>
-                <div class="dropzone-title">Or Drop / Tap to Upload Paper</div>
-                <div class="dropzone-subtitle">Supports instant evaluation on upload</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="capture-mode-pane hidden" id="pane-camera">
-            <div class="camera-viewport-container">
-              <video id="camera-video" playsinline autoplay muted class="camera-video"></video>
-              <canvas id="camera-canvas" class="hidden"></canvas>
-              <div class="camera-overlay">
-                <div class="camera-guide-frame">
-                  <div class="guide-text">Align Exam Paper within frame</div>
-                </div>
-              </div>
-              <div class="camera-controls">
-                <button type="button" class="btn-shutter" id="btn-snap-photo" title="Capture Photo">
-                  <span class="shutter-inner"></span>
-                </button>
-                <button type="button" class="btn-icon btn-camera-close" id="btn-close-camera">❌</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="paper-viewer-wrapper">
-            <div class="viewer-header">
-              <div class="viewer-title-group">
-                <span class="viewer-badge" id="paper-badge-roll">MED-2024-001</span>
-                <span class="viewer-subtitle" id="paper-student-name">Pooja Verma</span>
-              </div>
-              <div class="viewer-toolbar">
-                <button type="button" class="btn-tool" id="btn-zoom-out">🔍-</button>
-                <button type="button" class="btn-tool" id="btn-zoom-reset">100%</button>
-                <button type="button" class="btn-tool" id="btn-zoom-in">🔍+</button>
-                <button type="button" class="btn-tool" id="btn-rotate">🔄 90°</button>
-                <button type="button" class="btn-toggle-filters btn-tool" id="btn-toggle-filters">✨ Filters</button>
-              </div>
-            </div>
-
-            <div class="filter-toolbar hidden" id="filter-toolbar">
-              <div class="filter-item">
-                <label>Contrast: <span id="val-contrast">100%</span></label>
-                <input type="range" id="range-contrast" min="50" max="250" value="100" />
-              </div>
-              <div class="filter-item">
-                <label>Brightness: <span id="val-brightness">100%</span></label>
-                <input type="range" id="range-brightness" min="60" max="160" value="100" />
-              </div>
-              <div class="filter-item">
-                <label class="checkbox-label"><input type="checkbox" id="chk-grayscale" /> B&W Doc Mode</label>
-              </div>
-              <button type="button" class="btn btn-xs btn-outline" id="btn-reset-filters">Reset</button>
-            </div>
-
-            <div class="viewer-stage" id="viewer-stage">
-              <div class="viewer-content" id="viewer-content">
-                <img id="active-paper-img" src="" alt="Student Handwritten Answer Paper" draggable="false" />
-              </div>
-              <div class="viewer-drag-hint">💡 Drag to pan • Double-click to zoom</div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    attachEvents() {
-      const tabBtns = this.container.querySelectorAll('.tab-btn');
-      tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          tabBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          this.switchMode(btn.dataset.mode);
-        });
-      });
-
-      this.container.querySelectorAll('.preset-card').forEach(card => {
-        card.addEventListener('click', () => {
-          this.container.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-          this.loadSample(card.dataset.sampleId);
-        });
-      });
-
-      const fileInput = this.container.querySelector('#file-input');
-      const cameraInput = this.container.querySelector('#camera-file-input');
-      const btnBrowse = this.container.querySelector('#btn-browse-file');
-      const btnTakePhoto = this.container.querySelector('#btn-take-photo-direct');
-      const dropzone = this.container.querySelector('#paper-dropzone');
-
-      if (btnBrowse && fileInput) btnBrowse.addEventListener('click', () => fileInput.click());
-      if (btnTakePhoto && cameraInput) btnTakePhoto.addEventListener('click', () => cameraInput.click());
-      if (fileInput) fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
-      if (cameraInput) cameraInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
-
-      if (dropzone) {
-        dropzone.addEventListener('click', (e) => {
-          if (e.target !== btnBrowse && e.target !== btnTakePhoto) {
-            if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-              cameraInput?.click();
-            } else {
-              fileInput?.click();
-            }
-          }
-        });
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-        dropzone.addEventListener('drop', (e) => {
-          e.preventDefault();
-          dropzone.classList.remove('drag-over');
-          if (e.dataTransfer.files?.length) this.handleFileSelect(e.dataTransfer.files);
-        });
-      }
-
-      const btnSnap = this.container.querySelector('#btn-snap-photo');
-      const btnCloseCam = this.container.querySelector('#btn-close-camera');
-      if (btnSnap) btnSnap.addEventListener('click', () => this.snapPhoto());
-      if (btnCloseCam) btnCloseCam.addEventListener('click', () => this.switchMode('presets'));
-
-      const btnZoomIn = this.container.querySelector('#btn-zoom-in');
-      const btnZoomOut = this.container.querySelector('#btn-zoom-out');
-      const btnZoomReset = this.container.querySelector('#btn-zoom-reset');
-      const btnRotate = this.container.querySelector('#btn-rotate');
-      const btnToggleFilters = this.container.querySelector('#btn-toggle-filters');
-
-      if (btnZoomIn) btnZoomIn.addEventListener('click', () => this.adjustZoom(0.25));
-      if (btnZoomOut) btnZoomOut.addEventListener('click', () => this.adjustZoom(-0.25));
-      if (btnZoomReset) btnZoomReset.addEventListener('click', () => this.resetTransform());
-      if (btnRotate) btnRotate.addEventListener('click', () => this.rotatePaper());
-      if (btnToggleFilters) {
-        btnToggleFilters.addEventListener('click', () => {
-          this.container.querySelector('#filter-toolbar').classList.toggle('hidden');
-        });
-      }
-
-      const rangeContrast = this.container.querySelector('#range-contrast');
-      const rangeBrightness = this.container.querySelector('#range-brightness');
-      const chkGrayscale = this.container.querySelector('#chk-grayscale');
-      const btnResetFilters = this.container.querySelector('#btn-reset-filters');
-
-      if (rangeContrast) {
-        rangeContrast.addEventListener('input', (e) => {
-          this.filters.contrast = e.target.value;
-          this.container.querySelector('#val-contrast').textContent = `${e.target.value}%`;
-          this.applyFilters();
-        });
-      }
-      if (rangeBrightness) {
-        rangeBrightness.addEventListener('input', (e) => {
-          this.filters.brightness = e.target.value;
-          this.container.querySelector('#val-brightness').textContent = `${e.target.value}%`;
-          this.applyFilters();
-        });
-      }
-      if (chkGrayscale) {
-        chkGrayscale.addEventListener('change', (e) => {
-          this.filters.grayscale = e.target.checked;
-          this.applyFilters();
-        });
-      }
-      if (btnResetFilters) {
-        btnResetFilters.addEventListener('click', () => {
-          this.filters = { contrast: 100, brightness: 100, grayscale: false };
-          if (rangeContrast) rangeContrast.value = 100;
-          if (rangeBrightness) rangeBrightness.value = 100;
-          if (chkGrayscale) chkGrayscale.checked = false;
-          this.container.querySelector('#val-contrast').textContent = '100%';
-          this.container.querySelector('#val-brightness').textContent = '100%';
-          this.applyFilters();
-        });
-      }
-
-      const stage = this.container.querySelector('#viewer-stage');
-      if (stage) {
-        stage.addEventListener('mousedown', (e) => this.startDrag(e));
-        window.addEventListener('mousemove', (e) => this.doDrag(e));
-        window.addEventListener('mouseup', () => this.endDrag());
-
-        stage.addEventListener('touchstart', (e) => {
-          if (e.touches.length === 1) this.startDrag(e.touches[0]);
-        }, { passive: true });
-        window.addEventListener('touchmove', (e) => {
-          if (this.isDragging && e.touches.length === 1) this.doDrag(e.touches[0]);
-        }, { passive: true });
-        window.addEventListener('touchend', () => this.endDrag());
-
-        stage.addEventListener('dblclick', () => {
-          this.zoom = this.zoom > 1 ? 1 : 1.6;
-          this.panX = 0; this.panY = 0;
-          this.updateTransform();
-        });
-      }
-    }
-
-    switchMode(mode) {
-      this.container.querySelector('#pane-presets').classList.toggle('hidden', mode !== 'presets');
-      this.container.querySelector('#pane-upload').classList.toggle('hidden', mode !== 'upload');
-      this.container.querySelector('#pane-camera').classList.toggle('hidden', mode !== 'camera');
-
-      if (mode === 'camera') this.startCamera();
-      else this.stopCamera();
-    }
-
-    async startCamera() {
-      try {
-        this.stopCamera();
-        const video = this.container.querySelector('#camera-video');
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
-        });
-        video.srcObject = this.stream;
-      } catch (err) {
-        alert('Camera could not be accessed. Please upload an image file instead.');
-        this.switchMode('presets');
-      }
-    }
-
-    stopCamera() {
-      if (this.stream) {
-        this.stream.getTracks().forEach(t => t.stop());
-        this.stream = null;
-      }
-    }
-
-    snapPhoto() {
-      const video = this.container.querySelector('#camera-video');
-      const canvas = this.container.querySelector('#camera-canvas');
-      if (!video || !canvas) return;
-
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-      this.stopCamera();
-      this.switchMode('presets');
-
-      this.setPaperImage(dataUrl, {
-        id: 'custom-photo-' + Date.now(),
-        studentName: 'Student (Camera Scan)',
-        rollNo: 'ROLL-' + Math.floor(1000 + Math.random() * 9000),
-        isCustom: true
-      });
-    }
-
-    handleFileSelect(files) {
-      if (!files || !files.length) return;
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.setPaperImage(e.target.result, {
-          id: 'uploaded-' + Date.now(),
-          studentName: file.name.replace(/\.[^/.]+$/, ''),
-          rollNo: 'ROLL-' + Math.floor(1000 + Math.random() * 9000),
-          isCustom: true
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    loadSample(sampleId) {
-      const sample = SAMPLE_PAPERS.find(s => s.id === sampleId) || SAMPLE_PAPERS[0];
-      const dataUrl = getSampleSvgDataUrl(sample.id);
-      this.setPaperImage(dataUrl, sample);
-    }
-
-    setPaperImage(imageSrc, meta) {
-      this.currentImageSrc = imageSrc;
-      this.currentMeta = meta;
-
-      const img = this.container.querySelector('#active-paper-img');
-      const rollBadge = this.container.querySelector('#paper-badge-roll');
-      const nameLabel = this.container.querySelector('#paper-student-name');
-
-      if (img) img.src = imageSrc;
-      if (rollBadge && meta.rollNo) rollBadge.textContent = meta.rollNo;
-      if (nameLabel && meta.studentName) nameLabel.textContent = meta.studentName;
-
-      this.resetTransform();
-      this.onCaptureCallback({ imageSrc: this.currentImageSrc, meta: this.currentMeta });
-    }
-
-    adjustZoom(delta) {
-      this.zoom = Math.min(3.5, Math.max(0.7, this.zoom + delta));
-      this.container.querySelector('#btn-zoom-reset').textContent = `${Math.round(this.zoom * 100)}%`;
-      this.updateTransform();
-    }
-
-    resetTransform() {
-      this.zoom = 1; this.rotation = 0; this.panX = 0; this.panY = 0;
-      const btnReset = this.container.querySelector('#btn-zoom-reset');
-      if (btnReset) btnReset.textContent = '100%';
-      this.updateTransform();
-    }
-
-    rotatePaper() {
-      this.rotation = (this.rotation + 90) % 360;
-      this.updateTransform();
-    }
-
-    updateTransform() {
-      const content = this.container.querySelector('#viewer-content');
-      if (content) {
-        content.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom}) rotate(${this.rotation}deg)`;
-      }
-    }
-
-    applyFilters() {
-      const img = this.container.querySelector('#active-paper-img');
-      if (!img) return;
-      let filterStr = `contrast(${this.filters.contrast}%) brightness(${this.filters.brightness}%)`;
-      if (this.filters.grayscale) filterStr += ' grayscale(100%) contrast(150%)';
-      img.style.filter = filterStr;
-    }
-
-    startDrag(e) {
-      this.isDragging = true;
-      this.dragStartX = e.clientX - this.panX;
-      this.dragStartY = e.clientY - this.panY;
-      this.container.querySelector('#viewer-stage')?.classList.add('grabbing');
-    }
-
-    doDrag(e) {
-      if (!this.isDragging) return;
-      this.panX = e.clientX - this.dragStartX;
-      this.panY = e.clientY - this.dragStartY;
-      this.updateTransform();
-    }
-
-    endDrag() {
-      this.isDragging = false;
-      this.container.querySelector('#viewer-stage')?.classList.remove('grabbing');
-    }
-  }
-
-  // Helper to compress camera images before sending to Gemini API (avoids 413 Payload Too Large & timeouts)
+  // Helper to compress camera images before sending to Gemini API
   async function compressImageForGemini(dataUrl, maxDim = 1500, quality = 0.85) {
     if (!dataUrl || !dataUrl.startsWith('data:image')) return dataUrl;
     if (dataUrl.startsWith('data:image/svg+xml')) return dataUrl;
@@ -824,7 +413,316 @@
     });
   }
 
-  // --- 5. AI EVALUATION SERVICE (Proximity-Window Semantic Concept Resolver) ---
+  // --- 4. PAPER CAPTURE & VIEWER (Clean Somhi-Inspired Component) ---
+  class PaperCapture {
+    constructor(options = {}) {
+      this.container = options.container;
+      this.onCaptureCallback = options.onCapture || (() => {});
+      this.onGradeRequested = options.onGradeRequested || (() => {});
+      this.currentImageSrc = null;
+      this.currentMeta = null;
+      this.stream = null;
+      this.zoom = 1;
+      this.rotation = 0;
+      this.panX = 0;
+      this.panY = 0;
+      this.isDragging = false;
+      this.filters = { contrast: 100, brightness: 100, grayscale: false };
+      this.init();
+    }
+
+    init() {
+      this.renderUI();
+      this.attachEvents();
+    }
+
+    renderUI() {
+      if (!this.container) return;
+
+      if (!this.currentImageSrc) {
+        // STATE 1: Ready to Upload / Take Photo (Clean Minimal Actions)
+        this.container.innerHTML = `
+          <div class="capture-container-inner">
+            <div class="capture-actions-grid">
+              <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
+              <input type="file" id="gallery-file-input" accept="image/*" class="file-input-hidden" />
+              
+              <!-- Take Photo Card -->
+              <div class="action-card-camera" id="btn-take-photo-direct">
+                <div class="action-card-icon">📸</div>
+                <div class="action-card-title">Take Photo</div>
+                <div class="action-card-subtitle">Snap student sheet with phone camera</div>
+              </div>
+
+              <!-- Upload File Card -->
+              <div class="action-card-upload" id="btn-browse-file">
+                <div class="action-card-icon">📁</div>
+                <div class="action-card-title">Upload Image File</div>
+                <div class="action-card-subtitle">Select or drop JPG, PNG, HEIC</div>
+              </div>
+            </div>
+
+            <!-- Live Camera Viewport (Hidden unless video stream is started on desktop) -->
+            <div class="camera-viewport-container hidden" id="camera-viewport-box">
+              <video id="camera-video" playsinline autoplay muted class="camera-video"></video>
+              <canvas id="camera-canvas" class="hidden"></canvas>
+              <div class="camera-overlay">
+                <div class="camera-guide-frame">
+                  <div class="guide-text">Align Exam Paper within frame</div>
+                </div>
+              </div>
+              <div class="camera-controls">
+                <button type="button" class="btn-shutter" id="btn-snap-photo" title="Capture Photo">
+                  <span class="shutter-inner"></span>
+                </button>
+                <button type="button" class="btn-camera-close" id="btn-close-camera">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // STATE 2: Paper Loaded -> Preview with Primary Grade Button
+        this.container.innerHTML = `
+          <div class="capture-container-inner">
+            <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
+            <input type="file" id="gallery-file-input" accept="image/*" class="file-input-hidden" />
+
+            <div class="paper-viewer-card">
+              <div class="viewer-header-bar">
+                <div class="viewer-meta-info">
+                  <span class="viewer-roll-pill" id="paper-badge-roll">${this.currentMeta?.rollNo || 'STU-101'}</span>
+                  <span class="viewer-student-label" id="paper-student-name">${this.currentMeta?.studentName || 'Student Paper'}</span>
+                </div>
+                <div class="viewer-controls-group">
+                  <button type="button" class="btn-stage-tool" id="btn-zoom-out" title="Zoom Out">🔍-</button>
+                  <button type="button" class="btn-stage-tool" id="btn-zoom-reset">100%</button>
+                  <button type="button" class="btn-stage-tool" id="btn-zoom-in" title="Zoom In">🔍+</button>
+                  <button type="button" class="btn-stage-tool" id="btn-rotate" title="Rotate">🔄 90°</button>
+                </div>
+              </div>
+
+              <div class="viewer-stage" id="viewer-stage">
+                <div class="viewer-content" id="viewer-content">
+                  <img id="active-paper-img" src="${this.currentImageSrc}" alt="Student Handwritten Answer Paper" draggable="false" />
+                </div>
+                <div class="viewer-drag-hint">💡 Drag to pan • Double-tap to zoom</div>
+              </div>
+
+              <div class="viewer-bottom-action-bar">
+                <button type="button" class="btn-grade-primary" id="btn-grade-now">
+                  <span>✨</span> Grade with AI ➔
+                </button>
+                <button type="button" class="btn-change-photo" id="btn-retake-photo">
+                  📸 Change Photo
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    attachEvents() {
+      const cameraInput = this.container.querySelector('#camera-file-input');
+      const galleryInput = this.container.querySelector('#gallery-file-input');
+      const btnTakePhoto = this.container.querySelector('#btn-take-photo-direct');
+      const btnBrowse = this.container.querySelector('#btn-browse-file');
+      const btnRetake = this.container.querySelector('#btn-retake-photo');
+      const btnGradeNow = this.container.querySelector('#btn-grade-now');
+
+      if (btnTakePhoto && cameraInput) {
+        btnTakePhoto.addEventListener('click', () => {
+          if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            cameraInput.click();
+          } else {
+            // On desktop, try native camera viewport
+            this.startCamera();
+          }
+        });
+      }
+
+      if (btnBrowse && galleryInput) {
+        btnBrowse.addEventListener('click', () => galleryInput.click());
+      }
+
+      if (cameraInput) cameraInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
+      if (galleryInput) galleryInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
+
+      if (btnRetake) {
+        btnRetake.addEventListener('click', () => {
+          this.currentImageSrc = null;
+          this.currentMeta = null;
+          this.renderUI();
+          this.attachEvents();
+        });
+      }
+
+      if (btnGradeNow) {
+        btnGradeNow.addEventListener('click', () => this.onGradeRequested());
+      }
+
+      // Camera Viewfinder Events
+      const btnSnap = this.container.querySelector('#btn-snap-photo');
+      const btnCloseCam = this.container.querySelector('#btn-close-camera');
+      if (btnSnap) btnSnap.addEventListener('click', () => this.snapPhoto());
+      if (btnCloseCam) btnCloseCam.addEventListener('click', () => this.stopCamera());
+
+      // Stage Transform Events
+      const btnZoomIn = this.container.querySelector('#btn-zoom-in');
+      const btnZoomOut = this.container.querySelector('#btn-zoom-out');
+      const btnZoomReset = this.container.querySelector('#btn-zoom-reset');
+      const btnRotate = this.container.querySelector('#btn-rotate');
+
+      if (btnZoomIn) btnZoomIn.addEventListener('click', () => this.adjustZoom(0.25));
+      if (btnZoomOut) btnZoomOut.addEventListener('click', () => this.adjustZoom(-0.25));
+      if (btnZoomReset) btnZoomReset.addEventListener('click', () => this.resetTransform());
+      if (btnRotate) btnRotate.addEventListener('click', () => this.rotatePaper());
+
+      const stage = this.container.querySelector('#viewer-stage');
+      if (stage) {
+        stage.addEventListener('mousedown', (e) => this.startDrag(e));
+        window.addEventListener('mousemove', (e) => this.doDrag(e));
+        window.addEventListener('mouseup', () => this.endDrag());
+
+        stage.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) this.startDrag(e.touches[0]);
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+          if (this.isDragging && e.touches.length === 1) this.doDrag(e.touches[0]);
+        }, { passive: true });
+        window.addEventListener('touchend', () => this.endDrag());
+
+        stage.addEventListener('dblclick', () => {
+          this.zoom = this.zoom > 1 ? 1 : 1.6;
+          this.panX = 0; this.panY = 0;
+          this.updateTransform();
+        });
+      }
+    }
+
+    async startCamera() {
+      try {
+        this.stopCamera();
+        const videoBox = this.container.querySelector('#camera-viewport-box');
+        const video = this.container.querySelector('#camera-video');
+        if (!videoBox || !video) return;
+
+        videoBox.classList.remove('hidden');
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+        video.srcObject = this.stream;
+      } catch (err) {
+        this.container.querySelector('#gallery-file-input')?.click();
+      }
+    }
+
+    stopCamera() {
+      if (this.stream) {
+        this.stream.getTracks().forEach(t => t.stop());
+        this.stream = null;
+      }
+      this.container.querySelector('#camera-viewport-box')?.classList.add('hidden');
+    }
+
+    snapPhoto() {
+      const video = this.container.querySelector('#camera-video');
+      const canvas = this.container.querySelector('#camera-canvas');
+      if (!video || !canvas) return;
+
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
+      this.stopCamera();
+
+      this.setPaperImage(dataUrl, {
+        id: 'custom-photo-' + Date.now(),
+        studentName: 'Student (Camera Scan)',
+        rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
+        isCustom: true
+      });
+    }
+
+    handleFileSelect(files) {
+      if (!files || !files.length) return;
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.setPaperImage(e.target.result, {
+          id: 'uploaded-' + Date.now(),
+          studentName: file.name.replace(/\.[^/.]+$/, ''),
+          rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
+          isCustom: true
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    loadSample(sampleId) {
+      const sample = SAMPLE_PAPERS.find(s => s.id === sampleId) || SAMPLE_PAPERS[0];
+      const dataUrl = getSampleSvgDataUrl(sample.id);
+      this.setPaperImage(dataUrl, sample);
+    }
+
+    setPaperImage(imageSrc, meta) {
+      this.currentImageSrc = imageSrc;
+      this.currentMeta = meta;
+      this.renderUI();
+      this.attachEvents();
+      this.resetTransform();
+      this.onCaptureCallback({ imageSrc: this.currentImageSrc, meta: this.currentMeta });
+    }
+
+    adjustZoom(delta) {
+      this.zoom = Math.min(3.5, Math.max(0.7, this.zoom + delta));
+      const btnReset = this.container.querySelector('#btn-zoom-reset');
+      if (btnReset) btnReset.textContent = `${Math.round(this.zoom * 100)}%`;
+      this.updateTransform();
+    }
+
+    resetTransform() {
+      this.zoom = 1; this.rotation = 0; this.panX = 0; this.panY = 0;
+      const btnReset = this.container.querySelector('#btn-zoom-reset');
+      if (btnReset) btnReset.textContent = '100%';
+      this.updateTransform();
+    }
+
+    rotatePaper() {
+      this.rotation = (this.rotation + 90) % 360;
+      this.updateTransform();
+    }
+
+    updateTransform() {
+      const content = this.container.querySelector('#viewer-content');
+      if (content) {
+        content.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom}) rotate(${this.rotation}deg)`;
+      }
+    }
+
+    startDrag(e) {
+      this.isDragging = true;
+      this.dragStartX = e.clientX - this.panX;
+      this.dragStartY = e.clientY - this.panY;
+      this.container.querySelector('#viewer-stage')?.classList.add('grabbing');
+    }
+
+    doDrag(e) {
+      if (!this.isDragging) return;
+      this.panX = e.clientX - this.dragStartX;
+      this.panY = e.clientY - this.dragStartY;
+      this.updateTransform();
+    }
+
+    endDrag() {
+      this.isDragging = false;
+      this.container.querySelector('#viewer-stage')?.classList.remove('grabbing');
+    }
+  }
+
+  // --- 5. AI EVALUATION SERVICE ---
   class AiEvaluationService {
     constructor() {
       this.apiKey = this.loadApiKey();
@@ -957,7 +855,6 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-      // Try active vision models in order of capability
       const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-flash-8b'];
       let lastErr = null;
 
@@ -1044,10 +941,8 @@ Respond ONLY with a JSON object in this exact schema:
       const c = concept.toLowerCase().trim();
       if (!c) return false;
 
-      // 1. Direct whole-word check
       if (new RegExp(`\\b${escapeRegex(c)}\\b`, 'i').test(textScope)) return true;
 
-      // 2. Anatomical synonym and phonetic stem mapping
       const conceptAliases = {
         'latissimus dorsi': ['latis', 'latism', 'latiss', 'latissimus', 'dorsi'],
         'subscapularis': ['subscap', 'subscapular', 'subscapularis'],
@@ -1060,13 +955,12 @@ Respond ONLY with a JSON object in this exact schema:
         'coracobrachialis': ['coracobrachialis', 'coraco'],
         'short head of biceps': ['biceps', 'bicep', 'short head'],
         'clavicle': ['clavicle', 'clavic'],
-        'scapula': ['scapula'], // will not match subscapularis
+        'scapula': ['scapula'],
         'first rib': ['first rib', '1st rib'],
         'skin': ['skin'],
         'axillary fascia': ['axillary fascia', 'fascia']
       };
 
-      // Check predefined aliases
       for (const [key, aliases] of Object.entries(conceptAliases)) {
         if (c.includes(key) || key.includes(c)) {
           return aliases.some(alias => {
@@ -1076,7 +970,6 @@ Respond ONLY with a JSON object in this exact schema:
         }
       }
 
-      // Check compound token stems
       const words = c.split(/\s+/).filter(w => w.length > 3);
       if (words.length > 0) {
         return words.some(w => new RegExp(`\\b${escapeRegex(w)}[a-z]*\\b`, 'i').test(textScope));
@@ -1107,11 +1000,9 @@ Respond ONLY with a JSON object in this exact schema:
         const weight = Number(parseFloat(kp.weight || 1.0).toFixed(2));
         const rawCriteria = (kp.text || '').toLowerCase();
 
-        // 1. Detect boundary name (Anterior wall, Posterior wall, Medial wall, Lateral wall, Apex, Base)
         const headerMatch = rawCriteria.match(/(anterior wall|posterior wall|medial wall|lateral wall|apex|base|roots|trunks|divisions|cords|terminal branches)/i);
         const headerName = headerMatch ? headerMatch[1].toLowerCase() : null;
 
-        // 2. Robust automatic extraction of required relations from criteria text
         let itemsString = rawCriteria;
         if (headerName) {
           itemsString = rawCriteria.replace(headerName, '');
@@ -1126,10 +1017,8 @@ Respond ONLY with a JSON object in this exact schema:
           .map(k => k.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim())
           .filter(k => k.length > 2 && k !== headerName);
 
-        // Deduplicated list of required anatomical structures
         const criteriaItems = [...new Set([...extractedFromText, ...customKeywords])];
 
-        // 3. Find the student line or paragraph section containing the header
         let studentLineWithHeader = null;
         if (headerName) {
           studentLineWithHeader = studentLines.find(line => {
@@ -1137,7 +1026,6 @@ Respond ONLY with a JSON object in this exact schema:
           });
         }
 
-        // 4. Match relations within the scope of the answer
         const matchedItems = [];
         const searchScope = studentLineWithHeader || studentText;
 
@@ -1157,37 +1045,27 @@ Respond ONLY with a JSON object in this exact schema:
         let evidenceQuote = '(Omitted from answer sheet)';
         let justification = '';
 
-        // 5. High-Precision Anatomical Scoring Rules:
-        // Rule A: Point 2 -> Posterior Wall with 2+ muscles (e.g. latissimus dorsi, subscapularis, teres major) -> FULL (1.00)
         if (hasHeader && (matchedCount >= 2 || (totalItemsCount > 0 && matchedCount === totalItemsCount))) {
           status = 'hit';
           awardedMarks = weight;
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Complete answer: Identified ${headerName} and all key muscle attachments (${matchedItems.join(', ')}). Full score awarded.`;
-        }
-        // Rule B: Point 1 -> Anterior Wall with 1 muscle (pectoralis major), minor & subclavius omitted -> PARTIAL (0.50)
-        else if (hasHeader && matchedCount === 1) {
+          justification = `Complete: Identified ${headerName} and all key muscle attachments (${matchedItems.join(', ')}). Full score.`;
+        } else if (hasHeader && matchedCount === 1) {
           status = 'partial';
           awardedMarks = Number((weight * 0.5).toFixed(2));
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Partial answer: Identified ${headerName} with ${matchedItems.join(', ')}. Remaining relations omitted.`;
-        }
-        // Rule C: Point 3 & 4 -> Medial wall / Lateral wall boundary named only (0 muscles) -> PARTIAL (0.50)
-        else if (hasHeader && matchedCount === 0) {
+          justification = `Partial: Identified ${headerName} with ${matchedItems.join(', ')}. Remaining relations omitted.`;
+        } else if (hasHeader && matchedCount === 0) {
           status = 'partial';
           awardedMarks = Number((weight * 0.5).toFixed(2));
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Header only: Identified boundary (${headerName}). Partial marks awarded (muscles omitted).`;
-        }
-        // Rule D: Relations mentioned without boundary header
-        else if (!hasHeader && matchedCount >= 2) {
+          justification = `Header only: Identified boundary (${headerName}). Partial marks awarded.`;
+        } else if (!hasHeader && matchedCount >= 2) {
           status = 'partial';
           awardedMarks = Number((weight * 0.5).toFixed(2));
           evidenceQuote = this.extractSentenceCitation(studentText, matchedItems[0]);
           justification = `Partially mentioned relations (${matchedItems.join(', ')}).`;
-        }
-        // Rule E: Point 5 -> Missed completely (Apex/Base omitted) -> 0.00
-        else {
+        } else {
           status = 'missed';
           awardedMarks = 0;
           evidenceQuote = '(Omitted from answer sheet)';
@@ -1211,10 +1089,10 @@ Respond ONLY with a JSON object in this exact schema:
       const partialCount = pointsEval.filter(p => p.status === 'partial').length;
 
       let feedbackSummary = totalScore >= rubric.maxMarks * 0.8
-        ? 'Exemplary answer. Strong anatomical grasp and comprehensive muscle relations.'
+        ? 'Exemplary answer. Comprehensive coverage of relations.'
         : totalScore >= rubric.maxMarks * 0.5
-        ? `Identified key boundaries (${hitCount + partialCount}/${pointsEval.length} criteria). Point 2 full credit (${hitCount}); partial marks for Point 1, 3, 4.`
-        : 'Incomplete response. Critical anatomical walls or relations were omitted.';
+        ? `Identified key boundaries (${hitCount + partialCount}/${pointsEval.length} criteria). Partial marks awarded.`
+        : 'Incomplete response. Critical relations or boundaries were omitted.';
 
       return {
         transcription: studentText,
@@ -1256,18 +1134,12 @@ Respond ONLY with a JSON object in this exact schema:
 
     renderEmptyState() {
       if (!this.container) return;
-      this.container.innerHTML = `
-        <div class="review-empty-state">
-          <div class="empty-icon">${renderIcon('sparkles')}</div>
-          <h3>Ready for AI Evaluation</h3>
-          <p>Select a student paper on the left or upload an image, then tap <strong>"Run AI Evaluation"</strong> to generate automated grading and keypoint matching.</p>
-        </div>
-      `;
+      this.container.innerHTML = ''; // Clean empty state
     }
 
     setEvaluationData(evaluation, paperMeta, rubric) {
       this.currentEvaluation = evaluation;
-      this.currentPaperMeta = paperMeta || { studentName: 'Student', rollNo: 'ROLL-101' };
+      this.currentPaperMeta = paperMeta || { studentName: 'Student', rollNo: 'STU-101' };
       this.currentRubric = rubric;
       this.finalScore = evaluation.suggestedScore;
       this.isOverridden = false;
@@ -1285,27 +1157,36 @@ Respond ONLY with a JSON object in this exact schema:
       const isLive = evalData.mode === 'gemini-live';
 
       this.container.innerHTML = `
-        <div class="review-panel-inner animate-fade-in">
-          
-          <!-- Score Hero Card -->
+        <div class="step-card review-card-main">
+          <div class="step-header">
+            <div class="step-header-left">
+              <div class="step-number-badge">3</div>
+              <div class="step-title-group">
+                <h2>Evaluation Results & Review</h2>
+                <p>Verify score and keypoint criteria breakdown</p>
+              </div>
+            </div>
+            <div class="ai-source-badge ${isLive ? 'badge-live' : ''}">
+              ${isLive ? '✨ Gemini 2.0 Vision' : '⚡ Offline Resolver'}
+            </div>
+          </div>
+
+          <!-- Score Hero Box -->
           <div class="score-hero-card ${this.isOverridden ? 'score-overridden' : ''}">
             <div class="score-hero-header">
               <div class="student-info-block">
                 <span class="roll-badge">${meta.rollNo}</span>
                 <span class="student-name">${meta.studentName}</span>
               </div>
-              <div class="ai-source-badge ${isLive ? 'badge-live' : 'badge-offline'}">
-                ${renderIcon('sparkles')} ${isLive ? 'Gemini Cloud Vision' : 'Smart Offline NLP'}
-              </div>
+              <div class="score-percentage-pill">${percentage}% (${percentage >= 80 ? 'Distinction' : percentage >= 50 ? 'Pass' : 'Needs Review'})</div>
             </div>
 
             <div class="score-main-display">
               <div class="score-number-group">
                 <div class="score-value-wrap">
                   <input type="number" id="input-final-score" class="score-input-direct" value="${this.finalScore}" step="0.25" min="0" max="${maxMarks}" />
-                  <span class="score-max">/ ${maxMarks.toFixed(1)}</span>
+                  <span class="score-max">/ ${maxMarks.toFixed(1)} Marks</span>
                 </div>
-                <div class="score-percentage-pill">${percentage}% (${percentage >= 85 ? 'Distinction' : percentage >= 50 ? 'Pass' : 'Review'})</div>
               </div>
 
               <div class="score-adjust-chips">
@@ -1322,37 +1203,37 @@ Respond ONLY with a JSON object in this exact schema:
             ${this.isOverridden ? `
               <div class="override-notice">
                 <span>⚠️ Adjusted by Professor (Original AI: <strong>${evalData.suggestedScore}</strong>)</span>
-                <button type="button" class="btn-link" id="btn-revert-score">Revert to AI</button>
+                <button type="button" class="btn-text-subtle" id="btn-revert-score">Revert to AI</button>
               </div>
             ` : ''}
           </div>
 
-          <!-- Assessment Summary Box -->
+          <!-- Summary Box -->
           <div class="feedback-summary-box">
             <div class="box-title">📝 AI Assessment Summary</div>
             <p class="feedback-text">${evalData.feedbackSummary}</p>
           </div>
 
-          <!-- Transcribed OCR Text Box (Prominent & Editable) -->
+          <!-- OCR Transcript Drawer -->
           <div class="transcription-drawer">
-            <div class="drawer-header" style="display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 0.5rem 0.75rem;">
-              <span><strong>📄 Extracted Handwriting Transcript:</strong></span>
-              <button type="button" class="btn btn-xs btn-outline" id="btn-toggle-edit-transcript" style="font-weight: 700;">
-                ${renderIcon('edit')} ${this.isEditingTranscript ? 'Re-Evaluate Text' : 'Edit Text'}
+            <div class="drawer-header">
+              <span>📄 Extracted Handwriting Transcript</span>
+              <button type="button" class="btn-text-subtle" id="btn-toggle-edit-transcript">
+                ${this.isEditingTranscript ? '✓ Save & Re-Grade' : '✏️ Edit Text'}
               </button>
             </div>
-            <div class="drawer-content" style="padding: 0.75rem; background: white;">
+            <div class="drawer-content">
               ${this.isEditingTranscript 
-                ? `<textarea id="textarea-ocr-edit" class="transcript-editor" rows="5" style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 6px; border: 1.5px solid #0f766e; border-radius: 4px;">${evalData.transcription}</textarea>`
-                : `<div class="transcript-preview" style="font-family: monospace; font-size: 0.85rem; line-height: 1.45; color: #1e293b; max-height: 140px; overflow-y: auto;">${evalData.transcription.replace(/\n/g, '<br/>')}</div>`}
+                ? `<textarea id="textarea-ocr-edit" class="transcript-editor" rows="4">${evalData.transcription}</textarea>`
+                : `<div class="transcript-preview">${evalData.transcription.replace(/\n/g, '<br/>')}</div>`}
             </div>
           </div>
 
-          <!-- Rubric Key Points Checklist -->
+          <!-- Criteria Checklist -->
           <div class="criteria-section">
             <div class="criteria-header">
-              <h4>Rubric Key Points Checklist (${evalData.points.length})</h4>
-              <span class="criteria-subtext">Click badges to toggle Hit / Partial / Missed</span>
+              <h4>Key Points Checklist (${evalData.points.length})</h4>
+              <span class="criteria-subtext">Click badges to toggle marks</span>
             </div>
 
             <div class="criteria-list">
@@ -1364,8 +1245,8 @@ Respond ONLY with a JSON object in this exact schema:
                   </div>
                   <div class="criterion-desc">${pt.pointText}</div>
                   <div class="criterion-evidence">
-                    <span class="evidence-icon">❝</span>
-                    <span class="evidence-quote">${pt.evidenceQuote}</span>
+                    <span>❝</span>
+                    <span>${pt.evidenceQuote}</span>
                   </div>
                   <div class="criterion-justification">💡 <em>${pt.justification}</em></div>
                   <div class="criterion-toggles">
@@ -1378,16 +1259,16 @@ Respond ONLY with a JSON object in this exact schema:
             </div>
           </div>
 
-          <!-- Professor Remarks -->
+          <!-- Remarks -->
           <div class="professor-notes-section">
-            <label for="input-prof-remarks">Professor Remarks / Student Notes:</label>
-            <input type="text" id="input-prof-remarks" class="input-control" placeholder="e.g. Good wall identification. Missed medial/lateral muscle attachments." value="${this.professorRemarks}" />
+            <label for="input-prof-remarks">Teacher Remarks / Notes:</label>
+            <input type="text" id="input-prof-remarks" class="input-control" placeholder="e.g. Well answered. Check medial wall." value="${this.professorRemarks}" />
           </div>
 
-          <!-- Accept & Next Loop Button -->
+          <!-- Action Footer -->
           <div class="review-action-footer">
-            <button type="button" class="btn btn-success btn-lg btn-accept-next" id="btn-accept-next">
-              ${renderIcon('check')} Accept Score (${this.finalScore.toFixed(2)}) & Next Paper ➔
+            <button type="button" class="btn-accept-next" id="btn-accept-next">
+              ${renderIcon('check')} Save Grade (${this.finalScore.toFixed(2)} / ${maxMarks.toFixed(1)}) & Next Paper ➔
             </button>
           </div>
         </div>
@@ -1461,13 +1342,13 @@ Respond ONLY with a JSON object in this exact schema:
       point.status = newStatus;
       if (newStatus === 'hit') {
         point.awardedMarks = point.weight;
-        point.justification = 'Professor override: Criterion marked Full.';
+        point.justification = 'Marked Full.';
       } else if (newStatus === 'partial') {
         point.awardedMarks = Number((point.weight * 0.5).toFixed(2));
-        point.justification = 'Professor override: Criterion marked Partial.';
+        point.justification = 'Marked Partial.';
       } else {
         point.awardedMarks = 0;
-        point.justification = 'Professor override: Criterion marked 0.';
+        point.justification = 'Marked 0.';
       }
 
       const recalculated = this.currentEvaluation.points.reduce((acc, p) => acc + p.awardedMarks, 0);
@@ -1674,8 +1555,9 @@ Respond ONLY with a JSON object in this exact schema:
         container: document.getElementById('capture-container'),
         onCapture: (paperData) => {
           this.currentPaper = paperData;
-          this.updateActiveRubricBanner();
-        }
+          this.updateQuickRubricSelect();
+        },
+        onGradeRequested: () => this.runEvaluation()
       });
 
       this.reviewPanel = new ReviewPanel({
@@ -1691,14 +1573,16 @@ Respond ONLY with a JSON object in this exact schema:
 
       this.rubricManager.onChange(() => {
         this.renderRubricUI();
-        this.updateActiveRubricBanner();
         this.updateQuickRubricSelect();
+        this.updateCriteriaPreview();
       });
 
       this.bindGlobalEvents();
       this.renderRubricUI();
       this.updateHeaderStats();
       this.updateQuickRubricSelect();
+      this.updateCriteriaPreview();
+      this.renderSamplePapersModal();
     }
 
     bindGlobalEvents() {
@@ -1706,8 +1590,7 @@ Respond ONLY with a JSON object in this exact schema:
         tab.addEventListener('click', () => this.switchView(tab.dataset.view));
       });
 
-      document.getElementById('btn-run-eval')?.addEventListener('click', () => this.runEvaluation());
-
+      // Settings Modal
       const btnOpenSettings = document.getElementById('btn-open-settings');
       const headerApiBadge = document.getElementById('header-api-status');
       const modalSettings = document.getElementById('modal-settings');
@@ -1726,7 +1609,6 @@ Respond ONLY with a JSON object in this exact schema:
 
       btnOpenSettings?.addEventListener('click', openSettingsModal);
       headerApiBadge?.addEventListener('click', openSettingsModal);
-
       btnCloseSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
       btnCancelSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
 
@@ -1739,14 +1621,14 @@ Respond ONLY with a JSON object in this exact schema:
         }
         btnTestApiKey.disabled = true;
         btnTestApiKey.textContent = 'Testing...';
-        if (testFeedback) testFeedback.innerHTML = '<span style="color: #0f766e;">Connecting to Google AI Studio...</span>';
+        if (testFeedback) testFeedback.innerHTML = '<span style="color: #00a991;">Connecting to Google AI...</span>';
 
         const testRes = await this.aiService.testApiKey(keyVal);
         btnTestApiKey.disabled = false;
         btnTestApiKey.textContent = '🧪 Test Key';
 
         if (testRes.ok) {
-          if (testFeedback) testFeedback.innerHTML = `<span style="color: #059669; font-weight: 700;">✓ Connected Successfully! Active Vision: <code style="background: #e6f4ea; padding: 2px 5px; border-radius: 3px;">${testRes.activeModel}</code></span>`;
+          if (testFeedback) testFeedback.innerHTML = `<span style="color: #10b981; font-weight: 700;">✓ Connected! Active: <code>${testRes.activeModel}</code></span>`;
         } else {
           if (testFeedback) testFeedback.innerHTML = `<span style="color: #e11d48; font-weight: 600;">✕ ${testRes.error}</span>`;
         }
@@ -1765,21 +1647,90 @@ Respond ONLY with a JSON object in this exact schema:
         this.updateHeaderStats();
       });
 
+      // Quick Rubric Select
       document.getElementById('select-quick-rubric')?.addEventListener('change', (e) => {
         this.rubricManager.setPreset(e.target.value);
-        this.showNotification(`Loaded rubric: ${this.rubricManager.getRubric().subject}`, 'info');
+        this.showNotification(`Active question: ${this.rubricManager.getRubric().question.substring(0, 30)}...`, 'info');
+      });
+
+      // Quick New Rubric Button
+      document.getElementById('btn-quick-new-rubric')?.addEventListener('click', () => {
+        this.switchView('rubric');
+        this.rubricManager.createNewBlankQuestion();
+        this.showNotification('Define your new question & key points below.', 'info');
+      });
+
+      // Toggle Criteria Preview
+      document.getElementById('btn-toggle-criteria-preview')?.addEventListener('click', () => {
+        const box = document.getElementById('criteria-quick-preview');
+        box?.classList.toggle('hidden');
+      });
+
+      // Demo Papers Modal
+      const modalSamples = document.getElementById('modal-sample-papers');
+      document.getElementById('btn-open-samples-modal')?.addEventListener('click', () => {
+        modalSamples?.classList.remove('hidden');
+      });
+      document.getElementById('btn-close-samples-modal')?.addEventListener('click', () => {
+        modalSamples?.classList.add('hidden');
+      });
+    }
+
+    renderSamplePapersModal() {
+      const grid = document.getElementById('sample-papers-modal-grid');
+      if (!grid) return;
+
+      grid.innerHTML = SAMPLE_PAPERS.map(s => `
+        <div class="sample-modal-card" data-sample-id="${s.id}">
+          <div class="sample-card-top">
+            <span class="sample-card-roll">${s.rollNo}</span>
+            <span class="sample-card-score">${s.expectedScore}/${s.maxScore}M</span>
+          </div>
+          <div class="sample-card-name">${s.studentName}</div>
+          <div class="sample-card-desc">${s.description}</div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.sample-modal-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const sampleId = card.dataset.sampleId;
+          this.capture.loadSample(sampleId);
+          document.getElementById('modal-sample-papers')?.classList.add('hidden');
+          this.showNotification(`Loaded demo paper: ${card.querySelector('.sample-card-name')?.textContent}`, 'success');
+        });
       });
     }
 
     updateQuickRubricSelect() {
       const select = document.getElementById('select-quick-rubric');
-      if (!select) return;
+      const maxBadge = document.getElementById('banner-max-marks');
+      const countLabel = document.getElementById('criteria-count-label');
+
       const all = this.rubricManager.getAllRubrics();
-      const currentId = this.rubricManager.getRubric().id;
-      select.innerHTML = all.map(p => `
-        <option value="${p.id}" ${p.id === currentId ? 'selected' : ''}>
-          ${p.isCustom ? '⭐ ' : ''}${p.subject}: ${p.question.substring(0, 38)}... (${p.maxMarks}M)
-        </option>
+      const current = this.rubricManager.getRubric();
+
+      if (select) {
+        select.innerHTML = all.map(p => `
+          <option value="${p.id}" ${p.id === current.id ? 'selected' : ''}>
+            ${p.isCustom ? '⭐ ' : ''}${p.question} (${p.maxMarks}M)
+          </option>
+        `).join('');
+      }
+
+      if (maxBadge) maxBadge.textContent = `${current.maxMarks} Marks`;
+      if (countLabel) countLabel.textContent = `${current.keyPoints.length} Criteria Points`;
+      this.updateCriteriaPreview();
+    }
+
+    updateCriteriaPreview() {
+      const list = document.getElementById('criteria-preview-list');
+      if (!list) return;
+      const current = this.rubricManager.getRubric();
+      list.innerHTML = current.keyPoints.map((kp, i) => `
+        <div class="criteria-preview-item">
+          <strong>Pt ${i + 1} (${kp.weight}M):</strong>
+          <span>${kp.text}</span>
+        </div>
       `).join('');
     }
 
@@ -1789,60 +1740,53 @@ Respond ONLY with a JSON object in this exact schema:
       if (viewName === 'gradebook') this.gradebook.render();
     }
 
-    updateActiveRubricBanner() {
-      const r = this.rubricManager.getRubric();
-      const s = document.getElementById('banner-subject');
-      const q = document.getElementById('banner-question');
-      const m = document.getElementById('banner-max-marks');
-      if (s) s.textContent = r.subject;
-      if (q) q.textContent = r.question;
-      if (m) m.textContent = `${r.maxMarks} Marks`;
-    }
-
     async runEvaluation() {
       if (this.isEvaluating) return;
-      if (!this.currentPaper) return this.showNotification('Please select or capture a paper first.', 'warning');
-
-      const btn = document.getElementById('btn-run-eval');
-      const rubric = this.rubricManager.getRubric();
-
-      this.isEvaluating = true;
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-sm"></span> Evaluating...`;
+      if (!this.capture.currentImageSrc) {
+        return this.showNotification('Please snap a photo or upload an answer sheet first.', 'info');
       }
 
-      this.showEvaluationLoading('Evaluating student handwriting & anatomical relations...');
+      const rubric = this.rubricManager.getRubric();
+      const btnGrade = document.getElementById('btn-grade-now');
+
+      this.isEvaluating = true;
+      if (btnGrade) {
+        btnGrade.disabled = true;
+        btnGrade.innerHTML = `<span class="spinner-sm"></span> Evaluating...`;
+      }
+
+      this.showEvaluationLoading('Analyzing handwriting & grading against rubric...');
 
       try {
         const result = await this.aiService.evaluatePaper({
-          imageSrc: this.currentPaper.imageSrc,
-          rawText: this.currentPaper.meta?.rawText,
+          imageSrc: this.capture.currentImageSrc,
+          rawText: this.capture.currentMeta?.rawText,
           rubric: rubric,
-          sampleMeta: this.currentPaper.meta,
+          sampleMeta: this.capture.currentMeta,
           progressCallback: (statusText) => this.showEvaluationLoading(statusText)
         });
 
-        this.reviewPanel.setEvaluationData(result, this.currentPaper.meta, rubric);
+        this.reviewPanel.setEvaluationData(result, this.capture.currentMeta, rubric);
         this.showNotification(`Evaluation complete! Score: ${result.suggestedScore}/${rubric.maxMarks}`, 'success');
 
-        if (window.innerWidth < 900) {
-          document.getElementById('review-container')?.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Scroll review into view smoothly
+        document.getElementById('review-container')?.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
         console.error(err);
         const localFallback = this.aiService.evaluateIntelligentLocal({
-          rawText: this.currentPaper.meta?.rawText,
+          rawText: this.capture.currentMeta?.rawText,
           rubric: rubric,
-          sampleMeta: this.currentPaper.meta
+          sampleMeta: this.capture.currentMeta,
+          isCustomPhoto: true,
+          geminiError: err.message
         });
-        this.reviewPanel.setEvaluationData(localFallback, this.currentPaper.meta, rubric);
-        this.showNotification(`Evaluation complete! Score: ${localFallback.suggestedScore}/${rubric.maxMarks}`, 'info');
+        this.reviewPanel.setEvaluationData(localFallback, this.capture.currentMeta, rubric);
+        this.showNotification(`Evaluation completed. Score: ${localFallback.suggestedScore}/${rubric.maxMarks}`, 'info');
       } finally {
         this.isEvaluating = false;
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<span>✨</span> Run AI Evaluation`;
+        if (btnGrade) {
+          btnGrade.disabled = false;
+          btnGrade.innerHTML = `<span>✨</span> Grade with AI ➔`;
         }
       }
     }
@@ -1852,9 +1796,9 @@ Respond ONLY with a JSON object in this exact schema:
       const evalResult = this.aiService.evaluateIntelligentLocal({
         rawText: updatedText,
         rubric: rubric,
-        sampleMeta: this.currentPaper?.meta
+        sampleMeta: this.capture.currentMeta
       });
-      this.reviewPanel.setEvaluationData(evalResult, this.currentPaper?.meta, rubric);
+      this.reviewPanel.setEvaluationData(evalResult, this.capture.currentMeta, rubric);
       this.showNotification(`Recalculated with updated OCR text! Score: ${evalResult.suggestedScore}/${rubric.maxMarks}`, 'success');
     }
 
@@ -1865,10 +1809,10 @@ Respond ONLY with a JSON object in this exact schema:
         <div class="evaluation-loading-card">
           <div class="loading-pulse-ring"></div>
           <div class="loading-title">GradePilot AI Evaluating</div>
-          <div style="font-size: 0.85rem; color: #0f766e; font-weight: 600; margin-top: -6px;">${customStatus || 'Processing...'}</div>
+          <div style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600; margin-top: -4px;">${customStatus || 'Processing...'}</div>
           <div class="loading-steps-list">
-            <div class="step-item active"><span class="step-dot"></span> Transcribing handwritten terminology...</div>
-            <div class="step-item active"><span class="step-dot"></span> Matching keywords & wall boundaries...</div>
+            <div class="step-item active"><span class="step-dot"></span> Transcribing handwriting...</div>
+            <div class="step-item active"><span class="step-dot"></span> Matching rubric criteria...</div>
             <div class="step-item active"><span class="step-dot"></span> Calculating granular decimal score...</div>
           </div>
         </div>
@@ -1877,16 +1821,13 @@ Respond ONLY with a JSON object in this exact schema:
 
     handleAcceptAndNext(record) {
       this.gradebook.addRecord(record);
-      this.showNotification(`✓ Grade logged for ${record.studentName} (${record.rollNo}): ${record.finalScore}/${record.maxMarks}`, 'success');
+      this.showNotification(`✓ Score logged: ${record.studentName} (${record.finalScore}/${record.maxMarks})`, 'success');
 
-      this.currentSampleIndex = (this.currentSampleIndex + 1) % SAMPLE_PAPERS.length;
-      const nextSample = SAMPLE_PAPERS[this.currentSampleIndex];
-
-      document.querySelectorAll('.preset-card').forEach(c => {
-        c.classList.toggle('selected', c.dataset.sampleId === nextSample.id);
-      });
-
-      this.capture.loadSample(nextSample.id);
+      // Clear current paper so teacher can snap/upload the next student sheet cleanly
+      this.capture.currentImageSrc = null;
+      this.capture.currentMeta = null;
+      this.capture.renderUI();
+      this.capture.attachEvents();
       this.reviewPanel.renderEmptyState();
       this.updateHeaderStats();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1894,19 +1835,15 @@ Respond ONLY with a JSON object in this exact schema:
 
     updateHeaderStats() {
       const stats = this.gradebook.getStats();
-      const count = document.getElementById('header-graded-count');
-      const time = document.getElementById('header-time-saved');
       const api = document.getElementById('header-api-status');
 
-      if (count) count.textContent = `${stats.total} Graded`;
-      if (time) time.textContent = `~${stats.timeSavedMinutes}m Saved`;
       if (api) {
         if (this.aiService.hasLiveApiKey()) {
           api.className = 'header-api-badge live';
           api.innerHTML = `🟢 Live Vision Ready`;
         } else {
           api.className = 'header-api-badge offline';
-          api.innerHTML = `⚡ Offline NLP Ready`;
+          api.innerHTML = `⚡ Offline Mode`;
         }
       }
     }
@@ -1924,41 +1861,41 @@ Respond ONLY with a JSON object in this exact schema:
         <div class="rubric-builder-card">
           <div class="rubric-top-bar">
             <div>
-              <h3>Rubric & Answer Key Configuration</h3>
-              <p class="text-muted">Define question details and weighted key point criteria for AI grading.</p>
+              <h3>Rubric & Answer Key Editor</h3>
+              <p class="text-secondary" style="font-size: 0.85rem;">Configure question details and weighted criteria for AI grading.</p>
             </div>
-            <div class="preset-action-bar" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="btn btn-primary btn-sm" id="btn-new-blank-rubric" style="font-weight: 700; background: #0f766e;">
-                ${renderIcon('plus')} + New Question
+            <div class="preset-action-bar">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-new-blank-rubric">
+                ${renderIcon('plus')} + New Rubric
               </button>
               <div class="preset-selector-group">
-                <label>Presets:</label>
+                <label>Preset:</label>
                 <select id="select-rubric-preset" class="input-select">
                   ${allRubrics.map(p => `
                     <option value="${p.id}" ${p.id === rubric.id ? 'selected' : ''}>
-                      ${p.isCustom ? '⭐ ' : ''}${p.subject} - ${p.question.substring(0, 30)}... (${p.maxMarks}M)
+                      ${p.isCustom ? '⭐ ' : ''}${p.question.substring(0, 26)}... (${p.maxMarks}M)
                     </option>
                   `).join('')}
                 </select>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-save-custom-rubric" style="font-weight: 700;">
-                💾 Save Rubric
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-save-custom-rubric">
+                💾 Save
               </button>
             </div>
           </div>
 
           <div class="rubric-meta-grid">
+            <div class="form-group span-2">
+              <label for="input-rubric-question">Question Prompt / Title:</label>
+              <textarea id="input-rubric-question" class="input-control" rows="2" placeholder="Enter question prompt...">${rubric.question}</textarea>
+            </div>
             <div class="form-group">
               <label for="input-rubric-subject">Subject / Course Name:</label>
-              <input type="text" id="input-rubric-subject" class="input-control" value="${rubric.subject}" placeholder="e.g. Upper Limb Anatomy, Biology, History..." />
+              <input type="text" id="input-rubric-subject" class="input-control" value="${rubric.subject}" placeholder="e.g. Anatomy, Biology, History..." />
             </div>
             <div class="form-group">
               <label for="input-rubric-maxmarks">Maximum Marks:</label>
               <input type="number" id="input-rubric-maxmarks" class="input-control" step="0.5" min="1" value="${rubric.maxMarks}" />
-            </div>
-            <div class="form-group span-2">
-              <label for="input-rubric-question">Question Prompt:</label>
-              <textarea id="input-rubric-question" class="input-control" rows="2" placeholder="Enter question prompt...">${rubric.question}</textarea>
             </div>
           </div>
 
@@ -1971,7 +1908,7 @@ Respond ONLY with a JSON object in this exact schema:
           </div>
 
           <div class="keypoints-list-header">
-            <h4>Key Points / Answer Key Checklist (${rubric.keyPoints.length})</h4>
+            <h4>Key Points / Answer Checklist (${rubric.keyPoints.length})</h4>
             <button type="button" class="btn btn-primary btn-sm" id="btn-add-keypoint">
               ${renderIcon('plus')} Add Key Point
             </button>
@@ -2008,12 +1945,12 @@ Respond ONLY with a JSON object in this exact schema:
 
       c.querySelector('#btn-new-blank-rubric')?.addEventListener('click', () => {
         this.rubricManager.createNewBlankQuestion();
-        this.showNotification('New blank question created! Type your question & key points below.', 'info');
+        this.showNotification('New blank rubric created! Type your question & key points below.', 'info');
       });
 
       c.querySelector('#btn-save-custom-rubric')?.addEventListener('click', () => {
         this.rubricManager.saveCurrentAsPreset();
-        this.showNotification('✓ Question rubric saved to question bank!', 'success');
+        this.showNotification('✓ Rubric saved to question bank!', 'success');
       });
 
       c.querySelector('#select-rubric-preset')?.addEventListener('change', (e) => {

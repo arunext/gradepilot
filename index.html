@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>GradePilot AI | Universal Handwritten Exam Grading Platform</title>
-  <meta name="description" content="AI grading copilot for teachers and professors to automate the evaluation of handwritten exams, rubrics, and answer sheets." />
+  <title>GradePilot AI | Universal Handwritten Exam Grading</title>
+  <meta name="description" content="AI grading assistant for teachers and professors to easily evaluate handwritten exams, answer sheets, and rubrics." />
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
@@ -15,68 +15,102 @@
 </head>
 <body>
 
-  <!-- Top App Navigation Header -->
+  <!-- Top App Navigation Header (Somhi Style) -->
   <header class="app-header">
-    <div class="brand-group">
-      <div class="brand-icon">✈️</div>
-      <div class="brand-text">
-        <h1>GradePilot AI</h1>
+    <div class="app-header-top">
+      <div class="brand-group">
+        <div class="brand-logo-badge">✈️</div>
+        <div class="brand-text">
+          <h1>GradePilot</h1>
+        </div>
+        <span class="brand-tag">AI</span>
       </div>
-      <span class="brand-tag">PRO</span>
+
+      <!-- Header Right Stats & Settings -->
+      <div class="header-right">
+        <button type="button" id="header-api-status" class="header-api-badge offline" title="Click to configure Gemini Vision API key" style="cursor: pointer; border: none;">
+          ⚡ Offline Mode
+        </button>
+        <button type="button" class="btn btn-icon btn-secondary" id="btn-open-settings" title="API Settings">
+          ⚙️
+        </button>
+      </div>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="header-nav">
       <button type="button" class="nav-tab active" data-view="grading">
-        <span>📝</span> Grading Flow
+        <span>📝</span> Grade
       </button>
       <button type="button" class="nav-tab" data-view="rubric">
-        <span>📋</span> Rubric Setup
+        <span>📋</span> Rubrics
       </button>
       <button type="button" class="nav-tab" data-view="gradebook">
         <span>📊</span> Gradebook
       </button>
     </nav>
-
-    <!-- Header Right Stats & Settings -->
-    <div class="header-right">
-      <button type="button" id="header-api-status" class="header-api-badge offline" title="Click to configure Gemini Vision API key" style="cursor: pointer; border: none;">
-        ⚡ Offline Mode (Click for Gemini)
-      </button>
-      <span id="header-graded-count" class="header-stat-pill">0 Graded</span>
-      <span id="header-time-saved" class="header-stat-pill">~0m Saved</span>
-      <button type="button" class="btn btn-icon btn-secondary" id="btn-open-settings" title="API Settings">
-        ⚙️
-      </button>
-    </div>
   </header>
 
-  <!-- Main Content Viewport -->
+  <!-- Main Content Container -->
   <main class="main-container">
 
-    <!-- Active Rubric Context Banner -->
-    <section class="active-rubric-banner" id="active-rubric-banner">
-      <div class="banner-left">
-        <span class="banner-subject-title" id="banner-subject">Human Anatomy - Upper Limb</span>
-        <span class="banner-question-text" id="banner-question">Boundaries of Axilla: Anterior, Posterior, Medial, and Lateral walls.</span>
-      </div>
-      <div class="banner-right">
-        <select id="select-quick-rubric" class="input-select" title="Switch active question rubric"></select>
-        <span class="banner-max-badge" id="banner-max-marks">5.0 Marks</span>
-        <button type="button" class="btn-evaluate-hero" id="btn-run-eval">
-          <span>✨</span> Run AI Evaluation
-        </button>
-      </div>
-    </section>
-
-    <!-- VIEW 1: Rapid Grading Flow (Split Workspace) -->
+    <!-- VIEW 1: Simple, Guided Grading Flow -->
     <section class="view-section" id="view-grading">
-      <div class="grading-workspace-grid">
+      <div class="grading-flow-container">
         
-        <!-- Left Column: Camera, Upload & Interactive Paper Viewport -->
-        <div id="capture-container"></div>
+        <!-- STEP 1: Select Question / Rubric Card -->
+        <div class="step-card question-select-card">
+          <div class="step-header">
+            <div class="step-header-left">
+              <div class="step-number-badge">1</div>
+              <div class="step-title-group">
+                <h2>Select Exam Question</h2>
+                <p>Choose the question rubric to grade against</p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-new-rubric" title="Create a new rubric">
+              + New Rubric
+            </button>
+          </div>
+          
+          <div class="question-selector-row">
+            <div class="select-wrapper">
+              <select id="select-quick-rubric" class="input-select question-dropdown"></select>
+            </div>
+            <div class="rubric-meta-pills">
+              <span class="pill pill-score" id="banner-max-marks">5.0 Marks</span>
+              <button type="button" class="pill pill-expand" id="btn-toggle-criteria-preview">
+                <span id="criteria-count-label">5 Key Points</span> ▾
+              </button>
+            </div>
+          </div>
 
-        <!-- Right Column: Professor Review, Keypoint Checklist & Override Panel -->
+          <!-- Collapsible Criteria Preview -->
+          <div class="criteria-quick-preview hidden" id="criteria-quick-preview">
+            <div class="criteria-preview-list" id="criteria-preview-list"></div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Paper Capture / Upload & Evaluation -->
+        <div class="step-card paper-action-card">
+          <div class="step-header">
+            <div class="step-header-left">
+              <div class="step-number-badge">2</div>
+              <div class="step-title-group">
+                <h2>Add Student Answer Sheet</h2>
+                <p>Take a photo or upload a student scan</p>
+              </div>
+            </div>
+            <button type="button" class="btn-text-subtle" id="btn-open-samples-modal">
+              🧪 Try Demo Paper
+            </button>
+          </div>
+
+          <!-- Capture & Viewer Container -->
+          <div id="capture-container"></div>
+        </div>
+
+        <!-- STEP 3: Evaluation & Review Panel (Appears when paper is loaded/graded) -->
         <div id="review-container" class="review-container"></div>
 
       </div>
@@ -94,6 +128,22 @@
 
   </main>
 
+  <!-- Modal: Sample Papers Picker -->
+  <div class="modal-backdrop hidden" id="modal-sample-papers">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Select a Demo Student Paper</h3>
+        <button type="button" class="btn-icon-subtle" id="btn-close-samples-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-secondary" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+          Pick a sample handwritten answer sheet to test GradePilot's AI evaluation:
+        </p>
+        <div class="sample-papers-modal-grid" id="sample-papers-modal-grid"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings Modal (Gemini API Key & Model Configuration) -->
   <div class="modal-backdrop hidden" id="modal-settings">
     <div class="modal-card">
@@ -102,9 +152,9 @@
         <button type="button" class="btn-icon-subtle" id="btn-close-settings">✕</button>
       </div>
       <div class="modal-body">
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; color: #166534; line-height: 1.4;">
-          <strong>🎯 High-Accuracy Medical Handwriting OCR:</strong>
-          <br/>Enter your free Google Gemini API Key below. The app will automatically connect to your active Gemini Vision model.
+        <div style="background: #e6f7f5; border: 1px solid #99f6e4; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; color: #065f46; line-height: 1.4;">
+          <strong>🎯 High-Accuracy Handwriting OCR:</strong>
+          <br/>Enter your free Google Gemini API Key below to enable multimodal vision reading for handwritten exams.
         </div>
 
         <div class="form-group" style="margin-top: 0.5rem;">
@@ -123,7 +173,7 @@
           </div>
           <div id="api-test-feedback" style="font-size: 0.78rem; margin-top: 4px; font-weight: 600;"></div>
           <small class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 4px;">
-            Get a free key in 30 seconds at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #0f766e; font-weight: 700; text-decoration: underline;">aistudio.google.com/app/apikey</a>.
+            Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #00a991; font-weight: 700; text-decoration: underline;">aistudio.google.com/app/apikey</a>.
           </small>
         </div>
 
@@ -139,7 +189,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btn-cancel-settings">Cancel</button>
-        <button type="button" class="btn btn-primary" id="btn-save-api-key">Save & Activate Live AI</button>
+        <button type="button" class="btn btn-primary" id="btn-save-api-key">Save & Activate</button>
       </div>
     </div>
   </div>
@@ -148,6 +198,6 @@
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=3.0"></script>
+  <script src="js/bundle.js?v=4.0"></script>
 </body>
 </html>
