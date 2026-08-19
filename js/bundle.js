@@ -1,4 +1,4 @@
-// GradePilot AI - Universal Handwritten Exam Grading Platform
+// GradeCrow AI - The Cleverest Handwritten Exam Grading Platform (gradecrow.com)
 // Multimodal Vision OCR & Intelligent Semantic Concept Resolver (Somhi Design System)
 (function() {
   'use strict';
@@ -232,7 +232,7 @@
 
     loadStoredRubric() {
       try {
-        const stored = localStorage.getItem('gradepilot_current_rubric') || localStorage.getItem('anatomigrade_current_rubric');
+        const stored = localStorage.getItem('gradecrow_current_rubric') || localStorage.getItem('gradepilot_current_rubric') || localStorage.getItem('anatomigrade_current_rubric');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return null;
@@ -240,18 +240,18 @@
 
     loadCustomRubrics() {
       try {
-        const stored = localStorage.getItem('gradepilot_custom_rubrics') || localStorage.getItem('anatomigrade_custom_rubrics');
+        const stored = localStorage.getItem('gradecrow_custom_rubrics') || localStorage.getItem('gradepilot_custom_rubrics') || localStorage.getItem('anatomigrade_custom_rubrics');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return [];
     }
 
     saveCustomRubrics() {
-      try { localStorage.setItem('gradepilot_custom_rubrics', JSON.stringify(this.customRubrics)); } catch (e) {}
+      try { localStorage.setItem('gradecrow_custom_rubrics', JSON.stringify(this.customRubrics)); } catch (e) {}
     }
 
     saveToStorage() {
-      try { localStorage.setItem('gradepilot_current_rubric', JSON.stringify(this.currentRubric)); } catch (e) {}
+      try { localStorage.setItem('gradecrow_current_rubric', JSON.stringify(this.currentRubric)); } catch (e) {}
     }
 
     getAllRubrics() { return [...PRESET_RUBRICS, ...this.customRubrics]; }
@@ -735,7 +735,7 @@
     }
 
     loadApiKey() { 
-      return (localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim(); 
+      return (localStorage.getItem('gradecrow_gemini_api_key') || localStorage.getItem('gradepilot_gemini_api_key') || localStorage.getItem('anatomigrade_gemini_api_key') || '').trim(); 
     }
 
     getApiKey() {
@@ -745,8 +745,9 @@
     setApiKey(key) {
       this.apiKey = (key || '').trim();
       if (this.apiKey) {
-        localStorage.setItem('gradepilot_gemini_api_key', this.apiKey);
+        localStorage.setItem('gradecrow_gemini_api_key', this.apiKey);
       } else {
+        localStorage.removeItem('gradecrow_gemini_api_key');
         localStorage.removeItem('gradepilot_gemini_api_key');
         localStorage.removeItem('anatomigrade_gemini_api_key');
       }
@@ -817,7 +818,7 @@
       // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Transcribing handwriting with Google Gemini AI...');
+          progressCallback('Transcribing handwriting with GradeCrow AI...');
           const compressedSrc = await compressImageForGemini(imageSrc);
           const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
           if (visionResult) {
@@ -859,7 +860,7 @@
 
       if (!base64Data) throw new Error('No image data found.');
 
-      const prompt = `You are GradePilot AI, an expert exam evaluation assistant.
+      const prompt = `You are GradeCrow AI, an expert exam evaluation assistant (gradecrow.com).
 Look at this student's handwritten exam paper image.
 1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
 2. Evaluate the student's answer against the following question rubric and criteria.
@@ -1429,7 +1430,7 @@ Respond ONLY with a JSON object in this exact schema:
 
     loadRecords() {
       try {
-        const stored = localStorage.getItem('gradepilot_gradebook_records') || localStorage.getItem('anatomigrade_gradebook_records');
+        const stored = localStorage.getItem('gradecrow_gradebook_records') || localStorage.getItem('gradepilot_gradebook_records') || localStorage.getItem('anatomigrade_gradebook_records');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
       return [
@@ -1439,7 +1440,7 @@ Respond ONLY with a JSON object in this exact schema:
     }
 
     saveRecords() {
-      try { localStorage.setItem('gradepilot_gradebook_records', JSON.stringify(this.records)); } catch (e) {}
+      try { localStorage.setItem('gradecrow_gradebook_records', JSON.stringify(this.records)); } catch (e) {}
     }
 
     addRecord(rec) {
@@ -1575,7 +1576,7 @@ Respond ONLY with a JSON object in this exact schema:
       const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
       const link = document.createElement('a');
       link.href = encodeURI(csv);
-      link.download = `GradePilot_${new Date().toISOString().slice(0,10)}.csv`;
+      link.download = `GradeCrow_${new Date().toISOString().slice(0,10)}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1851,7 +1852,7 @@ Respond ONLY with a JSON object in this exact schema:
       c.innerHTML = `
         <div class="evaluation-loading-card">
           <div class="loading-pulse-ring"></div>
-          <div class="loading-title">GradePilot AI Evaluating</div>
+          <div class="loading-title">GradeCrow AI Evaluating</div>
           <div style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600; margin-top: -4px;">${customStatus || 'Processing...'}</div>
           <div class="loading-steps-list">
             <div class="step-item active"><span class="step-dot"></span> Transcribing handwriting...</div>
@@ -2053,11 +2054,13 @@ Respond ONLY with a JSON object in this exact schema:
   // Self-boot on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      window.gradePilotApp = new App();
-      window.anatomiGradeApp = window.gradePilotApp;
+      window.gradeCrowApp = new App();
+      window.gradePilotApp = window.gradeCrowApp;
+      window.anatomiGradeApp = window.gradeCrowApp;
     });
   } else {
-    window.gradePilotApp = new App();
-    window.anatomiGradeApp = window.gradePilotApp;
+    window.gradeCrowApp = new App();
+    window.gradePilotApp = window.gradeCrowApp;
+    window.anatomiGradeApp = window.gradeCrowApp;
   }
 })();

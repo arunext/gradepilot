@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>GradePilot AI | Universal Handwritten Exam Grading</title>
-  <meta name="description" content="AI grading assistant for teachers and professors to easily evaluate handwritten exams, answer sheets, and rubrics." />
+  <title>GradeCrow AI | The Cleverest Handwritten Exam Grading Platform</title>
+  <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors to evaluate handwritten exams, answer sheets, and rubrics in seconds." />
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
@@ -18,13 +18,33 @@
 </head>
 <body>
 
-  <!-- Top App Navigation Header (Somhi Style) -->
+  <!-- Top App Navigation Header (Somhi Minimalist Style) -->
   <header class="app-header">
     <div class="app-header-top">
       <div class="brand-group">
-        <div class="brand-logo-badge">✈️</div>
+        <div class="brand-logo-badge" title="GradeCrow AI">
+          <!-- Clever Crow Mascot SVG with Glasses -->
+          <svg class="crow-mascot-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" fill="none">
+            <!-- Academic Cap (Mortarboard) -->
+            <polygon points="16,2 27,6 16,10 5,6" fill="#1F252E"/>
+            <polygon points="16,10 24,7 24,9 16,12 8,9 8,7" fill="#00a991"/>
+            <line x1="24" y1="8" x2="26" y2="13" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="26" cy="13" r="1" fill="#f59e0b"/>
+
+            <!-- Crow Head & Body Profile -->
+            <path d="M10 11C10 8.5 13 8 16 8C20 8 22 10.5 22 14C22 18 19 22 16 28C14 28 11 25 10 21C9.5 19 10 13 10 11Z" fill="#1F252E"/>
+            
+            <!-- Crow Beak -->
+            <polygon points="21,13 28,15.5 21,17" fill="#f59e0b"/>
+
+            <!-- Round Glasses (Intellectual Frame) -->
+            <circle cx="16.5" cy="14.5" r="3.2" stroke="#00a991" stroke-width="1.4" fill="white"/>
+            <circle cx="16.5" cy="14.5" r="1.5" fill="#1F252E"/>
+            <path d="M13.3 14.5 Q12 13 10 13.5" stroke="#00a991" stroke-width="1.2" fill="none"/>
+          </svg>
+        </div>
         <div class="brand-text">
-          <h1>GradePilot</h1>
+          <h1>GradeCrow</h1>
         </div>
         <span class="brand-tag">AI</span>
       </div>
@@ -140,7 +160,7 @@
       </div>
       <div class="modal-body">
         <p class="text-secondary" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-          Pick a sample handwritten answer sheet to test GradePilot's AI evaluation:
+          Pick a sample handwritten answer sheet to test GradeCrow's sharp AI evaluation:
         </p>
         <div class="sample-papers-modal-grid" id="sample-papers-modal-grid"></div>
       </div>
@@ -184,9 +204,9 @@
           <label for="select-gemini-model">Vision Model Selection:</label>
           <select id="select-gemini-model" class="input-select">
             <option value="auto" selected>✨ Auto-Detect Best Available (Recommended)</option>
-            <option value="gemini-2.0-flash">gemini-2.0-flash (Fast & Accurate)</option>
-            <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
-            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash (Fast & Accurate)</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
           </select>
         </div>
       </div>
@@ -201,6 +221,6 @@
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=5.1"></script>
+  <script src="js/bundle.js?v=6.0"></script>
 </body>
 </html>
