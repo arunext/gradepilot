@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   }
 
   const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
-  let keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+  let keySecret = String(rawKeySecret).replace(/^(secret[:\s]*)/i, '').trim().replace(/^["']|["']$/g, '');
   if (!keySecret || keySecret.startsWith('rzp_') || keySecret.length < 10) {
     keySecret = 'SJJlpBi2ejZTnDS838iUCGtu';
   }

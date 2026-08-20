@@ -12,8 +12,10 @@ export default async function handler(req, res) {
 
   const rawKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRxsIkZPf05X3K';
   const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
-  let keyId = String(rawKeyId).trim().replace(/^["']|["']$/g, '');
-  let keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+
+  // Strip possible label prefixes (e.g. "Key ", "Secret ", "Key: ", "Secret: ") & quotes & whitespace
+  let keyId = String(rawKeyId).replace(/^(key[:\s]*)/i, '').trim().replace(/^["']|["']$/g, '');
+  let keySecret = String(rawKeySecret).replace(/^(secret[:\s]*)/i, '').trim().replace(/^["']|["']$/g, '');
 
   // Auto-fix if Key ID and Key Secret were accidentally swapped in Vercel
   if (keySecret.startsWith('rzp_') && !keyId.startsWith('rzp_')) {
