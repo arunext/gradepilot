@@ -20,9 +20,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required payment verification parameters' });
   }
 
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://ofnvnkcwzxmbwavxdvtm.supabase.co';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_2uZid037F0dWrwInQ7XXzg_uLNSoWU9';
+  const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
+  const keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+  const supabaseUrl = (process.env.SUPABASE_URL || 'https://ofnvnkcwzxmbwavxdvtm.supabase.co').trim();
+  const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || 'sb_publishable_2uZid037F0dWrwInQ7XXzg_uLNSoWU9').trim();
 
   try {
     // 1. Cryptographic HMAC SHA256 Signature Verification

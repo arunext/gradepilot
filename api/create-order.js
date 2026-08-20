@@ -10,8 +10,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required parameters (amount, scans, userId)' });
   }
 
-  const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRxsIkZPf05X3K';
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
+  const rawKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRxsIkZPf05X3K';
+  const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
+  const keyId = String(rawKeyId).trim().replace(/^["']|["']$/g, '');
+  const keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
 
   try {
     const amountInPaise = Math.round(Number(amount) * 100);
