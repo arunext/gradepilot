@@ -1,5 +1,6 @@
 # 🦅 GradeCrow AI — The Cleverest Handwritten Exam Grading Platform
 
+> **Live App**: [gradecrow.vercel.app](https://gradecrow.vercel.app/)  
 > **Domain**: `gradecrow.com`  
 > **Tagline**: *"Sharp eyes. Fair marks. Zero grading fatigue."*
 
