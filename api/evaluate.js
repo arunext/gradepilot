@@ -1,6 +1,35 @@
 // Vercel Serverless Function: /api/evaluate
 // Allows GradeCrow to evaluate papers using the owner's server-side GEMINI_API_KEY securely.
 
+let cachedServerModels = null;
+
+async function getServerModels(serverApiKey) {
+  if (cachedServerModels && cachedServerModels.length > 0) return cachedServerModels;
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${serverApiKey}`);
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      const valid = (listData.models || [])
+        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+        .map(m => m.name.replace(/^models\//, ''))
+        .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
+
+      const flash = valid.filter(m => m.includes('flash'));
+      const pro = valid.filter(m => m.includes('pro') && !m.includes('flash'));
+      const rest = valid.filter(m => !m.includes('flash') && !m.includes('pro'));
+
+      const sorted = [...flash, ...pro, ...rest];
+      if (sorted.length > 0) {
+        cachedServerModels = sorted;
+        return sorted;
+      }
+    }
+  } catch (e) {
+    console.warn('Server model discovery failed:', e);
+  }
+  return ['gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+}
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -63,14 +92,7 @@ Respond ONLY with a JSON object in this exact schema:
   ]
 }`;
 
-    const modelsToTry = [
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-2.5-flash-preview',
-      'gemini-1.5-pro'
-    ];
-
+    const modelsToTry = await getServerModels(serverApiKey);
     let lastError = null;
 
     for (const model of modelsToTry) {
