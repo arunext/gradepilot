@@ -2000,6 +2000,60 @@ Respond ONLY with a JSON object in this exact schema:
     }
   }
 
+  // --- 7.5 LEGAL & COMPLIANCE POLICIES (Razorpay KYC Requirement) ---
+  const LEGAL_DOCS = {
+    terms: {
+      title: 'Terms of Service',
+      html: `
+        <h4>1. Platform Overview</h4>
+        <p>GradeCrow AI (gradecrow.com) provides AI-assisted grading, OCR handwriting recognition, question schema extraction, and gradebook management for teachers, professors, and educational institutions.</p>
+        <h4>2. User Accounts & Fair Use</h4>
+        <p>You agree to provide accurate information when signing in with Google. Free daily scans and purchased credits are non-transferable and intended for legitimate academic evaluation.</p>
+        <h4>3. Credit Packs & Pricing</h4>
+        <p>Scan credit packs start at ₹49 INR. Payments are securely processed via Razorpay. Purchased credits do not expire and remain linked to your Google account.</p>
+        <h4>4. Data Ownership & Privacy</h4>
+        <p>Educators retain 100% ownership of their question keys and student exam papers. GradeCrow does not sell or share student papers for public model training.</p>
+      `
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      html: `
+        <h4>1. Information We Collect</h4>
+        <p>We collect your basic Google profile (name, email, avatar) to manage your account and credits. When you upload exam papers, we process the images strictly for grading.</p>
+        <h4>2. Data Security & Storage</h4>
+        <p>Account data is protected via Supabase PostgreSQL with strict Row Level Security (RLS). All financial transactions are encrypted and processed by Razorpay PCI-DSS Level 1 compliant infrastructure.</p>
+        <h4>3. Third-Party Services</h4>
+        <p>We use Google Cloud AI (Gemini Vision) for handwriting recognition and Razorpay for payment processing.</p>
+        <h4>4. Contact</h4>
+        <p>For any privacy inquiries or account deletion requests, email us at <strong>support@gradecrow.com</strong>.</p>
+      `
+    },
+    refund: {
+      title: 'Cancellation & Refund Policy',
+      html: `
+        <h4>1. Digital Credit Packs</h4>
+        <p>Credit packs (₹49, ₹199, ₹499, ₹999) provide instant digital grading credits. Unused credits never expire.</p>
+        <h4>2. Refund Eligibility</h4>
+        <p>If you experience any technical failure where credits were deducted without producing an evaluation, or if you were charged in error, please contact us within 7 days of purchase at <strong>support@gradecrow.com</strong> with your payment ID.</p>
+        <h4>3. Refund Timeline</h4>
+        <p>Approved refunds are credited back to your original payment method (UPI / Bank Account / Card) within 5–7 business days via Razorpay.</p>
+      `
+    },
+    contact: {
+      title: 'Contact Us & Support',
+      html: `
+        <h4>GradeCrow AI Support</h4>
+        <p>We are dedicated to helping educators evaluate exams faster.</p>
+        <ul style="padding-left: 1.25rem; margin: 0.75rem 0; line-height: 1.8;">
+          <li><strong>Email:</strong> support@gradecrow.com / arun@gradecrow.com</li>
+          <li><strong>Website:</strong> <a href="https://gradecrow.vercel.app" target="_blank" style="color: #00a991; font-weight: 700;">https://gradecrow.vercel.app</a></li>
+          <li><strong>Operating Hours:</strong> Monday – Saturday, 9:00 AM – 7:00 PM IST</li>
+          <li><strong>Response Time:</strong> Within 24 hours</li>
+        </ul>
+      `
+    }
+  };
+
   // --- 8. MAIN APP CONTROLLER ---
   class App {
     constructor() {
@@ -2011,6 +2065,101 @@ Respond ONLY with a JSON object in this exact schema:
       this.currentSampleIndex = 0;
       this.isEvaluating = false;
       this.init();
+    }
+
+    async buyCreditPack(pack, amount, scans) {
+      if (!this.authManager.user) {
+        this.showNotification('Please sign in with Google first to buy credit packs.', 'info');
+        this.authManager.signInWithGoogle();
+        return;
+      }
+
+      if (typeof window.Razorpay === 'undefined') {
+        return this.showNotification('Payment gateway is loading. Please try in a moment.', 'info');
+      }
+
+      this.showNotification(`Creating secure order for ${scans} scans (₹${amount})...`, 'info');
+
+      try {
+        const orderRes = await fetch('/api/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pack,
+            amount,
+            scans,
+            userId: this.authManager.user.id,
+            userEmail: this.authManager.user.email,
+            userName: this.authManager.profile?.full_name || ''
+          })
+        });
+
+        const orderData = await orderRes.json();
+        if (!orderRes.ok || orderData.error) {
+          throw new Error(orderData.error || 'Could not initiate payment order');
+        }
+
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'GradeCrow AI',
+          description: `${scans} Exam Grading Scans (${(pack || '').toUpperCase()} Pack)`,
+          image: 'https://gradecrow.vercel.app/favicon.svg',
+          order_id: orderData.orderId,
+          prefill: {
+            name: this.authManager.profile?.full_name || '',
+            email: this.authManager.user.email || ''
+          },
+          theme: {
+            color: '#00a991'
+          },
+          handler: async (response) => {
+            this.showNotification('Verifying payment with Razorpay...', 'info');
+            try {
+              const verifyRes = await fetch('/api/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  userId: this.authManager.user.id,
+                  scans: scans,
+                  pack: pack,
+                  amount: amount
+                })
+              });
+
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.ok) {
+                if (this.authManager.profile) {
+                  this.authManager.profile.credits_balance = verifyData.newBalance;
+                }
+                this.updateHeaderStats();
+                document.getElementById('modal-pricing')?.classList.add('hidden');
+                this.showNotification(`🎉 Payment successful! +${scans} scans added to your account.`, 'success');
+              } else {
+                throw new Error(verifyData.error || 'Payment verification failed');
+              }
+            } catch (vErr) {
+              console.error(vErr);
+              this.showNotification(`Verification notice: ${vErr.message}. Contact support@gradecrow.com`, 'error');
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              this.showNotification('Payment cancelled.', 'info');
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        this.showNotification(`Checkout error: ${err.message}`, 'error');
+      }
     }
 
     init() {
@@ -2341,7 +2490,7 @@ Respond ONLY with a JSON object in this exact schema:
         }
       });
 
-      // Pricing Modal
+      // Pricing Modal & Razorpay Buy Buttons
       const modalPricing = document.getElementById('modal-pricing');
       const btnClosePricing = document.getElementById('btn-close-pricing-modal');
       btnClosePricing?.addEventListener('click', () => modalPricing?.classList.add('hidden'));
@@ -2351,17 +2500,31 @@ Respond ONLY with a JSON object in this exact schema:
           const pack = btn.dataset.pack;
           const amount = btn.dataset.amount;
           const scans = btn.dataset.scans;
-          if (!this.authManager.user) {
-            this.showNotification('Please sign in with Google first to buy credit packs.', 'info');
-            this.authManager.signInWithGoogle();
-            return;
-          }
-          this.showNotification(`Preparing UPI checkout for ${scans} scans (₹${amount})...`, 'info');
-          setTimeout(() => {
-            this.showNotification(`💳 Razorpay / UPI gateway activating. Contact support for instant credits.`, 'info');
-          }, 1500);
+          this.buyCreditPack(pack, amount, scans);
         });
       });
+
+      // Mandatory Legal & Compliance Modals
+      const modalLegal = document.getElementById('modal-legal');
+      const btnCloseLegal = document.getElementById('btn-close-legal-modal');
+      const btnDoneLegal = document.getElementById('btn-done-legal-modal');
+      const legalTitle = document.getElementById('legal-modal-title');
+      const legalBody = document.getElementById('legal-modal-body');
+
+      document.querySelectorAll('.footer-link-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const docKey = btn.dataset.legal;
+          const doc = LEGAL_DOCS[docKey];
+          if (doc && legalTitle && legalBody) {
+            legalTitle.textContent = doc.title;
+            legalBody.innerHTML = doc.html;
+            modalLegal?.classList.remove('hidden');
+          }
+        });
+      });
+
+      btnCloseLegal?.addEventListener('click', () => modalLegal?.classList.add('hidden'));
+      btnDoneLegal?.addEventListener('click', () => modalLegal?.classList.add('hidden'));
 
       // Scan Question / Marking Scheme Modal
       const modalScanScheme = document.getElementById('modal-scan-scheme');

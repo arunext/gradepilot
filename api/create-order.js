@@ -1,0 +1,60 @@
+// Serverless API: Create Razorpay Order in INR
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { pack, amount, scans, userId, userEmail, userName } = req.body || {};
+
+  if (!amount || !scans || !userId) {
+    return res.status(400).json({ error: 'Missing required parameters (amount, scans, userId)' });
+  }
+
+  const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRxsIkZPf05X3K';
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
+
+  try {
+    const amountInPaise = Math.round(Number(amount) * 100);
+    const receiptId = `rcpt_${Date.now()}_${userId.slice(0, 6)}`;
+
+    const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency: 'INR',
+        receipt: receiptId,
+        notes: {
+          userId: String(userId),
+          pack: String(pack || 'starter'),
+          scans: String(scans),
+          userEmail: String(userEmail || '')
+        }
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Razorpay Order creation error:', data);
+      return res.status(response.status).json({ error: data.error?.description || 'Failed to create Razorpay order' });
+    }
+
+    return res.status(200).json({
+      orderId: data.id,
+      amount: data.amount,
+      currency: data.currency,
+      keyId: keyId,
+      pack: pack,
+      scans: scans
+    });
+  } catch (err) {
+    console.error('Server error creating Razorpay order:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+}

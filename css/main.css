@@ -1125,6 +1125,60 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+/* App Footer & Legal Compliance Links */
+.app-footer {
+  margin-top: 3rem;
+  border-top: 1px solid var(--border-color);
+  padding: 1.75rem 1rem 2rem;
+  background: white;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.footer-brand {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.15s ease;
+  text-decoration: underline;
+  text-decoration-color: #cbd5e1;
+}
+
+.footer-link-btn:hover {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+}
+
+.footer-copyright {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .hidden { display: none !important; }
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }

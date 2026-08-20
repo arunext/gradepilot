@@ -30,6 +30,9 @@
 
   <!-- Supabase JS Client for Google Auth & Cloud Ledger -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Razorpay Standard Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -177,6 +180,24 @@
     </section>
 
   </main>
+
+  <!-- App Footer & Mandatory Compliance Links -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span>🦅 GradeCrow AI</span> • The Cleverest Handwritten Exam Grading Platform
+      </div>
+      <div class="footer-links">
+        <button type="button" class="footer-link-btn" data-legal="terms">Terms of Service</button>
+        <button type="button" class="footer-link-btn" data-legal="privacy">Privacy Policy</button>
+        <button type="button" class="footer-link-btn" data-legal="refund">Cancellation & Refund Policy</button>
+        <button type="button" class="footer-link-btn" data-legal="contact">Contact Us & Support</button>
+      </div>
+      <div class="footer-copyright">
+        © 2026 GradeCrow AI. All rights reserved. Secured by Razorpay & Google Cloud AI.
+      </div>
+    </div>
+  </footer>
 
   <!-- Modal: Scan Handwritten Question / Marking Scheme -->
   <div class="modal-backdrop hidden" id="modal-scan-scheme">
@@ -554,10 +575,26 @@
     </div>
   </div>
 
+  <!-- Modal: Mandatory Compliance & Legal Policies -->
+  <div class="modal-backdrop hidden" id="modal-legal">
+    <div class="modal-card" style="max-width: 620px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="legal-modal-title" style="font-size: 1.15rem; font-weight: 800;">Terms & Conditions</h3>
+        <button type="button" class="btn-icon-subtle" id="btn-close-legal-modal">✕</button>
+      </div>
+      <div class="modal-body" id="legal-modal-body" style="overflow-y: auto; font-size: 0.85rem; line-height: 1.6; color: var(--text-main); padding: 1.25rem;">
+        <!-- Dynamic Legal Content Injected Here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-done-legal-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Global Floating Toast Notification -->
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=9.2"></script>
+  <script src="js/bundle.js?v=9.5"></script>
 </body>
 </html>
