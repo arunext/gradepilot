@@ -3,7 +3,197 @@
 (function() {
   'use strict';
 
-  // --- 0. CREDIT MANAGER (5 Free Daily Scans) ---
+  // --- 0. SUPABASE CONFIG & AUTH MANAGER ---
+  const SUPABASE_CONFIG = {
+    url: 'https://ofnvnkcwzxmbwavxdvtm.supabase.co',
+    anonKey: 'sb_publishable_2uZid037F0dWrwInQ7XXzg_uLNSoWU9'
+  };
+
+  class SupabaseAuthManager {
+    constructor() {
+      this.client = null;
+      this.user = null;
+      this.profile = null;
+      this.listeners = [];
+      this.init();
+    }
+
+    init() {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          this.client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+          this.initAuth();
+        } catch (e) {
+          console.warn('Supabase client init failed:', e);
+        }
+      }
+    }
+
+    async initAuth() {
+      if (!this.client) return;
+      try {
+        const { data: { session } } = await this.client.auth.getSession();
+        if (session && session.user) {
+          await this.syncProfile(session.user);
+        }
+        this.client.auth.onAuthStateChange(async (event, session) => {
+          if (session && session.user) {
+            await this.syncProfile(session.user);
+          } else {
+            this.user = null;
+            this.profile = null;
+            this.notify();
+          }
+        });
+      } catch (e) {
+        console.warn('Auth session check error:', e);
+      }
+    }
+
+    async syncProfile(user) {
+      this.user = user;
+      const refParam = localStorage.getItem('gradecrow_ref_code');
+      try {
+        const { data: existing, error } = await this.client
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (existing) {
+          this.profile = existing;
+        } else {
+          // New User Registration!
+          const generatedCode = 'CROW-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+          const startingCredits = refParam ? 105 : 5; // 5 daily + 100 bonus scans if referred!
+          
+          const newProfile = {
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email.split('@')[0],
+            avatar_url: user.user_metadata?.avatar_url || '',
+            credits_balance: startingCredits,
+            referral_code: generatedCode,
+            referred_by: refParam || null,
+            referrals_count: 0
+          };
+
+          const { data: created } = await this.client
+            .from('profiles')
+            .insert(newProfile)
+            .select()
+            .single();
+
+          this.profile = created || newProfile;
+
+          // If referred, credit the referrer with +100 scans!
+          if (refParam) {
+            try {
+              const { data: referrer } = await this.client
+                .from('profiles')
+                .select('id, credits_balance, referrals_count')
+                .eq('referral_code', refParam)
+                .single();
+
+              if (referrer) {
+                await this.client
+                  .from('profiles')
+                  .update({
+                    credits_balance: (referrer.credits_balance || 0) + 100,
+                    referrals_count: (referrer.referrals_count || 0) + 1
+                  })
+                  .eq('id', referrer.id);
+
+                await this.client.from('credit_transactions').insert({
+                  user_id: referrer.id,
+                  amount: 100,
+                  type: 'referral_bonus',
+                  description: `Referred teacher: ${user.email}`
+                });
+              }
+            } catch (errRef) {
+              console.warn('Referral reward credit error:', errRef);
+            }
+            localStorage.removeItem('gradecrow_ref_code');
+          }
+        }
+      } catch (err) {
+        console.warn('Sync profile error:', err);
+        this.profile = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Teacher',
+          avatar_url: user.user_metadata?.avatar_url || '',
+          credits_balance: 5,
+          referral_code: 'CROW-' + user.id.substring(0, 4).toUpperCase(),
+          referrals_count: 0
+        };
+      }
+      this.notify();
+    }
+
+    onAuthChange(cb) {
+      this.listeners.push(cb);
+    }
+
+    notify() {
+      this.listeners.forEach(fn => fn({ user: this.user, profile: this.profile }));
+    }
+
+    async signInWithGoogle() {
+      if (!this.client) return alert('Authentication service initializing. Please refresh.');
+      const redirectTo = window.location.origin + window.location.pathname;
+      const { error } = await this.client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectTo
+        }
+      });
+      if (error) alert('Google Sign-In error: ' + error.message);
+    }
+
+    async signOut() {
+      if (this.client) await this.client.auth.signOut();
+      this.user = null;
+      this.profile = null;
+      this.notify();
+    }
+
+    getCredits(hasCustomKey = false) {
+      if (hasCustomKey) return Infinity;
+      if (this.profile && typeof this.profile.credits_balance === 'number') {
+        return this.profile.credits_balance;
+      }
+      return null;
+    }
+
+    canScan(hasCustomKey = false, guestCreditManager) {
+      if (hasCustomKey) return true;
+      if (this.profile && typeof this.profile.credits_balance === 'number') {
+        return this.profile.credits_balance > 0;
+      }
+      return guestCreditManager.canScan(false);
+    }
+
+    async useScan(hasCustomKey = false, guestCreditManager) {
+      if (hasCustomKey) return;
+      if (this.profile && this.client) {
+        const newBal = Math.max(0, (this.profile.credits_balance || 0) - 1);
+        this.profile.credits_balance = newBal;
+        try {
+          await this.client
+            .from('profiles')
+            .update({ credits_balance: newBal })
+            .eq('id', this.user.id);
+        } catch (e) {}
+        this.notify();
+      } else {
+        guestCreditManager.useScan(false);
+      }
+    }
+  }
+
+  // --- 0.1 GUEST CREDIT MANAGER (5 Free Daily Scans) ---
   class CreditManager {
     constructor() {
       this.DAILY_LIMIT = 5;
@@ -1816,6 +2006,7 @@ Respond ONLY with a JSON object in this exact schema:
       this.rubricManager = new RubricManager();
       this.aiService = new AiEvaluationService();
       this.creditManager = new CreditManager();
+      this.authManager = new SupabaseAuthManager();
       this.currentPaper = null;
       this.currentSampleIndex = 0;
       this.isEvaluating = false;
@@ -1823,6 +2014,16 @@ Respond ONLY with a JSON object in this exact schema:
     }
 
     init() {
+      // Detect Referral Code in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+      if (refCode) {
+        localStorage.setItem('gradecrow_ref_code', refCode.trim().toUpperCase());
+        setTimeout(() => {
+          this.showNotification(`🎁 Referral invite active! Sign in with Google to claim +100 bonus scans.`, 'success');
+        }, 1200);
+      }
+
       this.capture = new PaperCapture({
         container: document.getElementById('capture-container'),
         onCapture: (paperData) => {
@@ -1849,7 +2050,13 @@ Respond ONLY with a JSON object in this exact schema:
         this.updateCriteriaPreview();
       });
 
+      this.authManager.onAuthChange(() => {
+        this.updateAuthUI();
+        this.updateHeaderStats();
+      });
+
       this.bindGlobalEvents();
+      this.updateAuthUI();
       this.renderRubricUI();
       this.updateHeaderStats();
       this.updateQuickRubricSelect();
@@ -1857,13 +2064,144 @@ Respond ONLY with a JSON object in this exact schema:
       this.renderSamplePapersModal();
     }
 
+    updateAuthUI() {
+      const container = document.getElementById('auth-header-container');
+      if (!container) return;
+
+      const user = this.authManager.user;
+      const profile = this.authManager.profile;
+
+      if (!user) {
+        // Logged Out
+        container.innerHTML = `
+          <button type="button" class="btn-google-login" id="btn-google-login" title="Sign in with Google">
+            <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            Sign In
+          </button>
+        `;
+        container.querySelector('#btn-google-login')?.addEventListener('click', () => {
+          this.authManager.signInWithGoogle();
+        });
+      } else {
+        // Logged In
+        const name = profile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0];
+        const firstName = name.split(' ')[0];
+        const avatar = profile?.avatar_url || user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.id}`;
+        const email = profile?.email || user.email;
+
+        container.innerHTML = `
+          <div class="user-menu-wrapper">
+            <button type="button" class="user-avatar-trigger" id="btn-user-avatar" title="Account & Settings">
+              <img src="${avatar}" class="user-avatar-img" alt="${firstName}" />
+              <span class="user-name-text">${firstName}</span>
+              <span class="user-caret">▾</span>
+            </button>
+            <div class="account-dropdown-menu hidden" id="account-dropdown-menu">
+              <div class="dropdown-user-info">
+                <img src="${avatar}" class="dropdown-avatar" />
+                <div>
+                  <div class="dropdown-name">${name}</div>
+                  <div class="dropdown-email">${email}</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item item-highlight" id="menu-btn-referral">
+                🎁 Refer a Colleague (+100 Scans)
+              </button>
+              <button type="button" class="dropdown-item" id="menu-btn-pricing">
+                🪙 Buy Credits (from ₹49)
+              </button>
+              <button type="button" class="dropdown-item" id="menu-btn-settings">
+                ⚙️ Settings & Custom Key
+              </button>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item item-danger" id="menu-btn-signout">
+                🚪 Sign Out
+              </button>
+            </div>
+          </div>
+        `;
+
+        const menuTrigger = container.querySelector('#btn-user-avatar');
+        const dropdown = container.querySelector('#account-dropdown-menu');
+
+        menuTrigger?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown?.classList.toggle('hidden');
+        });
+
+        container.querySelector('#menu-btn-referral')?.addEventListener('click', () => {
+          dropdown?.classList.add('hidden');
+          this.openReferralModal();
+        });
+
+        container.querySelector('#menu-btn-pricing')?.addEventListener('click', () => {
+          dropdown?.classList.add('hidden');
+          document.getElementById('modal-pricing')?.classList.remove('hidden');
+        });
+
+        container.querySelector('#menu-btn-settings')?.addEventListener('click', () => {
+          dropdown?.classList.add('hidden');
+          this.openSettingsModal();
+        });
+
+        container.querySelector('#menu-btn-signout')?.addEventListener('click', () => {
+          dropdown?.classList.add('hidden');
+          this.authManager.signOut();
+          this.showNotification('Signed out.', 'info');
+        });
+      }
+    }
+
+    openReferralModal() {
+      const modal = document.getElementById('modal-referral');
+      if (!modal) return;
+
+      const code = this.authManager.profile?.referral_code || 'CROW';
+      const refUrl = `https://gradecrow.vercel.app/?ref=${code}`;
+      const inputUrl = document.getElementById('input-referral-url');
+      const btnWhatsapp = document.getElementById('btn-whatsapp-share');
+      const countStat = document.getElementById('referral-count-stat');
+      const creditsStat = document.getElementById('referral-credits-stat');
+
+      if (inputUrl) inputUrl.value = refUrl;
+      if (countStat) countStat.textContent = this.authManager.profile?.referrals_count || 0;
+      if (creditsStat) creditsStat.textContent = (this.authManager.profile?.referrals_count || 0) * 100;
+
+      if (btnWhatsapp) {
+        const shareMsg = `Hey! I'm using GradeCrow AI to grade handwritten exam papers in seconds. Use my link to get 100 free bonus scans: ${refUrl}`;
+        btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMsg)}`;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    openSettingsModal() {
+      const inputApiKey = document.getElementById('input-gemini-key');
+      const testFeedback = document.getElementById('api-test-feedback');
+      const modalSettings = document.getElementById('modal-settings');
+      if (inputApiKey) inputApiKey.value = this.aiService.loadApiKey();
+      if (testFeedback) testFeedback.innerHTML = '';
+      modalSettings?.classList.remove('hidden');
+    }
+
     bindGlobalEvents() {
       document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.addEventListener('click', () => this.switchView(tab.dataset.view));
       });
 
+      // Close dropdowns on outside click
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('account-dropdown-menu');
+        const trigger = document.getElementById('btn-user-avatar');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+          if (!dropdown.contains(e.target) && !trigger?.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        }
+      });
+
       // Settings Modal
-      const btnOpenSettings = document.getElementById('btn-open-settings');
       const headerApiBadge = document.getElementById('header-api-status');
       const modalSettings = document.getElementById('modal-settings');
       const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -1873,26 +2211,71 @@ Respond ONLY with a JSON object in this exact schema:
       const inputApiKey = document.getElementById('input-gemini-key');
       const testFeedback = document.getElementById('api-test-feedback');
 
-      const openSettingsModal = () => {
-        if (inputApiKey) inputApiKey.value = this.aiService.loadApiKey();
-        if (testFeedback) testFeedback.innerHTML = '';
-        modalSettings?.classList.remove('hidden');
-      };
-
-      btnOpenSettings?.addEventListener('click', openSettingsModal);
-      headerApiBadge?.addEventListener('click', openSettingsModal);
+      headerApiBadge?.addEventListener('click', () => this.openSettingsModal());
       btnCloseSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
       btnCancelSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
 
-      // Credits Modal
+      // Credits Limit Modal
       const modalCredits = document.getElementById('modal-credits-limit');
       const btnCloseCredits = document.getElementById('btn-close-credits-modal');
-      const btnOpenSettingsFromCredits = document.getElementById('btn-open-settings-from-credits');
+      const btnOpenPricingFromLimit = document.getElementById('btn-open-pricing-from-limit');
+      const btnOpenReferralFromLimit = document.getElementById('btn-open-referral-from-limit');
+      const linkOpenSettingsFromLimit = document.getElementById('link-open-settings-from-limit');
 
       btnCloseCredits?.addEventListener('click', () => modalCredits?.classList.add('hidden'));
-      btnOpenSettingsFromCredits?.addEventListener('click', () => {
+      btnOpenPricingFromLimit?.addEventListener('click', () => {
         modalCredits?.classList.add('hidden');
-        openSettingsModal();
+        document.getElementById('modal-pricing')?.classList.remove('hidden');
+      });
+      btnOpenReferralFromLimit?.addEventListener('click', () => {
+        modalCredits?.classList.add('hidden');
+        this.openReferralModal();
+      });
+      linkOpenSettingsFromLimit?.addEventListener('click', (e) => {
+        e.preventDefault();
+        modalCredits?.classList.add('hidden');
+        this.openSettingsModal();
+      });
+
+      // Referral Modal
+      const modalReferral = document.getElementById('modal-referral');
+      const btnCloseReferral = document.getElementById('btn-close-referral-modal');
+      const btnCopyRefLink = document.getElementById('btn-copy-referral-link');
+
+      btnCloseReferral?.addEventListener('click', () => modalReferral?.classList.add('hidden'));
+      btnCopyRefLink?.addEventListener('click', () => {
+        const inputUrl = document.getElementById('input-referral-url');
+        if (inputUrl) {
+          navigator.clipboard.writeText(inputUrl.value).then(() => {
+            this.showNotification('✓ Referral link copied to clipboard!', 'success');
+          }).catch(() => {
+            inputUrl.select();
+            document.execCommand('copy');
+            this.showNotification('✓ Referral link copied!', 'success');
+          });
+        }
+      });
+
+      // Pricing Modal
+      const modalPricing = document.getElementById('modal-pricing');
+      const btnClosePricing = document.getElementById('btn-close-pricing-modal');
+      btnClosePricing?.addEventListener('click', () => modalPricing?.classList.add('hidden'));
+
+      document.querySelectorAll('.btn-buy-pack').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pack = btn.dataset.pack;
+          const amount = btn.dataset.amount;
+          const scans = btn.dataset.scans;
+          if (!this.authManager.user) {
+            this.showNotification('Please sign in with Google first to buy credit packs.', 'info');
+            this.authManager.signInWithGoogle();
+            return;
+          }
+          this.showNotification(`Preparing UPI checkout for ${scans} scans (₹${amount})...`, 'info');
+          setTimeout(() => {
+            this.showNotification(`💳 Razorpay / UPI gateway activating. Contact support for instant credits.`, 'info');
+          }, 1500);
+        });
       });
 
       // Scan Question / Marking Scheme Modal
@@ -2149,7 +2532,7 @@ Respond ONLY with a JSON object in this exact schema:
       }
 
       const hasCustomKey = this.aiService.hasLiveApiKey();
-      if (!this.creditManager.canScan(hasCustomKey)) {
+      if (!this.authManager.canScan(hasCustomKey, this.creditManager)) {
         document.getElementById('modal-credits-limit')?.classList.remove('hidden');
         return;
       }
@@ -2174,7 +2557,7 @@ Respond ONLY with a JSON object in this exact schema:
           progressCallback: (statusText) => this.showEvaluationLoading(statusText)
         });
 
-        this.creditManager.useScan(hasCustomKey);
+        await this.authManager.useScan(hasCustomKey, this.creditManager);
         this.updateHeaderStats();
 
         this.reviewPanel.setEvaluationData(result, this.capture.currentMeta, rubric);
@@ -2191,7 +2574,7 @@ Respond ONLY with a JSON object in this exact schema:
           isCustomPhoto: true,
           geminiError: err.message
         });
-        this.creditManager.useScan(hasCustomKey);
+        await this.authManager.useScan(hasCustomKey, this.creditManager);
         this.updateHeaderStats();
         this.reviewPanel.setEvaluationData(localFallback, this.capture.currentMeta, rubric);
         this.showNotification(`Evaluation completed. Score: ${localFallback.suggestedScore}/${rubric.maxMarks}`, 'info');
@@ -2267,14 +2650,26 @@ Respond ONLY with a JSON object in this exact schema:
       const creditsBadge = document.getElementById('header-credits-badge');
 
       const hasCustomKey = this.aiService.hasLiveApiKey();
-      const remaining = this.creditManager.getRemaining(hasCustomKey);
+      const userCredits = this.authManager.getCredits(hasCustomKey);
+      const isUser = Boolean(this.authManager.user);
 
       if (creditsBadge) {
         if (hasCustomKey) {
           creditsBadge.className = 'header-credits-badge unlimited';
           creditsBadge.innerHTML = `✨ Unlimited`;
           creditsBadge.title = 'Custom API Key Active (Unlimited Scans)';
+        } else if (isUser && userCredits !== null) {
+          if (userCredits > 10) {
+            creditsBadge.className = 'header-credits-badge';
+          } else if (userCredits > 0) {
+            creditsBadge.className = 'header-credits-badge low';
+          } else {
+            creditsBadge.className = 'header-credits-badge zero';
+          }
+          creditsBadge.innerHTML = `🦅 <span id="credits-count">${userCredits}</span> Scans`;
+          creditsBadge.title = `${userCredits} scans available in your Google account`;
         } else {
+          const remaining = this.creditManager.getRemaining(false);
           if (remaining > 2) {
             creditsBadge.className = 'header-credits-badge';
           } else if (remaining > 0) {
@@ -2283,7 +2678,7 @@ Respond ONLY with a JSON object in this exact schema:
             creditsBadge.className = 'header-credits-badge zero';
           }
           creditsBadge.innerHTML = `🦅 <span id="credits-count">${remaining}</span>/5 Free`;
-          creditsBadge.title = `${remaining} free scans remaining today`;
+          creditsBadge.title = `${remaining} free guest scans remaining today`;
         }
       }
 
