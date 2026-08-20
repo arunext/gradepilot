@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
   const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
   let keySecret = String(rawKeySecret).replace(/^(secret[:\s]*)/i, '').trim().replace(/^["']|["']$/g, '');
-  if (!keySecret || keySecret.startsWith('rzp_') || keySecret.length < 10) {
+  if (!keySecret || keySecret.startsWith('rzp_') || keySecret.startsWith('sb_') || keySecret.length < 10 || keySecret.length > 30) {
     keySecret = 'SJJlpBi2ejZTnDS838iUCGtu';
   }
   const supabaseUrl = (process.env.SUPABASE_URL || 'https://ofnvnkcwzxmbwavxdvtm.supabase.co').trim();

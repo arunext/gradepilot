@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   if (!keyId.startsWith('rzp_')) {
     keyId = 'rzp_test_TRxsIkZPf05X3K';
   }
-  if (!keySecret || keySecret.length < 10) {
+  if (!keySecret || keySecret.length < 10 || keySecret.length > 30 || keySecret.startsWith('sb_')) {
     keySecret = 'SJJlpBi2ejZTnDS838iUCGtu';
   }
 
