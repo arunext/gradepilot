@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="16" fill="#1F252E"/>
+  
+  <!-- Academic Mortarboard Cap -->
+  <polygon points="32,6 56,15 32,24 8,15" fill="#00a991"/>
+  <polygon points="32,24 48,18 48,22 32,28 16,22 16,18" fill="#008370"/>
+  <line x1="48" y1="20" x2="52" y2="30" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="52" cy="31" r="2.5" fill="#f59e0b"/>
+
+  <!-- Crow Head & Body Silhouette -->
+  <path d="M20 22C20 17 26 16 32 16C40 16 44 21 44 28C44 36 38 44 32 56C28 56 22 50 20 42C19 38 20 26 20 22Z" fill="#FFFFFF"/>
+  
+  <!-- Beak -->
+  <polygon points="42,26 56,31 42,35" fill="#f59e0b"/>
+
+  <!-- Intellectual Round Glasses -->
+  <circle cx="33" cy="29" r="6.5" stroke="#00a991" stroke-width="2.8" fill="#1F252E"/>
+  <circle cx="33" cy="29" r="2.8" fill="#00a991"/>
+  <circle cx="34" cy="28" r="1" fill="#FFFFFF"/>
+  <path d="M26.5 29 Q24 26 20 27" stroke="#00a991" stroke-width="2" fill="none"/>
+</svg>

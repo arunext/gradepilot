@@ -3,6 +3,57 @@
 (function() {
   'use strict';
 
+  // --- 0. CREDIT MANAGER (5 Free Daily Scans) ---
+  class CreditManager {
+    constructor() {
+      this.DAILY_LIMIT = 5;
+      this.data = this.loadData();
+    }
+
+    loadData() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      try {
+        const stored = localStorage.getItem('gradecrow_daily_credits');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.date === todayStr) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      const fresh = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT };
+      this.saveData(fresh);
+      return fresh;
+    }
+
+    saveData(d) {
+      try {
+        localStorage.setItem('gradecrow_daily_credits', JSON.stringify(d));
+      } catch (e) {}
+    }
+
+    getRemaining(hasCustomKey = false) {
+      if (hasCustomKey) return Infinity;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (this.data.date !== todayStr) {
+        this.data = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT };
+        this.saveData(this.data);
+      }
+      return Math.max(0, this.data.maxScans - (this.data.scansUsed || 0));
+    }
+
+    canScan(hasCustomKey = false) {
+      if (hasCustomKey) return true;
+      return this.getRemaining(false) > 0;
+    }
+
+    useScan(hasCustomKey = false) {
+      if (hasCustomKey) return;
+      this.data.scansUsed = (this.data.scansUsed || 0) + 1;
+      this.saveData(this.data);
+    }
+  }
+
   // --- 1. SVG ICONS ---
   const icons = {
     camera: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
@@ -815,10 +866,10 @@
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
       let geminiError = null;
 
-      // 1. If Live Gemini API Key is available, perform Multimodal Vision OCR on the actual camera image
+      // 1. If Live Custom Gemini API Key is available, perform Multimodal Vision OCR directly on the client
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Transcribing handwriting with GradeCrow AI...');
+          progressCallback('Transcribing handwriting with GradeCrow AI (Custom Key)...');
           const compressedSrc = await compressImageForGemini(imageSrc);
           const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
           if (visionResult) {
@@ -828,12 +879,44 @@
             };
           }
         } catch (err) {
-          console.warn('Gemini Vision call failed:', err);
-          geminiError = err.message || 'Gemini Vision call failed';
+          console.warn('Custom Gemini Vision call failed:', err);
+          geminiError = err.message || 'Custom Gemini Vision call failed';
         }
       }
 
-      // 2. Fallback
+      // 2. Otherwise, attempt serverless endpoint /api/evaluate (using owner's server-side GEMINI_API_KEY)
+      try {
+        progressCallback('Connecting to GradeCrow AI Cloud...');
+        const compressedSrc = await compressImageForGemini(imageSrc);
+        const serverRes = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: compressedSrc,
+            mimeType: 'image/jpeg',
+            rubric
+          })
+        });
+
+        if (serverRes.ok) {
+          const serverData = await serverRes.json();
+          if (serverData && serverData.points) {
+            return {
+              ...serverData,
+              mode: 'gemini-server'
+            };
+          }
+        } else {
+          const errJson = await serverRes.json().catch(() => ({}));
+          if (errJson.error !== 'NO_SERVER_KEY') {
+            geminiError = errJson.message || 'Server evaluation error';
+          }
+        }
+      } catch (serverErr) {
+        console.warn('Server evaluate route unavailable, using local intelligent engine:', serverErr);
+      }
+
+      // 3. Fallback to Intelligent Local Semantic Concept Engine
       progressCallback('Evaluating student answer sheet & criteria attachments...');
       await new Promise(r => setTimeout(r, 200));
       return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
@@ -1588,6 +1671,7 @@ Respond ONLY with a JSON object in this exact schema:
     constructor() {
       this.rubricManager = new RubricManager();
       this.aiService = new AiEvaluationService();
+      this.creditManager = new CreditManager();
       this.currentPaper = null;
       this.currentSampleIndex = 0;
       this.isEvaluating = false;
@@ -1656,6 +1740,17 @@ Respond ONLY with a JSON object in this exact schema:
       btnCloseSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
       btnCancelSettings?.addEventListener('click', () => modalSettings?.classList.add('hidden'));
 
+      // Credits Modal
+      const modalCredits = document.getElementById('modal-credits-limit');
+      const btnCloseCredits = document.getElementById('btn-close-credits-modal');
+      const btnOpenSettingsFromCredits = document.getElementById('btn-open-settings-from-credits');
+
+      btnCloseCredits?.addEventListener('click', () => modalCredits?.classList.add('hidden'));
+      btnOpenSettingsFromCredits?.addEventListener('click', () => {
+        modalCredits?.classList.add('hidden');
+        openSettingsModal();
+      });
+
       // Test Key button
       btnTestApiKey?.addEventListener('click', async () => {
         const keyVal = inputApiKey ? inputApiKey.value.trim() : '';
@@ -1684,9 +1779,9 @@ Respond ONLY with a JSON object in this exact schema:
         this.aiService.setApiKey(keyVal);
         modalSettings?.classList.add('hidden');
         if (keyVal) {
-          this.showNotification('✓ Gemini Vision API activated!', 'success');
+          this.showNotification('✓ Unlimited Gemini Vision API activated!', 'success');
         } else {
-          this.showNotification('API key removed. Running in offline mode.', 'info');
+          this.showNotification('Custom key removed. Using standard daily scans.', 'info');
         }
         this.updateHeaderStats();
       });
@@ -1790,6 +1885,12 @@ Respond ONLY with a JSON object in this exact schema:
         return this.showNotification('Please snap a photo or upload an answer sheet first.', 'info');
       }
 
+      const hasCustomKey = this.aiService.hasLiveApiKey();
+      if (!this.creditManager.canScan(hasCustomKey)) {
+        document.getElementById('modal-credits-limit')?.classList.remove('hidden');
+        return;
+      }
+
       const rubric = this.rubricManager.getRubric();
       const btnGrade = document.getElementById('btn-grade-now');
 
@@ -1810,6 +1911,9 @@ Respond ONLY with a JSON object in this exact schema:
           progressCallback: (statusText) => this.showEvaluationLoading(statusText)
         });
 
+        this.creditManager.useScan(hasCustomKey);
+        this.updateHeaderStats();
+
         this.reviewPanel.setEvaluationData(result, this.capture.currentMeta, rubric);
         this.showNotification(`Evaluation complete! Score: ${result.suggestedScore}/${rubric.maxMarks}`, 'success');
 
@@ -1824,6 +1928,8 @@ Respond ONLY with a JSON object in this exact schema:
           isCustomPhoto: true,
           geminiError: err.message
         });
+        this.creditManager.useScan(hasCustomKey);
+        this.updateHeaderStats();
         this.reviewPanel.setEvaluationData(localFallback, this.capture.currentMeta, rubric);
         this.showNotification(`Evaluation completed. Score: ${localFallback.suggestedScore}/${rubric.maxMarks}`, 'info');
       } finally {
@@ -1851,13 +1957,28 @@ Respond ONLY with a JSON object in this exact schema:
       if (!c) return;
       c.innerHTML = `
         <div class="evaluation-loading-card">
-          <div class="loading-pulse-ring"></div>
-          <div class="loading-title">GradeCrow AI Evaluating</div>
-          <div style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600; margin-top: -4px;">${customStatus || 'Processing...'}</div>
+          <div class="crow-animation-stage">
+            <svg class="crow-mascot-anim" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+              <rect width="64" height="64" rx="16" fill="#1F252E"/>
+              <polygon points="32,6 56,15 32,24 8,15" fill="#00a991"/>
+              <polygon points="32,24 48,18 48,22 32,28 16,22 16,18" fill="#008370"/>
+              <line x1="48" y1="20" x2="52" y2="30" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="52" cy="31" r="2.5" fill="#f59e0b"/>
+              <path d="M20 22C20 17 26 16 32 16C40 16 44 21 44 28C44 36 38 44 32 56C28 56 22 50 20 42C19 38 20 26 20 22Z" fill="#FFFFFF"/>
+              <polygon points="42,26 56,31 42,35" fill="#f59e0b"/>
+              <circle class="crow-anim-glasses" cx="33" cy="29" r="6.5" stroke="#00a991" stroke-width="2.8" fill="#1F252E"/>
+              <circle cx="33" cy="29" r="2.8" fill="#00a991"/>
+              <circle cx="34" cy="28" r="1" fill="#FFFFFF"/>
+              <path d="M26.5 29 Q24 26 20 27" stroke="#00a991" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="crow-scan-beam"></div>
+          </div>
+          <div class="loading-title">GradeCrow AI is Inspecting Paper</div>
+          <div class="loading-subtitle">${customStatus || 'Analyzing handwriting & rubric criteria...'}</div>
           <div class="loading-steps-list">
-            <div class="step-item active"><span class="step-dot"></span> Transcribing handwriting...</div>
-            <div class="step-item active"><span class="step-dot"></span> Matching rubric criteria...</div>
-            <div class="step-item active"><span class="step-dot"></span> Calculating granular decimal score...</div>
+            <div class="step-item active"><span class="step-dot"></span> 🦅 Crow-Eye OCR Handwriting Analysis...</div>
+            <div class="step-item active"><span class="step-dot"></span> ⚖️ Rubric Criteria & Concept Attachment...</div>
+            <div class="step-item active"><span class="step-dot"></span> ✍️ Decimal Score Calculation & Evidence Quotes...</div>
           </div>
         </div>
       `;
@@ -1880,14 +2001,36 @@ Respond ONLY with a JSON object in this exact schema:
     updateHeaderStats() {
       const stats = this.gradebook.getStats();
       const api = document.getElementById('header-api-status');
+      const creditsBadge = document.getElementById('header-credits-badge');
+
+      const hasCustomKey = this.aiService.hasLiveApiKey();
+      const remaining = this.creditManager.getRemaining(hasCustomKey);
+
+      if (creditsBadge) {
+        if (hasCustomKey) {
+          creditsBadge.className = 'header-credits-badge unlimited';
+          creditsBadge.innerHTML = `✨ Unlimited Pro`;
+          creditsBadge.title = 'Custom API Key Active (Unlimited Scans)';
+        } else {
+          if (remaining > 2) {
+            creditsBadge.className = 'header-credits-badge';
+          } else if (remaining > 0) {
+            creditsBadge.className = 'header-credits-badge low';
+          } else {
+            creditsBadge.className = 'header-credits-badge zero';
+          }
+          creditsBadge.innerHTML = `🦅 <span id="credits-count">${remaining}</span>/5 Free Scans`;
+          creditsBadge.title = `${remaining} free scans remaining today`;
+        }
+      }
 
       if (api) {
-        if (this.aiService.hasLiveApiKey()) {
+        if (hasCustomKey) {
           api.className = 'header-api-badge live';
-          api.innerHTML = `🟢 Live Vision Ready`;
+          api.innerHTML = `🟢 Custom Key`;
         } else {
-          api.className = 'header-api-badge offline';
-          api.innerHTML = `⚡ Offline Mode`;
+          api.className = 'header-api-badge live';
+          api.innerHTML = `🟢 AI Ready`;
         }
       }
     }

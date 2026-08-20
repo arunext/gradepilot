@@ -1,0 +1,20 @@
+{
+  "name": "gradecrow",
+  "version": "7.0.0",
+  "description": "GradeCrow AI — The Cleverest Universal Handwritten Exam Grading Platform",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./serve.ps1"
+  },
+  "keywords": [
+    "ai-grading",
+    "handwriting-ocr",
+    "gemini-vision",
+    "education",
+    "teachers",
+    "exam-grader"
+  ],
+  "author": "GradeCrow AI",
+  "license": "MIT"
+}

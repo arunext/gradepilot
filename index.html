@@ -9,6 +9,9 @@
   <title>GradeCrow AI | The Cleverest Handwritten Exam Grading Platform</title>
   <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors to evaluate handwritten exams, answer sheets, and rubrics in seconds." />
   
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/capture.css" />
@@ -20,44 +23,32 @@
 
   <!-- Top App Navigation Header (Somhi Minimalist Style) -->
   <header class="app-header">
-    <div class="app-header-top">
-      <div class="brand-group">
-        <div class="brand-logo-badge" title="GradeCrow AI">
-          <!-- Clever Crow Mascot SVG with Glasses -->
-          <svg class="crow-mascot-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" fill="none">
-            <!-- Academic Cap (Mortarboard) -->
-            <polygon points="16,2 27,6 16,10 5,6" fill="#1F252E"/>
-            <polygon points="16,10 24,7 24,9 16,12 8,9 8,7" fill="#00a991"/>
-            <line x1="24" y1="8" x2="26" y2="13" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
-            <circle cx="26" cy="13" r="1" fill="#f59e0b"/>
+    <div class="brand-group">
+      <div class="brand-logo-badge" title="GradeCrow AI">
+        <!-- Clever Crow Mascot SVG with Glasses -->
+        <svg class="crow-mascot-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="24" height="24" fill="none">
+          <!-- Academic Cap (Mortarboard) -->
+          <polygon points="16,2 27,6 16,10 5,6" fill="#1F252E"/>
+          <polygon points="16,10 24,7 24,9 16,12 8,9 8,7" fill="#00a991"/>
+          <line x1="24" y1="8" x2="26" y2="13" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="26" cy="13" r="1" fill="#f59e0b"/>
 
-            <!-- Crow Head & Body Profile -->
-            <path d="M10 11C10 8.5 13 8 16 8C20 8 22 10.5 22 14C22 18 19 22 16 28C14 28 11 25 10 21C9.5 19 10 13 10 11Z" fill="#1F252E"/>
-            
-            <!-- Crow Beak -->
-            <polygon points="21,13 28,15.5 21,17" fill="#f59e0b"/>
+          <!-- Crow Head & Body Profile -->
+          <path d="M10 11C10 8.5 13 8 16 8C20 8 22 10.5 22 14C22 18 19 22 16 28C14 28 11 25 10 21C9.5 19 10 13 10 11Z" fill="#1F252E"/>
+          
+          <!-- Crow Beak -->
+          <polygon points="21,13 28,15.5 21,17" fill="#f59e0b"/>
 
-            <!-- Round Glasses (Intellectual Frame) -->
-            <circle cx="16.5" cy="14.5" r="3.2" stroke="#00a991" stroke-width="1.4" fill="white"/>
-            <circle cx="16.5" cy="14.5" r="1.5" fill="#1F252E"/>
-            <path d="M13.3 14.5 Q12 13 10 13.5" stroke="#00a991" stroke-width="1.2" fill="none"/>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <h1>GradeCrow</h1>
-        </div>
-        <span class="brand-tag">AI</span>
+          <!-- Round Glasses (Intellectual Frame) -->
+          <circle cx="16.5" cy="14.5" r="3.2" stroke="#00a991" stroke-width="1.4" fill="white"/>
+          <circle cx="16.5" cy="14.5" r="1.5" fill="#1F252E"/>
+          <path d="M13.3 14.5 Q12 13 10 13.5" stroke="#00a991" stroke-width="1.2" fill="none"/>
+        </svg>
       </div>
-
-      <!-- Header Right Stats & Settings -->
-      <div class="header-right">
-        <button type="button" id="header-api-status" class="header-api-badge offline" title="Click to configure Gemini Vision API key" style="cursor: pointer; border: none;">
-          ⚡ Offline Mode
-        </button>
-        <button type="button" class="btn btn-icon btn-secondary" id="btn-open-settings" title="API Settings">
-          ⚙️
-        </button>
+      <div class="brand-text">
+        <h1>GradeCrow</h1>
       </div>
+      <span class="brand-tag">AI</span>
     </div>
 
     <!-- Navigation Tabs -->
@@ -72,6 +63,19 @@
         <span>📊</span> Gradebook
       </button>
     </nav>
+
+    <!-- Header Right Stats, Credits & Settings -->
+    <div class="header-right">
+      <div id="header-credits-badge" class="header-credits-badge" title="Daily Free AI Scans">
+        🦅 <span id="credits-count">5</span>/5 Free Scans
+      </div>
+      <button type="button" id="header-api-status" class="header-api-badge live" title="Click to view API / Server status" style="cursor: pointer; border: none;">
+        🟢 AI Ready
+      </button>
+      <button type="button" class="btn btn-icon btn-secondary" id="btn-open-settings" title="API Settings">
+        ⚙️
+      </button>
+    </div>
   </header>
 
   <!-- Main Content Container -->
@@ -167,27 +171,52 @@
     </div>
   </div>
 
+  <!-- Modal: Daily Credits Limit Reached -->
+  <div class="modal-backdrop hidden" id="modal-credits-limit">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+        <div style="font-size: 2.5rem; margin-bottom: -6px;">🦅</div>
+      </div>
+      <div class="modal-body" style="padding-top: 0;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
+          Daily Free Scans Limit Reached
+        </h3>
+        <p class="text-secondary" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
+          You've used all <strong>5 free AI scans</strong> for today. Daily credits reset at midnight!
+        </p>
+        <div style="background: #e6f7f5; border: 1px solid #99f6e4; border-radius: 8px; padding: 0.85rem; font-size: 0.82rem; color: #065f46; text-align: left; margin-bottom: 1rem;">
+          <strong>💡 Want Unlimited Grading Right Now?</strong>
+          <br/>Enter your own free Google Gemini API Key in Settings ⚙️ to enjoy <strong>unlimited free grading</strong> with no daily limits.
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" id="btn-close-credits-modal">Maybe Later</button>
+        <button type="button" class="btn btn-primary" id="btn-open-settings-from-credits">⚙️ Enter Free API Key</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings Modal (Gemini API Key & Model Configuration) -->
   <div class="modal-backdrop hidden" id="modal-settings">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Google Gemini Vision API Setup</h3>
+        <h3>GradeCrow AI Settings</h3>
         <button type="button" class="btn-icon-subtle" id="btn-close-settings">✕</button>
       </div>
       <div class="modal-body">
         <div style="background: #e6f7f5; border: 1px solid #99f6e4; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; color: #065f46; line-height: 1.4;">
-          <strong>🎯 High-Accuracy Handwriting OCR:</strong>
-          <br/>Enter your free Google Gemini API Key below to enable multimodal vision reading for handwritten exams.
+          <strong>🎯 Unlimited Custom API Key:</strong>
+          <br/>By default, GradeCrow provides 5 free daily scans. Add your free Google Gemini API Key below for <strong>unlimited instant grading</strong>.
         </div>
 
-        <div class="form-group" style="margin-top: 0.5rem;">
-          <label for="input-gemini-key">Google Gemini API Key:</label>
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label for="input-gemini-key">Google Gemini API Key (Optional for Unlimited):</label>
           <div style="display: flex; gap: 0.5rem;">
             <input 
               type="password" 
               id="input-gemini-key" 
               class="input-control" 
-              placeholder="Paste AIzaSy..." 
+              placeholder="Paste AIzaSy... or leave blank for default" 
               style="flex: 1;"
             />
             <button type="button" class="btn btn-secondary btn-sm" id="btn-test-api-key" style="font-weight: 700;">
@@ -196,7 +225,7 @@
           </div>
           <div id="api-test-feedback" style="font-size: 0.78rem; margin-top: 4px; font-weight: 600;"></div>
           <small class="text-muted" style="font-size: 0.75rem; display: block; margin-top: 4px;">
-            Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #00a991; font-weight: 700; text-decoration: underline;">aistudio.google.com/app/apikey</a>.
+            Get a free key in 30 seconds at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #00a991; font-weight: 700; text-decoration: underline;">aistudio.google.com/app/apikey</a>.
           </small>
         </div>
 
@@ -212,7 +241,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btn-cancel-settings">Cancel</button>
-        <button type="button" class="btn btn-primary" id="btn-save-api-key">Save & Activate</button>
+        <button type="button" class="btn btn-primary" id="btn-save-api-key">Save Settings</button>
       </div>
     </div>
   </div>
@@ -221,6 +250,6 @@
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=6.0"></script>
+  <script src="js/bundle.js?v=7.0"></script>
 </body>
 </html>
