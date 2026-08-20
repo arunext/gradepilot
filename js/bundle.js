@@ -345,6 +345,26 @@
       return true;
     }
 
+    loadScannedQuestion(scannedData) {
+      const newId = 'scanned-' + Date.now().toString(36);
+      this.currentRubric = {
+        id: newId,
+        subject: scannedData.subject || 'General',
+        question: scannedData.question || 'Scanned Question',
+        maxMarks: typeof scannedData.maxMarks === 'number' && scannedData.maxMarks > 0 ? scannedData.maxMarks : 5.0,
+        isCustom: true,
+        keyPoints: (scannedData.keyPoints || []).map((kp, idx) => ({
+          id: kp.id || `pt-${idx + 1}-${Date.now().toString(36)}`,
+          text: kp.text || `Point ${idx + 1}`,
+          weight: typeof kp.weight === 'number' ? kp.weight : 1.0,
+          keywords: Array.isArray(kp.keywords) ? kp.keywords : []
+        }))
+      };
+      this.saveCurrentAsPreset();
+      this.notify();
+      return this.currentRubric;
+    }
+
     setPreset(presetId) {
       const found = this.getAllRubrics().find(p => p.id === presetId);
       if (found) {
@@ -920,6 +940,119 @@
       progressCallback('Evaluating student answer sheet & criteria attachments...');
       await new Promise(r => setTimeout(r, 200));
       return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
+    }
+
+    async parseQuestionSchemeFromImage({ imageSrc, progressCallback = () => {} }) {
+      progressCallback('Optimizing image & connecting to GradeCrow AI...');
+      const compressedSrc = await compressImageForGemini(imageSrc);
+
+      // 1. Try serverless route /api/parse-question
+      try {
+        progressCallback('Reading handwritten question & points allocation...');
+        const serverRes = await fetch('/api/parse-question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: compressedSrc,
+            mimeType: 'image/jpeg'
+          })
+        });
+
+        if (serverRes.ok) {
+          const parsed = await serverRes.json();
+          if (parsed && parsed.question && Array.isArray(parsed.keyPoints)) {
+            return parsed;
+          }
+        }
+      } catch (err) {
+        console.warn('Server parse-question route failed:', err);
+      }
+
+      // 2. If client has custom API key, try direct client call
+      if (this.hasLiveApiKey()) {
+        try {
+          const activeKey = this.getApiKey();
+          const cleanBase64 = compressedSrc.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
+          const modelsToTry = await this.getWorkingModels(activeKey);
+          
+          const prompt = `You are GradeCrow AI, an expert exam assistant (gradecrow.com).
+Look at this handwritten or printed image of an exam question, marking scheme, or rubric written by a teacher.
+
+Extract:
+1. The Question Title or Prompt.
+2. The Subject / Course Name (or "General" if not mentioned).
+3. The Maximum Marks / Total Score.
+4. Each Key Point / Expected Answer Criterion along with its allocated marks/weight.
+   If marks for individual points are not explicitly stated, divide the total marks evenly across the points.
+5. Key vocabulary keywords for each point.
+
+Respond ONLY with a valid JSON object matching this exact schema:
+{
+  "question": "The full question text or title...",
+  "subject": "Subject or Course Name",
+  "maxMarks": 5.0,
+  "keyPoints": [
+    {
+      "text": "Description of criterion or expected concept",
+      "weight": 1.0,
+      "keywords": ["keyword 1", "keyword 2"]
+    }
+  ]
+}`;
+
+          for (const model of modelsToTry) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
+            const res = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  role: 'user',
+                  parts: [
+                    { text: prompt },
+                    { inlineData: { mimeType: 'image/jpeg', data: cleanBase64 } }
+                  ]
+                }],
+                generationConfig: { temperature: 0.1 }
+              })
+            });
+
+            if (res.ok) {
+              const resData = await res.json();
+              let text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                if (text.includes('```')) text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+                const parsed = JSON.parse(text);
+                return {
+                  question: parsed.question || 'Scanned Question',
+                  subject: parsed.subject || 'General',
+                  maxMarks: typeof parsed.maxMarks === 'number' ? parsed.maxMarks : 5.0,
+                  keyPoints: (parsed.keyPoints || []).map((kp, idx) => ({
+                    id: `pt-${idx + 1}-${Date.now().toString(36)}`,
+                    text: kp.text || `Point ${idx + 1}`,
+                    weight: typeof kp.weight === 'number' ? Number(kp.weight.toFixed(2)) : 1.0,
+                    keywords: Array.isArray(kp.keywords) ? kp.keywords : []
+                  }))
+                };
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Direct client parse failed:', err);
+        }
+      }
+
+      // 3. Fallback dummy structure if offline
+      return {
+        question: 'Scanned Question (OCR offline)',
+        subject: 'General Course',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: `pt-1-${Date.now().toString(36)}`, text: 'Core concept explanation (1.5 marks)', weight: 1.5, keywords: [] },
+          { id: `pt-2-${Date.now().toString(36)}`, text: 'Key terminology & definitions (1.5 marks)', weight: 1.5, keywords: [] },
+          { id: `pt-3-${Date.now().toString(36)}`, text: 'Examples or detailed mechanism (2.0 marks)', weight: 2.0, keywords: [] }
+        ]
+      };
     }
 
     async evaluateWithGeminiVision({ imageSrc, rubric, progressCallback }) {
@@ -1751,6 +1884,99 @@ Respond ONLY with a JSON object in this exact schema:
         openSettingsModal();
       });
 
+      // Scan Question / Marking Scheme Modal
+      const modalScanScheme = document.getElementById('modal-scan-scheme');
+      const btnCloseScanScheme = document.getElementById('btn-close-scan-scheme');
+      const btnCancelScanScheme = document.getElementById('btn-cancel-scan-scheme');
+      const btnQuickScanScheme = document.getElementById('btn-quick-scan-scheme');
+      const btnTriggerSchemeCamera = document.getElementById('btn-trigger-scheme-camera');
+      const btnTriggerSchemeFile = document.getElementById('btn-trigger-scheme-file');
+      const inputSchemeCamera = document.getElementById('input-scheme-camera');
+      const inputSchemeFile = document.getElementById('input-scheme-file');
+      const schemePlaceholder = document.getElementById('scheme-upload-placeholder');
+      const schemePreviewArea = document.getElementById('scheme-preview-area');
+      const schemePreviewImg = document.getElementById('scheme-preview-img');
+      const btnRetakeScheme = document.getElementById('btn-retake-scheme');
+      const btnSubmitScanScheme = document.getElementById('btn-submit-scan-scheme');
+      const schemeScanStatus = document.getElementById('scheme-scan-status');
+
+      this.currentSchemeSrc = null;
+
+      const openScanSchemeModal = () => {
+        this.currentSchemeSrc = null;
+        if (schemePreviewImg) schemePreviewImg.src = '';
+        schemePreviewArea?.classList.add('hidden');
+        schemePlaceholder?.classList.remove('hidden');
+        schemeScanStatus?.classList.add('hidden');
+        if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
+        modalScanScheme?.classList.remove('hidden');
+      };
+
+      btnQuickScanScheme?.addEventListener('click', openScanSchemeModal);
+      btnCloseScanScheme?.addEventListener('click', () => modalScanScheme?.classList.add('hidden'));
+      btnCancelScanScheme?.addEventListener('click', () => modalScanScheme?.classList.add('hidden'));
+
+      const handleSchemeFileSelected = (file) => {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.currentSchemeSrc = e.target.result;
+          if (schemePreviewImg) schemePreviewImg.src = this.currentSchemeSrc;
+          schemePlaceholder?.classList.add('hidden');
+          schemePreviewArea?.classList.remove('hidden');
+          if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      };
+
+      btnTriggerSchemeCamera?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        inputSchemeCamera?.click();
+      });
+      btnTriggerSchemeFile?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        inputSchemeFile?.click();
+      });
+
+      inputSchemeCamera?.addEventListener('change', (e) => handleSchemeFileSelected(e.target.files?.[0]));
+      inputSchemeFile?.addEventListener('change', (e) => handleSchemeFileSelected(e.target.files?.[0]));
+
+      btnRetakeScheme?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.currentSchemeSrc = null;
+        if (schemePreviewImg) schemePreviewImg.src = '';
+        schemePreviewArea?.classList.add('hidden');
+        schemePlaceholder?.classList.remove('hidden');
+        if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
+      });
+
+      btnSubmitScanScheme?.addEventListener('click', async () => {
+        if (!this.currentSchemeSrc) return;
+        btnSubmitScanScheme.disabled = true;
+        schemeScanStatus?.classList.remove('hidden');
+        if (schemeScanStatus) schemeScanStatus.textContent = '🦅 GradeCrow AI is reading handwritten question & points...';
+
+        try {
+          const parsed = await this.aiService.parseQuestionSchemeFromImage({
+            imageSrc: this.currentSchemeSrc,
+            progressCallback: (msg) => {
+              if (schemeScanStatus) schemeScanStatus.textContent = msg;
+            }
+          });
+
+          this.rubricManager.loadScannedQuestion(parsed);
+          modalScanScheme?.classList.add('hidden');
+          this.switchView('rubric');
+          this.showNotification(`✓ Question & marking scheme scanned! You can edit any point below.`, 'success');
+        } catch (err) {
+          console.error(err);
+          this.showNotification(`Could not parse question: ${err.message}`, 'error');
+        } finally {
+          btnSubmitScanScheme.disabled = false;
+          schemeScanStatus?.classList.add('hidden');
+        }
+      });
+
       // Test Key button
       btnTestApiKey?.addEventListener('click', async () => {
         const keyVal = inputApiKey ? inputApiKey.value.trim() : '';
@@ -1786,13 +2012,13 @@ Respond ONLY with a JSON object in this exact schema:
         this.updateHeaderStats();
       });
 
-      // Quick Rubric Select
+      // Quick Question Select
       document.getElementById('select-quick-rubric')?.addEventListener('change', (e) => {
         this.rubricManager.setPreset(e.target.value);
         this.showNotification(`Active question: ${this.rubricManager.getRubric().question.substring(0, 30)}...`, 'info');
       });
 
-      // Quick New Rubric Button
+      // Quick New Question Button
       document.getElementById('btn-quick-new-rubric')?.addEventListener('click', () => {
         this.switchView('rubric');
         this.rubricManager.createNewBlankQuestion();
@@ -1900,7 +2126,7 @@ Respond ONLY with a JSON object in this exact schema:
         btnGrade.innerHTML = `<span class="spinner-sm"></span> Evaluating...`;
       }
 
-      this.showEvaluationLoading('Analyzing handwriting & grading against rubric...');
+      this.showEvaluationLoading('Analyzing handwriting & grading against question key...');
 
       try {
         const result = await this.aiService.evaluatePaper({
@@ -1974,10 +2200,10 @@ Respond ONLY with a JSON object in this exact schema:
             <div class="crow-scan-beam"></div>
           </div>
           <div class="loading-title">GradeCrow AI is Inspecting Paper</div>
-          <div class="loading-subtitle">${customStatus || 'Analyzing handwriting & rubric criteria...'}</div>
+          <div class="loading-subtitle">${customStatus || 'Analyzing handwriting & question key...'}</div>
           <div class="loading-steps-list">
             <div class="step-item active"><span class="step-dot"></span> 🦅 Crow-Eye OCR Handwriting Analysis...</div>
-            <div class="step-item active"><span class="step-dot"></span> ⚖️ Rubric Criteria & Concept Attachment...</div>
+            <div class="step-item active"><span class="step-dot"></span> ⚖️ Question Criteria & Marking Scheme...</div>
             <div class="step-item active"><span class="step-dot"></span> ✍️ Decimal Score Calculation & Evidence Quotes...</div>
           </div>
         </div>
@@ -2048,15 +2274,18 @@ Respond ONLY with a JSON object in this exact schema:
         <div class="rubric-builder-card">
           <div class="rubric-top-bar">
             <div>
-              <h3>Rubric & Answer Key Editor</h3>
-              <p class="text-secondary" style="font-size: 0.85rem;">Configure question details and weighted criteria for AI grading.</p>
+              <h3>Question & Answer Key Editor</h3>
+              <p class="text-secondary" style="font-size: 0.85rem;">Configure question details and point-by-point marking checklist for AI grading.</p>
             </div>
             <div class="preset-action-bar">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-scan-scheme-from-editor">
+                📸 Scan Scheme
+              </button>
               <button type="button" class="btn btn-primary btn-sm" id="btn-new-blank-rubric">
-                ${renderIcon('plus')} + New Rubric
+                ${renderIcon('plus')} + New Question
               </button>
               <div class="preset-selector-group">
-                <label>Preset:</label>
+                <label>Saved:</label>
                 <select id="select-rubric-preset" class="input-select">
                   ${allRubrics.map(p => `
                     <option value="${p.id}" ${p.id === rubric.id ? 'selected' : ''}>
@@ -2074,7 +2303,7 @@ Respond ONLY with a JSON object in this exact schema:
           <div class="rubric-meta-grid">
             <div class="form-group span-2">
               <label for="input-rubric-question">Question Prompt / Title:</label>
-              <textarea id="input-rubric-question" class="input-control" rows="2" placeholder="Enter question prompt...">${rubric.question}</textarea>
+              <textarea id="input-rubric-question" class="input-control" rows="2" placeholder="Enter question prompt or scan handwritten paper...">${rubric.question}</textarea>
             </div>
             <div class="form-group">
               <label for="input-rubric-subject">Subject / Course Name:</label>
@@ -2089,13 +2318,13 @@ Respond ONLY with a JSON object in this exact schema:
           <div class="weight-summary-bar ${isBalanced ? 'balanced' : 'unbalanced'}">
             <div class="weight-status-text">
               Total Criteria Marks: <strong>${currentTotalWeight.toFixed(2)}</strong> / Max: <strong>${rubric.maxMarks.toFixed(2)}</strong>
-              ${isBalanced ? '<span class="status-badge-ok">✓ Balanced</span>' : '<span class="status-badge-warn">⚠️ Mismatch</span>'}
+              ${isBalanced ? '<span class="status-badge-ok">✓ Balanced</span>' : '<span class="status-badge-warn">⚠️ Marks Mismatch</span>'}
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-rebalance-weights">Auto-Balance Weights</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-rebalance-weights">Auto-Balance Marks</button>
           </div>
 
           <div class="keypoints-list-header">
-            <h4>Key Points / Answer Checklist (${rubric.keyPoints.length})</h4>
+            <h4>Key Points / Marking Checklist (${rubric.keyPoints.length})</h4>
             <button type="button" class="btn btn-primary btn-sm" id="btn-add-keypoint">
               ${renderIcon('plus')} Add Key Point
             </button>
@@ -2130,19 +2359,23 @@ Respond ONLY with a JSON object in this exact schema:
       const c = document.getElementById('rubric-builder-container');
       if (!c) return;
 
+      c.querySelector('#btn-scan-scheme-from-editor')?.addEventListener('click', () => {
+        document.getElementById('modal-scan-scheme')?.classList.remove('hidden');
+      });
+
       c.querySelector('#btn-new-blank-rubric')?.addEventListener('click', () => {
         this.rubricManager.createNewBlankQuestion();
-        this.showNotification('New blank rubric created! Type your question & key points below.', 'info');
+        this.showNotification('New blank question created! Type your question & key points below.', 'info');
       });
 
       c.querySelector('#btn-save-custom-rubric')?.addEventListener('click', () => {
         this.rubricManager.saveCurrentAsPreset();
-        this.showNotification('✓ Rubric saved to question bank!', 'success');
+        this.showNotification('✓ Question saved to question bank!', 'success');
       });
 
       c.querySelector('#select-rubric-preset')?.addEventListener('change', (e) => {
         this.rubricManager.setPreset(e.target.value);
-        this.showNotification('Rubric loaded!', 'info');
+        this.showNotification('Question loaded!', 'info');
       });
 
       c.querySelector('#input-rubric-subject')?.addEventListener('change', (e) => {

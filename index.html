@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>GradeCrow AI | The Cleverest Handwritten Exam Grading Platform</title>
-  <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors to evaluate handwritten exams, answer sheets, and rubrics in seconds." />
+  <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors to evaluate handwritten exams, answer sheets, and questions in seconds." />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -57,7 +57,7 @@
         <span>📝</span> Grade
       </button>
       <button type="button" class="nav-tab" data-view="rubric">
-        <span>📋</span> Rubrics
+        <span>📋</span> Questions
       </button>
       <button type="button" class="nav-tab" data-view="gradebook">
         <span>📊</span> Gradebook
@@ -85,19 +85,24 @@
     <section class="view-section" id="view-grading">
       <div class="grading-flow-container">
         
-        <!-- STEP 1: Select Question / Rubric Card -->
+        <!-- STEP 1: Select Exam Question Card -->
         <div class="step-card question-select-card">
           <div class="step-header">
             <div class="step-header-left">
               <div class="step-number-badge">1</div>
               <div class="step-title-group">
                 <h2>Select Exam Question</h2>
-                <p>Choose the question rubric to grade against</p>
+                <p>Choose or scan the question key to grade against</p>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-new-rubric" title="Create a new rubric">
-              + New Rubric
-            </button>
+            <div class="step-header-actions" style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-scan-scheme" title="Scan handwritten question or marking scheme">
+                📸 Scan Scheme
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-new-rubric" title="Create a new blank question">
+                + New Question
+              </button>
+            </div>
           </div>
           
           <div class="question-selector-row">
@@ -143,7 +148,7 @@
       </div>
     </section>
 
-    <!-- VIEW 2: Rubric & Answer Key Builder -->
+    <!-- VIEW 2: Question & Answer Key Builder -->
     <section class="view-section hidden" id="view-rubric">
       <div id="rubric-builder-container"></div>
     </section>
@@ -154,6 +159,64 @@
     </section>
 
   </main>
+
+  <!-- Modal: Scan Handwritten Question / Marking Scheme -->
+  <div class="modal-backdrop hidden" id="modal-scan-scheme">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>📸 Scan Question & Marking Scheme</h3>
+        <button type="button" class="btn-icon-subtle" id="btn-close-scan-scheme">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-secondary" style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.75rem;">
+          Snap a photo of your handwritten or printed question paper with its marks allocation (e.g. <em>"1 mark for point x, 2 marks for point y..."</em>). GradeCrow AI will convert it into an editable question format.
+        </p>
+
+        <!-- Capture / Upload Area for Scheme -->
+        <div class="scheme-upload-box" id="scheme-upload-box" style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; background: #fafbfc; cursor: pointer; transition: all 0.2s;">
+          <input type="file" id="input-scheme-file" accept="image/*" style="display: none;" />
+          <input type="file" id="input-scheme-camera" accept="image/*" capture="environment" style="display: none;" />
+          
+          <div id="scheme-upload-placeholder">
+            <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📝</div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.25rem;">
+              Take a Photo or Upload Image
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Handwritten notes, question papers, or syllabus marking keys
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-trigger-scheme-camera">
+                📸 Take Photo
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-trigger-scheme-file">
+                📁 Upload Image
+              </button>
+            </div>
+          </div>
+
+          <div id="scheme-preview-area" class="hidden" style="margin-top: 0.5rem;">
+            <img id="scheme-preview-img" src="" alt="Scheme Preview" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 0.75rem;" />
+            <div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-retake-scheme">
+                🔄 Change Image
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="scheme-scan-status" class="hidden" style="margin-top: 1rem; text-align: center; background: #e6f7f5; border: 1px solid #99f6e4; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; color: #065f46; font-weight: 600;">
+          🦅 GradeCrow AI is reading question and marking scheme...
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-scan-scheme">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-submit-scan-scheme" disabled>
+          ✨ Extract Question Key ➔
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: Sample Papers Picker -->
   <div class="modal-backdrop hidden" id="modal-sample-papers">
@@ -250,6 +313,6 @@
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=7.0"></script>
+  <script src="js/bundle.js?v=8.0"></script>
 </body>
 </html>
