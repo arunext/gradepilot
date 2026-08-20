@@ -60,7 +60,17 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error('Razorpay Order creation error:', data);
-      return res.status(response.status).json({ error: data.error?.description || 'Failed to create Razorpay order' });
+      return res.status(response.status).json({
+        error: data.error?.description || data.error?.message || data.error || 'Failed to create Razorpay order',
+        details: data,
+        debug: {
+          keyId: keyId,
+          keyIdLength: keyId.length,
+          secretLength: keySecret.length,
+          rawKeyIdProvided: !!process.env.RAZORPAY_KEY_ID,
+          rawSecretProvided: !!process.env.RAZORPAY_KEY_SECRET
+        }
+      });
     }
 
     return res.status(200).json({
