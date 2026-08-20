@@ -66,7 +66,10 @@ export default async function handler(req, res) {
 Look at this student's handwritten exam paper image.
 1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
 2. Evaluate the student's answer against the following question rubric and criteria.
-3. Determine for each key point if it is "hit" (full marks), "partial" (half marks), or "missed" (0 marks).
+3. SCORING & PARTIAL MARKS RULES:
+   - "hit" (Full Marks = 100% of weight): The student provides the correct heading AND adequate explanation/details.
+   - "partial" (Partial/Half Marks = 50% of weight, e.g. 0.5 for 1.0M, 0.75 for 1.5M, 1.0 for 2.0M): Award partial marks whenever the student writes the correct heading, concept title, or key terminology, even if the detailed explanation is brief or absent. DO NOT award 0 marks if the correct heading or concept name is present!
+   - "missed" (0 Marks): The topic or heading is completely absent or incorrect.
 4. Extract the exact quote from the student's text as evidence.
 
 QUESTION: ${rubric.question}
@@ -84,10 +87,10 @@ Respond ONLY with a JSON object in this exact schema:
   "points": [
     {
       "pointId": "${rubric.keyPoints?.[0]?.id || 'pt-1'}",
-      "status": "hit",
-      "awardedMarks": 1.0,
-      "evidenceQuote": "Exact quote from handwritten text",
-      "justification": "Why these marks were awarded"
+      "status": "partial",
+      "awardedMarks": 0.5,
+      "evidenceQuote": "Exact quote or heading from handwritten text",
+      "justification": "Heading mentioned without full description; awarded partial marks."
     }
   ]
 }`;

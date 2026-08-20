@@ -1080,7 +1080,10 @@ Respond ONLY with a valid JSON object matching this exact schema:
 Look at this student's handwritten exam paper image.
 1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
 2. Evaluate the student's answer against the following question rubric and criteria.
-3. Determine for each key point if it is "hit" (full marks), "partial" (half marks), or "missed" (0 marks).
+3. SCORING & PARTIAL MARKS RULES:
+   - "hit" (Full Marks = 100% of weight): The student provides the correct heading AND adequate explanation/details.
+   - "partial" (Partial/Half Marks = 50% of weight, e.g. 0.5 for 1.0M, 0.75 for 1.5M, 1.0 for 2.0M): Award partial marks whenever the student writes the correct heading, concept title, or key terminology, even if the detailed explanation is brief or absent. DO NOT award 0 marks if the correct heading or concept name is present!
+   - "missed" (0 Marks): The topic or heading is completely absent or incorrect.
 4. Extract the exact quote from the student's text as evidence.
 
 QUESTION: ${rubric.question}
@@ -1098,10 +1101,10 @@ Respond ONLY with a JSON object in this exact schema:
   "points": [
     {
       "pointId": "${rubric.keyPoints[0]?.id || 'pt-1'}",
-      "status": "hit",
-      "awardedMarks": 1.0,
-      "evidenceQuote": "Exact quote from handwritten text",
-      "justification": "Why these marks were awarded"
+      "status": "partial",
+      "awardedMarks": 0.5,
+      "evidenceQuote": "Exact quote or heading from handwritten text",
+      "justification": "Heading mentioned without full description; awarded partial marks."
     }
   ]
 }`;
@@ -1260,11 +1263,19 @@ Respond ONLY with a JSON object in this exact schema:
         const weight = Number(parseFloat(kp.weight || 1.0).toFixed(2));
         const rawCriteria = (kp.text || '').toLowerCase();
 
-        const headerMatch = rawCriteria.match(/(anterior wall|posterior wall|medial wall|lateral wall|apex|base|roots|trunks|divisions|cords|terminal branches)/i);
-        const headerName = headerMatch ? headerMatch[1].toLowerCase() : null;
+        // 1. Identify heading/title candidate (e.g. text before colon, hyphen, or first key phrase)
+        const anatomyHeaderMatch = rawCriteria.match(/(anterior wall|posterior wall|medial wall|lateral wall|apex|base|roots|trunks|divisions|cords|terminal branches)/i);
+        let headerName = anatomyHeaderMatch ? anatomyHeaderMatch[1].toLowerCase() : null;
+        
+        if (!headerName) {
+          const splitParts = rawCriteria.split(/[:\-\–\—\(\.\,]/);
+          if (splitParts[0] && splitParts[0].trim().length > 2) {
+            headerName = splitParts[0].trim();
+          }
+        }
 
         let itemsString = rawCriteria;
-        if (headerName) {
+        if (headerName && rawCriteria.includes(headerName)) {
           itemsString = rawCriteria.replace(headerName, '');
         }
 
@@ -1282,7 +1293,7 @@ Respond ONLY with a JSON object in this exact schema:
         let studentLineWithHeader = null;
         if (headerName) {
           studentLineWithHeader = studentLines.find(line => {
-            return new RegExp(`\\b${escapeRegex(headerName)}\\b`, 'i').test(line);
+            return this.matchesMedicalConcept(line, headerName);
           });
         }
 
@@ -1309,27 +1320,27 @@ Respond ONLY with a JSON object in this exact schema:
           status = 'hit';
           awardedMarks = weight;
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Complete: Identified ${headerName} and all key muscle attachments (${matchedItems.join(', ')}). Full score.`;
-        } else if (hasHeader && matchedCount === 1) {
+          justification = `Complete: Mentioned heading (${headerName}) with key details (${matchedItems.join(', ')}). Full marks.`;
+        } else if (hasHeader && matchedCount >= 1) {
           status = 'partial';
-          awardedMarks = Number((weight * 0.5).toFixed(2));
+          awardedMarks = Number((weight * 0.75).toFixed(2));
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Partial: Identified ${headerName} with ${matchedItems.join(', ')}. Remaining relations omitted.`;
+          justification = `Partial: Mentioned heading (${headerName}) with ${matchedItems.join(', ')}. Details incomplete.`;
         } else if (hasHeader && matchedCount === 0) {
           status = 'partial';
           awardedMarks = Number((weight * 0.5).toFixed(2));
           evidenceQuote = `"...${studentLineWithHeader.trim()}..."`;
-          justification = `Header only: Identified boundary (${headerName}). Partial marks awarded.`;
-        } else if (!hasHeader && matchedCount >= 2) {
+          justification = `Heading only: Mentioned concept (${headerName}) without full explanation. Partial marks awarded.`;
+        } else if (!hasHeader && matchedCount >= 1) {
           status = 'partial';
           awardedMarks = Number((weight * 0.5).toFixed(2));
           evidenceQuote = this.extractSentenceCitation(studentText, matchedItems[0]);
-          justification = `Partially mentioned relations (${matchedItems.join(', ')}).`;
+          justification = `Partially mentioned concept details (${matchedItems.join(', ')}).`;
         } else {
           status = 'missed';
           awardedMarks = 0;
           evidenceQuote = '(Omitted from answer sheet)';
-          justification = `Boundary and relations omitted from answer sheet.`;
+          justification = `Concept and description omitted from answer sheet.`;
         }
 
         totalScore += awardedMarks;
@@ -1898,7 +1909,11 @@ Respond ONLY with a JSON object in this exact schema:
       const schemePreviewImg = document.getElementById('scheme-preview-img');
       const btnRetakeScheme = document.getElementById('btn-retake-scheme');
       const btnSubmitScanScheme = document.getElementById('btn-submit-scan-scheme');
-      const schemeScanStatus = document.getElementById('scheme-scan-status');
+      const schemeUploadBox = document.getElementById('scheme-upload-box');
+      const schemeModalDesc = document.getElementById('scheme-modal-desc');
+      const schemeScanningStage = document.getElementById('scheme-scanning-stage');
+      const schemeDynamicStatus = document.getElementById('scheme-dynamic-status');
+      const schemeModalFooter = document.getElementById('scheme-modal-footer');
 
       this.currentSchemeSrc = null;
 
@@ -1907,7 +1922,10 @@ Respond ONLY with a JSON object in this exact schema:
         if (schemePreviewImg) schemePreviewImg.src = '';
         schemePreviewArea?.classList.add('hidden');
         schemePlaceholder?.classList.remove('hidden');
-        schemeScanStatus?.classList.add('hidden');
+        schemeUploadBox?.classList.remove('hidden');
+        schemeModalDesc?.classList.remove('hidden');
+        schemeModalFooter?.classList.remove('hidden');
+        schemeScanningStage?.classList.add('hidden');
         if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
         modalScanScheme?.classList.remove('hidden');
       };
@@ -1953,27 +1971,46 @@ Respond ONLY with a JSON object in this exact schema:
       btnSubmitScanScheme?.addEventListener('click', async () => {
         if (!this.currentSchemeSrc) return;
         btnSubmitScanScheme.disabled = true;
-        schemeScanStatus?.classList.remove('hidden');
-        if (schemeScanStatus) schemeScanStatus.textContent = '🦅 GradeCrow AI is reading handwritten question & points...';
+
+        // Show Animated Crow Scanning Stage & hide input form
+        schemeUploadBox?.classList.add('hidden');
+        schemeModalDesc?.classList.add('hidden');
+        schemeModalFooter?.classList.add('hidden');
+        schemeScanningStage?.classList.remove('hidden');
+
+        const scanMessages = [
+          '🦅 Crow-Eye OCR analyzing handwritten question & point scheme...',
+          '⚖️ Reading point allocations (1 mark, 1.5 marks, 2 marks)...',
+          '🧠 Extracting key concepts & required vocabulary...',
+          '✍️ Formulating editable Question Checklist...'
+        ];
+        let msgIndex = 0;
+        if (schemeDynamicStatus) schemeDynamicStatus.textContent = scanMessages[0];
+        const statusInterval = setInterval(() => {
+          msgIndex = (msgIndex + 1) % scanMessages.length;
+          if (schemeDynamicStatus) schemeDynamicStatus.textContent = scanMessages[msgIndex];
+        }, 3500);
 
         try {
           const parsed = await this.aiService.parseQuestionSchemeFromImage({
             imageSrc: this.currentSchemeSrc,
             progressCallback: (msg) => {
-              if (schemeScanStatus) schemeScanStatus.textContent = msg;
+              if (schemeDynamicStatus) schemeDynamicStatus.textContent = msg;
             }
           });
 
+          clearInterval(statusInterval);
           this.rubricManager.loadScannedQuestion(parsed);
           modalScanScheme?.classList.add('hidden');
           this.switchView('rubric');
           this.showNotification(`✓ Question & marking scheme scanned! You can edit any point below.`, 'success');
         } catch (err) {
+          clearInterval(statusInterval);
           console.error(err);
           this.showNotification(`Could not parse question: ${err.message}`, 'error');
+          openScanSchemeModal();
         } finally {
           btnSubmitScanScheme.disabled = false;
-          schemeScanStatus?.classList.add('hidden');
         }
       });
 
@@ -2235,7 +2272,7 @@ Respond ONLY with a JSON object in this exact schema:
       if (creditsBadge) {
         if (hasCustomKey) {
           creditsBadge.className = 'header-credits-badge unlimited';
-          creditsBadge.innerHTML = `✨ Unlimited Pro`;
+          creditsBadge.innerHTML = `✨ Unlimited`;
           creditsBadge.title = 'Custom API Key Active (Unlimited Scans)';
         } else {
           if (remaining > 2) {
@@ -2245,7 +2282,7 @@ Respond ONLY with a JSON object in this exact schema:
           } else {
             creditsBadge.className = 'header-credits-badge zero';
           }
-          creditsBadge.innerHTML = `🦅 <span id="credits-count">${remaining}</span>/5 Free Scans`;
+          creditsBadge.innerHTML = `🦅 <span id="credits-count">${remaining}</span>/5 Free`;
           creditsBadge.title = `${remaining} free scans remaining today`;
         }
       }
@@ -2281,7 +2318,7 @@ Respond ONLY with a JSON object in this exact schema:
               <button type="button" class="btn btn-secondary btn-sm" id="btn-scan-scheme-from-editor">
                 📸 Scan Scheme
               </button>
-              <button type="button" class="btn btn-primary btn-sm" id="btn-new-blank-rubric">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-new-blank-rubric">
                 ${renderIcon('plus')} + New Question
               </button>
               <div class="preset-selector-group">
@@ -2294,8 +2331,8 @@ Respond ONLY with a JSON object in this exact schema:
                   `).join('')}
                 </select>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-save-custom-rubric">
-                💾 Save
+              <button type="button" class="btn-save-prominent" id="btn-save-custom-rubric">
+                💾 Save Question
               </button>
             </div>
           </div>
@@ -2349,6 +2386,16 @@ Respond ONLY with a JSON object in this exact schema:
               </div>
             `).join('')}
           </div>
+
+          <!-- Prominent Bottom Save & Grade Action Bar -->
+          <div class="question-bottom-actions">
+            <button type="button" class="btn btn-secondary" id="btn-save-question-bottom">
+              💾 Save Question
+            </button>
+            <button type="button" class="btn btn-primary btn-lg" id="btn-save-and-grade" style="font-weight: 800; padding: 0.65rem 1.5rem;">
+              💾 Save & Grade With This Question ➔
+            </button>
+          </div>
         </div>
       `;
 
@@ -2368,9 +2415,18 @@ Respond ONLY with a JSON object in this exact schema:
         this.showNotification('New blank question created! Type your question & key points below.', 'info');
       });
 
-      c.querySelector('#btn-save-custom-rubric')?.addEventListener('click', () => {
+      const handleSave = () => {
         this.rubricManager.saveCurrentAsPreset();
         this.showNotification('✓ Question saved to question bank!', 'success');
+      };
+
+      c.querySelector('#btn-save-custom-rubric')?.addEventListener('click', handleSave);
+      c.querySelector('#btn-save-question-bottom')?.addEventListener('click', handleSave);
+
+      c.querySelector('#btn-save-and-grade')?.addEventListener('click', () => {
+        this.rubricManager.saveCurrentAsPreset();
+        this.switchView('grading');
+        this.showNotification('✓ Question saved! Ready to grade student sheets.', 'success');
       });
 
       c.querySelector('#select-rubric-preset')?.addEventListener('change', (e) => {
@@ -2378,15 +2434,15 @@ Respond ONLY with a JSON object in this exact schema:
         this.showNotification('Question loaded!', 'info');
       });
 
-      c.querySelector('#input-rubric-subject')?.addEventListener('change', (e) => {
+      c.querySelector('#input-rubric-subject')?.addEventListener('input', (e) => {
         this.rubricManager.setQuestionMeta({ subject: e.target.value });
       });
 
-      c.querySelector('#input-rubric-maxmarks')?.addEventListener('change', (e) => {
+      c.querySelector('#input-rubric-maxmarks')?.addEventListener('input', (e) => {
         this.rubricManager.setQuestionMeta({ maxMarks: e.target.value });
       });
 
-      c.querySelector('#input-rubric-question')?.addEventListener('change', (e) => {
+      c.querySelector('#input-rubric-question')?.addEventListener('input', (e) => {
         this.rubricManager.setQuestionMeta({ question: e.target.value });
       });
 
@@ -2405,13 +2461,13 @@ Respond ONLY with a JSON object in this exact schema:
 
       c.querySelectorAll('.keypoint-item').forEach(item => {
         const id = item.dataset.id;
-        item.querySelector('.kp-text-input')?.addEventListener('change', (e) => {
+        item.querySelector('.kp-text-input')?.addEventListener('input', (e) => {
           this.rubricManager.updateKeyPoint(id, { text: e.target.value });
         });
-        item.querySelector('.kp-keywords-input')?.addEventListener('change', (e) => {
+        item.querySelector('.kp-keywords-input')?.addEventListener('input', (e) => {
           this.rubricManager.updateKeyPoint(id, { keywords: e.target.value });
         });
-        item.querySelector('.kp-weight-input')?.addEventListener('change', (e) => {
+        item.querySelector('.kp-weight-input')?.addEventListener('input', (e) => {
           this.rubricManager.updateKeyPoint(id, { weight: e.target.value });
         });
       });

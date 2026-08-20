@@ -728,24 +728,50 @@ input:focus, textarea:focus, select:focus {
 @media (max-width: 768px) {
   .app-header {
     height: auto;
-    padding: 0.6rem 0.85rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+      "brand actions"
+      "nav nav";
+    row-gap: 0.45rem;
+    column-gap: 0.5rem;
+    align-items: center;
   }
 
   .brand-group {
-    order: 1;
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 1.12rem;
+  }
+
+  .brand-logo-badge {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-logo-badge svg {
+    width: 22px;
+    height: 22px;
   }
 
   .header-right {
-    order: 2;
-    margin-left: auto;
-    gap: 0.4rem;
+    grid-area: actions;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0;
   }
 
   .header-credits-badge {
-    padding: 0.25rem 0.55rem;
+    padding: 0.22rem 0.5rem;
     font-size: 0.72rem;
+    font-weight: 700;
   }
 
   .header-api-badge {
@@ -753,7 +779,7 @@ input:focus, textarea:focus, select:focus {
   }
 
   .header-nav {
-    order: 3;
+    grid-area: nav;
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

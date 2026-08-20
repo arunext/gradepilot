@@ -67,7 +67,7 @@
     <!-- Header Right Stats, Credits & Settings -->
     <div class="header-right">
       <div id="header-credits-badge" class="header-credits-badge" title="Daily Free AI Scans">
-        🦅 <span id="credits-count">5</span>/5 Free Scans
+        🦅 <span id="credits-count">5</span>/5 Free
       </div>
       <button type="button" id="header-api-status" class="header-api-badge live" title="Click to view API / Server status" style="cursor: pointer; border: none;">
         🟢 AI Ready
@@ -168,7 +168,7 @@
         <button type="button" class="btn-icon-subtle" id="btn-close-scan-scheme">✕</button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary" style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.75rem;">
+        <p class="text-secondary" id="scheme-modal-desc" style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.75rem;">
           Snap a photo of your handwritten or printed question paper with its marks allocation (e.g. <em>"1 mark for point x, 2 marks for point y..."</em>). GradeCrow AI will convert it into an editable question format.
         </p>
 
@@ -205,11 +205,37 @@
           </div>
         </div>
 
-        <div id="scheme-scan-status" class="hidden" style="margin-top: 1rem; text-align: center; background: #e6f7f5; border: 1px solid #99f6e4; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; color: #065f46; font-weight: 600;">
-          🦅 GradeCrow AI is reading question and marking scheme...
+        <!-- Animated Crow Scanning Stage -->
+        <div id="scheme-scanning-stage" class="hidden" style="text-align: center; padding: 1.5rem 0.5rem;">
+          <div class="crow-animation-stage" style="margin: 0 auto 1.25rem;">
+            <svg class="crow-mascot-anim" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+              <rect width="64" height="64" rx="16" fill="#1F252E"/>
+              <polygon points="32,6 56,15 32,24 8,15" fill="#00a991"/>
+              <polygon points="32,24 48,18 48,22 32,28 16,22 16,18" fill="#008370"/>
+              <line x1="48" y1="20" x2="52" y2="30" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="52" cy="31" r="2.5" fill="#f59e0b"/>
+              <path d="M20 22C20 17 26 16 32 16C40 16 44 21 44 28C44 36 38 44 32 56C28 56 22 50 20 42C19 38 20 26 20 22Z" fill="#FFFFFF"/>
+              <polygon points="42,26 56,31 42,35" fill="#f59e0b"/>
+              <circle class="crow-anim-glasses" cx="33" cy="29" r="6.5" stroke="#00a991" stroke-width="2.8" fill="#1F252E"/>
+              <circle cx="33" cy="29" r="2.8" fill="#00a991"/>
+              <circle cx="34" cy="28" r="1" fill="#FFFFFF"/>
+              <path d="M26.5 29 Q24 26 20 27" stroke="#00a991" stroke-width="2" fill="none"/>
+            </svg>
+            <div class="crow-scan-beam"></div>
+          </div>
+          <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.35rem;">
+            GradeCrow AI is Reading Question Scheme
+          </div>
+          <div id="scheme-dynamic-status" style="font-size: 0.88rem; color: var(--color-primary); font-weight: 700; min-height: 22px; margin-bottom: 0.35rem;">
+            🦅 Crow-Eye OCR analyzing handwriting & point scheme...
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">
+            Extracting decimal mark allocations and structuring editable checklist...
+          </div>
         </div>
+
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="scheme-modal-footer">
         <button type="button" class="btn btn-secondary" id="btn-cancel-scan-scheme">Cancel</button>
         <button type="button" class="btn btn-primary" id="btn-submit-scan-scheme" disabled>
           ✨ Extract Question Key ➔
