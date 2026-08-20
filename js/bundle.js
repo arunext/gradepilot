@@ -2111,6 +2111,9 @@ Respond ONLY with a JSON object in this exact schema:
               <button type="button" class="dropdown-item" id="menu-btn-pricing">
                 🪙 Buy Credits (from ₹49)
               </button>
+              <button type="button" class="dropdown-item" id="menu-btn-install-app">
+                📱 Save as Web App (iOS/Android)
+              </button>
               <button type="button" class="dropdown-item" id="menu-btn-settings">
                 ⚙️ Settings & Custom Key
               </button>
@@ -2140,6 +2143,11 @@ Respond ONLY with a JSON object in this exact schema:
           document.getElementById('modal-pricing')?.classList.remove('hidden');
         });
 
+        container.querySelector('#menu-btn-install-app')?.addEventListener('click', () => {
+          dropdown?.classList.add('hidden');
+          this.openInstallModal();
+        });
+
         container.querySelector('#menu-btn-settings')?.addEventListener('click', () => {
           dropdown?.classList.add('hidden');
           this.openSettingsModal();
@@ -2151,6 +2159,36 @@ Respond ONLY with a JSON object in this exact schema:
           this.showNotification('Signed out.', 'info');
         });
       }
+    }
+
+    openInstallModal() {
+      const modal = document.getElementById('modal-install-app');
+      if (!modal) return;
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const tabIos = document.getElementById('tab-btn-ios');
+      const tabAndroid = document.getElementById('tab-btn-android');
+      const panelIos = document.getElementById('panel-install-ios');
+      const panelAndroid = document.getElementById('panel-install-android');
+
+      if (isIOS) {
+        tabIos?.classList.add('active');
+        tabAndroid?.classList.remove('active');
+        panelIos?.classList.remove('hidden');
+        panelAndroid?.classList.add('hidden');
+      } else {
+        tabAndroid?.classList.add('active');
+        tabIos?.classList.remove('active');
+        panelAndroid?.classList.remove('hidden');
+        panelIos?.classList.add('hidden');
+      }
+
+      const directBtnBox = document.getElementById('pwa-direct-install-box');
+      if (this.deferredInstallPrompt && directBtnBox) {
+        directBtnBox.classList.remove('hidden');
+      }
+
+      modal.classList.remove('hidden');
     }
 
     openReferralModal() {
@@ -2190,6 +2228,14 @@ Respond ONLY with a JSON object in this exact schema:
         tab.addEventListener('click', () => this.switchView(tab.dataset.view));
       });
 
+      // Capture PWA beforeinstallprompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        this.deferredInstallPrompt = e;
+        const directBtnBox = document.getElementById('pwa-direct-install-box');
+        if (directBtnBox) directBtnBox.classList.remove('hidden');
+      });
+
       // Close dropdowns on outside click
       document.addEventListener('click', (e) => {
         const dropdown = document.getElementById('account-dropdown-menu');
@@ -2198,6 +2244,45 @@ Respond ONLY with a JSON object in this exact schema:
           if (!dropdown.contains(e.target) && !trigger?.contains(e.target)) {
             dropdown.classList.add('hidden');
           }
+        }
+      });
+
+      // Install App Modal Handlers
+      const modalInstall = document.getElementById('modal-install-app');
+      const btnCloseInstall = document.getElementById('btn-close-install-modal');
+      const btnDoneInstall = document.getElementById('btn-done-install-modal');
+      const btnDirectInstall = document.getElementById('btn-pwa-direct-install');
+      const tabIos = document.getElementById('tab-btn-ios');
+      const tabAndroid = document.getElementById('tab-btn-android');
+      const panelIos = document.getElementById('panel-install-ios');
+      const panelAndroid = document.getElementById('panel-install-android');
+
+      btnCloseInstall?.addEventListener('click', () => modalInstall?.classList.add('hidden'));
+      btnDoneInstall?.addEventListener('click', () => modalInstall?.classList.add('hidden'));
+
+      tabIos?.addEventListener('click', () => {
+        tabIos.classList.add('active');
+        tabAndroid?.classList.remove('active');
+        panelIos?.classList.remove('hidden');
+        panelAndroid?.classList.add('hidden');
+      });
+
+      tabAndroid?.addEventListener('click', () => {
+        tabAndroid.classList.add('active');
+        tabIos?.classList.remove('active');
+        panelAndroid?.classList.remove('hidden');
+        panelIos?.classList.add('hidden');
+      });
+
+      btnDirectInstall?.addEventListener('click', async () => {
+        if (this.deferredInstallPrompt) {
+          this.deferredInstallPrompt.prompt();
+          const { outcome } = await this.deferredInstallPrompt.userChoice;
+          if (outcome === 'accepted') {
+            this.showNotification('✓ GradeCrow AI added to your home screen!', 'success');
+            modalInstall?.classList.add('hidden');
+          }
+          this.deferredInstallPrompt = null;
         }
       });
 

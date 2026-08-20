@@ -9,15 +9,24 @@
   <title>GradeCrow AI | The Cleverest Handwritten Exam Grading Platform</title>
   <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors to evaluate handwritten exams, answer sheets, and questions in seconds." />
   
-  <!-- Favicon -->
+  <!-- Favicon & PWA Icons -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Mobile Web App & PWA Capabilities (iOS & Android) -->
+  <meta name="theme-color" content="#00a991" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="GradeCrow" />
 
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="css/main.css?v=9.0" />
-  <link rel="stylesheet" href="css/capture.css?v=9.0" />
-  <link rel="stylesheet" href="css/review.css?v=9.0" />
-  <link rel="stylesheet" href="css/rubric.css?v=9.0" />
-  <link rel="stylesheet" href="css/gradebook.css?v=9.0" />
+  <link rel="stylesheet" href="css/main.css?v=9.2" />
+  <link rel="stylesheet" href="css/capture.css?v=9.2" />
+  <link rel="stylesheet" href="css/review.css?v=9.2" />
+  <link rel="stylesheet" href="css/rubric.css?v=9.2" />
+  <link rel="stylesheet" href="css/gradebook.css?v=9.2" />
 
   <!-- Supabase JS Client for Google Auth & Cloud Ledger -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -475,10 +484,80 @@
     </div>
   </div>
 
+  <!-- Modal: Save / Install as Web App (iOS & Android) -->
+  <div class="modal-backdrop hidden" id="modal-install-app">
+    <div class="modal-card" style="max-width: 480px; text-align: center;">
+      <div class="modal-header" style="justify-content: space-between;">
+        <h3 style="font-size: 1.15rem; font-weight: 800;">📱 Save GradeCrow as Web App</h3>
+        <button type="button" class="btn-icon-subtle" id="btn-close-install-modal">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div style="font-size: 2.8rem; margin-bottom: 0.25rem;">📲 🦅</div>
+        <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.35rem;">
+          Grade Papers in 1 Tap from Home Screen
+        </h4>
+        <p class="text-secondary" style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 1.25rem;">
+          Install GradeCrow on your iPhone, iPad, or Android phone for instant full-screen camera grading with zero app store downloads.
+        </p>
+
+        <!-- Direct Install Button (Android / Desktop Chrome / Edge) -->
+        <div id="pwa-direct-install-box" class="hidden" style="margin-bottom: 1.25rem;">
+          <button type="button" class="btn btn-primary btn-lg" id="btn-pwa-direct-install" style="width: 100%; font-weight: 800; font-size: 1rem; padding: 0.75rem;">
+            ⚡ Tap to Install App
+          </button>
+        </div>
+
+        <!-- Tabbed Platform Instructions (iOS Safari vs Android Chrome) -->
+        <div class="install-guide-box">
+          <div class="install-tabs">
+            <button type="button" class="install-tab-btn active" id="tab-btn-ios">🍎 iPhone / iPad (iOS)</button>
+            <button type="button" class="install-tab-btn" id="tab-btn-android">🤖 Android / Chrome</button>
+          </div>
+
+          <!-- iOS Instructions -->
+          <div class="install-step-panel" id="panel-install-ios">
+            <div class="install-step-row">
+              <span class="step-num">1</span>
+              <span>Tap the <strong>Share</strong> button <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a991" stroke-width="2.5" style="vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> at the bottom of Safari</span>
+            </div>
+            <div class="install-step-row">
+              <span class="step-num">2</span>
+              <span>Scroll down and tap <strong>"Add to Home Screen"</strong> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a991" stroke-width="2.5" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+            </div>
+            <div class="install-step-row">
+              <span class="step-num">3</span>
+              <span>Tap <strong>"Add"</strong> in the top-right corner</span>
+            </div>
+          </div>
+
+          <!-- Android Instructions -->
+          <div class="install-step-panel hidden" id="panel-install-android">
+            <div class="install-step-row">
+              <span class="step-num">1</span>
+              <span>Tap the <strong>three dots menu (⋮)</strong> in Chrome</span>
+            </div>
+            <div class="install-step-row">
+              <span class="step-num">2</span>
+              <span>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></span>
+            </div>
+            <div class="install-step-row">
+              <span class="step-num">3</span>
+              <span>Confirm <strong>"Install"</strong> to add GradeCrow to your app drawer</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-done-install-modal">Got It!</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Global Floating Toast Notification -->
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=9.0"></script>
+  <script src="js/bundle.js?v=9.2"></script>
 </body>
 </html>

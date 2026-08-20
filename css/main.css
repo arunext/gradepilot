@@ -491,6 +491,69 @@ body {
   .pricing-grid { grid-template-columns: 1fr; }
 }
 
+/* Install Web App Guide Modal */
+.install-guide-box {
+  background: #f8fafc;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: left;
+}
+
+.install-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.install-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.install-tab-btn.active {
+  background: #e6f7f5;
+  color: #065f46;
+}
+
+.install-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.install-step-row:last-child {
+  margin-bottom: 0;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    Buttons & Form Controls (Somhi Style)
    ========================================================================== */
