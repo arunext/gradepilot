@@ -2006,7 +2006,7 @@ Respond ONLY with a JSON object in this exact schema:
       title: 'Terms of Service',
       html: `
         <h4>1. Platform Overview</h4>
-        <p>GradeCrow AI (gradecrow.com) provides AI-assisted grading, OCR handwriting recognition, question schema extraction, and gradebook management for teachers, professors, and educational institutions.</p>
+        <p>GradeCrow (gradecrow.com) provides AI-assisted grading, OCR handwriting recognition, question schema extraction, and gradebook management for teachers, professors, and educational institutions.</p>
         <h4>2. User Accounts & Fair Use</h4>
         <p>You agree to provide accurate information when signing in with Google. Free daily scans and purchased credits are non-transferable and intended for legitimate academic evaluation.</p>
         <h4>3. Credit Packs & Pricing</h4>
@@ -2042,7 +2042,7 @@ Respond ONLY with a JSON object in this exact schema:
     contact: {
       title: 'Contact Us & Support',
       html: `
-        <h4>GradeCrow AI Support</h4>
+        <h4>GradeCrow Support</h4>
         <p>We are dedicated to helping educators evaluate exams faster.</p>
         <ul style="padding-left: 1.25rem; margin: 0.75rem 0; line-height: 1.8;">
           <li><strong>Email:</strong> support@gradecrow.com / arun@gradecrow.com</li>
@@ -2103,7 +2103,7 @@ Respond ONLY with a JSON object in this exact schema:
           key: orderData.keyId,
           amount: orderData.amount,
           currency: orderData.currency || 'INR',
-          name: 'GradeCrow AI',
+          name: 'GradeCrow',
           description: `${scans} Exam Grading Scans (${(pack || '').toUpperCase()} Pack)`,
           image: 'https://gradecrow.vercel.app/favicon.svg',
           order_id: orderData.orderId,
@@ -2381,7 +2381,7 @@ Respond ONLY with a JSON object in this exact schema:
       if (creditsStat) creditsStat.textContent = (this.authManager.profile?.referrals_count || 0) * 100;
 
       if (btnWhatsapp) {
-        const shareMsg = `Hey! I'm using GradeCrow AI to grade handwritten exam papers in seconds. Use my link to get 100 free bonus scans: ${refUrl}`;
+        const shareMsg = `Hey! I'm using GradeCrow to grade handwritten exam papers in seconds. Use my link to get 100 free bonus scans: ${refUrl}`;
         btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMsg)}`;
       }
 
@@ -2453,7 +2453,7 @@ Respond ONLY with a JSON object in this exact schema:
           this.deferredInstallPrompt.prompt();
           const { outcome } = await this.deferredInstallPrompt.userChoice;
           if (outcome === 'accepted') {
-            this.showNotification('✓ GradeCrow AI added to your home screen!', 'success');
+            this.showNotification('✓ GradeCrow added to your home screen!', 'success');
             modalInstall?.classList.add('hidden');
           }
           this.deferredInstallPrompt = null;
@@ -2892,7 +2892,7 @@ Respond ONLY with a JSON object in this exact schema:
             </svg>
             <div class="crow-scan-beam"></div>
           </div>
-          <div class="loading-title">GradeCrow AI is Inspecting Paper</div>
+          <div class="loading-title">GradeCrow is Inspecting Paper</div>
           <div class="loading-subtitle">${customStatus || 'Analyzing handwriting & question key...'}</div>
           <div class="loading-steps-list">
             <div class="step-item active"><span class="step-dot"></span> 🦅 Crow-Eye OCR Handwriting Analysis...</div>

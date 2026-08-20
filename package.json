@@ -1,7 +1,7 @@
 {
   "name": "gradecrow",
   "version": "7.0.0",
-  "description": "GradeCrow AI — The Cleverest Universal Handwritten Exam Grading Platform",
+  "description": "GradeCrow — The Cleverest Universal Handwritten Exam Grading Platform",
   "main": "index.html",
   "type": "module",
   "scripts": {
@@ -15,6 +15,6 @@
     "teachers",
     "exam-grader"
   ],
-  "author": "GradeCrow AI",
+  "author": "GradeCrow",
   "license": "MIT"
 }
