@@ -2117,6 +2117,9 @@ Respond ONLY with a JSON object in this exact schema:
           handler: async (response) => {
             this.showNotification('Verifying payment with Razorpay...', 'info');
             try {
+              const sessionData = await this.authManager.client?.auth.getSession();
+              const userToken = sessionData?.data?.session?.access_token;
+
               const verifyRes = await fetch('/api/verify-payment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2127,12 +2130,34 @@ Respond ONLY with a JSON object in this exact schema:
                   userId: this.authManager.user.id,
                   scans: scans,
                   pack: pack,
-                  amount: amount
+                  amount: amount,
+                  userToken: userToken
                 })
               });
 
               const verifyData = await verifyRes.json();
               if (verifyRes.ok && verifyData.ok) {
+                // Ensure Supabase DB is directly persisted
+                if (this.authManager.client && this.authManager.user) {
+                  try {
+                    await this.authManager.client
+                      .from('profiles')
+                      .update({ credits_balance: verifyData.newBalance })
+                      .eq('id', this.authManager.user.id);
+
+                    await this.authManager.client
+                      .from('credit_transactions')
+                      .insert({
+                        user_id: this.authManager.user.id,
+                        amount: parseInt(scans, 10),
+                        type: 'purchase',
+                        description: `Purchased ${pack} Pack (${scans} scans for ₹${amount}) - Payment ID: ${response.razorpay_payment_id}`
+                      });
+                  } catch (syncErr) {
+                    console.warn('Client DB sync notice:', syncErr);
+                  }
+                }
+
                 if (this.authManager.profile) {
                   this.authManager.profile.credits_balance = verifyData.newBalance;
                 }

@@ -13,7 +13,8 @@ export default async function handler(req, res) {
     userId,
     scans,
     pack,
-    amount
+    amount,
+    userToken
   } = req.body || {};
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || !scans) {
@@ -27,6 +28,11 @@ export default async function handler(req, res) {
   }
   const supabaseUrl = (process.env.SUPABASE_URL || 'https://ofnvnkcwzxmbwavxdvtm.supabase.co').trim();
   const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || 'sb_publishable_2uZid037F0dWrwInQ7XXzg_uLNSoWU9').trim();
+  const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
+  // Prefer Service Role Key -> User JWT Token -> Anon Key
+  const activeBearer = supabaseServiceKey ? supabaseServiceKey : (userToken ? userToken : supabaseAnonKey);
+  const activeApiKey = supabaseServiceKey ? supabaseServiceKey : supabaseAnonKey;
 
   try {
     // 1. Cryptographic HMAC SHA256 Signature Verification
@@ -44,8 +50,8 @@ export default async function handler(req, res) {
     // 2. Fetch User Profile from Supabase
     const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`, {
       headers: {
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${supabaseAnonKey}`
+        'apikey': activeApiKey,
+        'Authorization': `Bearer ${activeBearer}`
       }
     });
 
@@ -61,8 +67,8 @@ export default async function handler(req, res) {
       await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
         method: 'PATCH',
         headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'apikey': activeApiKey,
+          'Authorization': `Bearer ${activeBearer}`,
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         },
@@ -77,8 +83,8 @@ export default async function handler(req, res) {
     await fetch(`${supabaseUrl}/rest/v1/credit_transactions`, {
       method: 'POST',
       headers: {
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': activeApiKey,
+        'Authorization': `Bearer ${activeBearer}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
