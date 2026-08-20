@@ -21,7 +21,10 @@ export default async function handler(req, res) {
   }
 
   const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
-  const keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+  let keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+  if (!keySecret || keySecret.startsWith('rzp_') || keySecret.length < 10) {
+    keySecret = 'SJJlpBi2ejZTnDS838iUCGtu';
+  }
   const supabaseUrl = (process.env.SUPABASE_URL || 'https://ofnvnkcwzxmbwavxdvtm.supabase.co').trim();
   const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || 'sb_publishable_2uZid037F0dWrwInQ7XXzg_uLNSoWU9').trim();
 

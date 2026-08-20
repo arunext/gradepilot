@@ -12,8 +12,22 @@ export default async function handler(req, res) {
 
   const rawKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TRxsIkZPf05X3K';
   const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || 'SJJlpBi2ejZTnDS838iUCGtu';
-  const keyId = String(rawKeyId).trim().replace(/^["']|["']$/g, '');
-  const keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+  let keyId = String(rawKeyId).trim().replace(/^["']|["']$/g, '');
+  let keySecret = String(rawKeySecret).trim().replace(/^["']|["']$/g, '');
+
+  // Auto-fix if Key ID and Key Secret were accidentally swapped in Vercel
+  if (keySecret.startsWith('rzp_') && !keyId.startsWith('rzp_')) {
+    const temp = keyId;
+    keyId = keySecret;
+    keySecret = temp;
+  }
+
+  if (!keyId.startsWith('rzp_')) {
+    keyId = 'rzp_test_TRxsIkZPf05X3K';
+  }
+  if (!keySecret || keySecret.length < 10) {
+    keySecret = 'SJJlpBi2ejZTnDS838iUCGtu';
+  }
 
   try {
     const amountInPaise = Math.round(Number(amount) * 100);
