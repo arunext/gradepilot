@@ -69,13 +69,30 @@ export default async function handler(req, res) {
       img.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '')
     );
 
+    const isMultiQuestion = Array.isArray(rubric.questions) && rubric.questions.length > 0;
+    
+    // Normalize questions array
+    const questionsList = isMultiQuestion ? rubric.questions : [{
+      id: rubric.id || 'q-1',
+      number: 1,
+      title: rubric.question || 'Exam Question',
+      maxMarks: rubric.maxMarks || 10.0,
+      keyPoints: rubric.keyPoints || []
+    }];
+
+    const rubricPromptText = questionsList.map((q, qIdx) => `
+QUESTION ${q.number || qIdx + 1}: ${q.title} [Max Marks: ${q.maxMarks}]
+KEY POINTS:
+${(q.keyPoints || []).map((kp, kIdx) => `  - Point ${kIdx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
+`).join('\n');
+
     const prompt = `You are GradeCrow AI, an expert exam evaluation assistant (gradecrow.com).
 Look at the attached student handwritten exam paper image(s) (${cleanPages.length} page(s) attached).
 
 1. OCR TRANSCRIPTION & MATH/DIAGRAM HANDLING:
    - Transcribe all handwritten text, math equations, derivations, and diagram labels across ALL pages.
    - Convert all mathematical formulas, fractions, integrals, and equations into standard LaTeX notation (e.g. $$E=mc^2$$ or $$\\frac{a}{b}$$).
-   - Evaluate step-by-step mathematical reasoning. Award partial marks if method/formula application is correct even if final numerical calculation has minor arithmetic errors.
+   - Evaluate step-by-step mathematical reasoning across every question on the exam paper.
    - For diagrams/visual answers, evaluate structural accuracy and presence of required labels.
 
 2. EVALUATION & SCORING RULES:
@@ -86,21 +103,20 @@ Look at the attached student handwritten exam paper image(s) (${cleanPages.lengt
 3. EVIDENCE & CITATIONS:
    - Extract exact quotes/snippets or LaTeX formula snippets as evidence. Mention page number if multi-page (e.g., "[Page 2] ...").
 
-QUESTION: ${rubric.question}
-SUBJECT: ${rubric.subject || 'General'}
-MAXIMUM MARKS: ${rubric.maxMarks}
+EXAM SUBJECT: ${rubric.subject || 'General Academic'}
+TOTAL MAX MARKS: ${rubric.maxMarks}
 
-RUBRIC KEY POINTS:
-${(rubric.keyPoints || []).map((kp, idx) => `Point ${idx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
+MASTER EXAM RUBRIC QUESTIONS & KEY POINTS:
+${rubricPromptText}
 
 Respond ONLY with a JSON object matching this schema:
 {
   "transcription": "The full transcribed text and LaTeX math formulas...",
-  "suggestedScore": 3.5,
-  "feedbackSummary": "A concise 2-sentence summary of strengths, math accuracy, and omissions.",
+  "suggestedScore": 14.5,
+  "feedbackSummary": "A concise 2-sentence summary of strengths, math accuracy, and omissions across questions.",
   "points": [
     {
-      "pointId": "${rubric.keyPoints?.[0]?.id || 'pt-1'}",
+      "pointId": "kp-1",
       "status": "partial",
       "awardedMarks": 0.5,
       "evidenceQuote": "[Page 1] Exact quote or LaTeX formula",
@@ -153,11 +169,20 @@ Respond ONLY with a JSON object matching this schema:
         }
 
         const parsed = JSON.parse(cleanedJson);
-        const pointsList = (rubric.keyPoints || []).map(kp => {
+
+        // Map evaluated points back into question-grouped structures
+        const allKeyPoints = [];
+        questionsList.forEach(q => {
+          (q.keyPoints || []).forEach(kp => allKeyPoints.push({ ...kp, questionId: q.id, questionNumber: q.number, questionTitle: q.title }));
+        });
+
+        const pointsList = allKeyPoints.map(kp => {
           const found = (parsed.points || []).find(p => p.pointId === kp.id);
           if (found) {
             return {
               pointId: kp.id,
+              questionId: kp.questionId,
+              questionNumber: kp.questionNumber,
               pointText: kp.text,
               weight: kp.weight,
               status: found.status || 'partial',
@@ -170,6 +195,8 @@ Respond ONLY with a JSON object matching this schema:
           }
           return {
             pointId: kp.id,
+            questionId: kp.questionId,
+            questionNumber: kp.questionNumber,
             pointText: kp.text,
             weight: kp.weight,
             status: 'missed',
@@ -181,12 +208,27 @@ Respond ONLY with a JSON object matching this schema:
 
         const calculatedTotal = pointsList.reduce((sum, p) => sum + p.awardedMarks, 0);
 
+        // Group evaluated points by question for clean UI rendering
+        const questionEvaluations = questionsList.map(q => {
+          const qPoints = pointsList.filter(p => p.questionId === q.id || p.questionNumber === q.number);
+          const qScore = qPoints.reduce((sum, p) => sum + p.awardedMarks, 0);
+          return {
+            questionId: q.id,
+            number: q.number,
+            title: q.title,
+            maxMarks: q.maxMarks,
+            suggestedScore: Number(qScore.toFixed(2)),
+            points: qPoints
+          };
+        });
+
         return res.status(200).json({
           transcription: parsed.transcription || '(Handwriting transcribed by GradeCrow Vision)',
           suggestedScore: Number(calculatedTotal.toFixed(2)),
           maxMarks: rubric.maxMarks,
           feedbackSummary: parsed.feedbackSummary || `Graded via GradeCrow Server Vision (${model}).`,
           points: pointsList,
+          questionEvaluations: questionEvaluations,
           mode: 'gemini-server'
         });
 

@@ -145,6 +145,21 @@ export class ReviewPanel {
           <p class="feedback-text">${formatMathText(evalData.feedbackSummary || 'All key criteria evaluated.')}</p>
         </div>
 
+        ${evalData.questionEvaluations && evalData.questionEvaluations.length > 1 ? `
+          <!-- Multi-Question Per-Question Summary Pills -->
+          <div class="question-summary-bar">
+            <div class="summary-bar-title">Exam Breakdown (${evalData.questionEvaluations.length} Questions):</div>
+            <div class="question-pills-row">
+              ${evalData.questionEvaluations.map(q => `
+                <div class="q-score-pill">
+                  <span class="q-pill-label">Q${q.number}:</span>
+                  <strong class="q-pill-score">${q.suggestedScore.toFixed(2)}</strong> / ${q.maxMarks.toFixed(1)} M
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
         <!-- Key Points Breakdown Checklist -->
         <div class="criteria-section">
           <div class="criteria-header">
@@ -153,44 +168,82 @@ export class ReviewPanel {
           </div>
 
           <div class="criteria-list">
-            ${evalData.points.map((pt, idx) => {
-              const statusClass = pt.status === 'hit' ? 'status-hit' : pt.status === 'partial' ? 'status-partial' : 'status-missed';
-              return `
-                <div class="criterion-card ${statusClass}" data-point-id="${pt.pointId}" data-index="${idx}">
-                  <div class="criterion-top-row">
-                    <div class="criterion-num">Point ${idx + 1}</div>
-                    <div class="criterion-score-badge">
-                      <span class="awarded-val">${pt.awardedMarks.toFixed(2)}</span> / ${pt.weight.toFixed(2)} Marks
-                    </div>
+            ${evalData.questionEvaluations && evalData.questionEvaluations.length > 1 ? `
+              ${evalData.questionEvaluations.map(q => `
+                <div class="question-group-card">
+                  <div class="question-group-header">
+                    <span class="q-group-badge">Question ${q.number}</span>
+                    <h5 class="q-group-title">${formatMathText(q.title)}</h5>
+                    <span class="q-group-score">${q.suggestedScore.toFixed(2)} / ${q.maxMarks.toFixed(1)} M</span>
                   </div>
-
-                  <div class="criterion-desc">${formatMathText(pt.pointText)}</div>
-
-                  <!-- Evidence citation from student handwriting -->
-                  <div class="criterion-evidence">
-                    <span class="evidence-icon">❝</span>
-                    <span class="evidence-quote">${formatMathText(pt.evidenceQuote)}</span>
-                  </div>
-
-                  <div class="criterion-justification">
-                    💡 <em>${pt.justification}</em>
-                  </div>
-
-                  <!-- Interactive override toggles for professor -->
-                  <div class="criterion-toggles">
-                    <button type="button" class="btn-toggle-status ${pt.status === 'hit' ? 'active-hit' : ''}" data-action="hit">
-                      ✓ Full (${pt.weight.toFixed(2)})
-                    </button>
-                    <button type="button" class="btn-toggle-status ${pt.status === 'partial' ? 'active-partial' : ''}" data-action="partial">
-                      ½ Half (${(pt.weight * 0.5).toFixed(2)})
-                    </button>
-                    <button type="button" class="btn-toggle-status ${pt.status === 'missed' ? 'active-missed' : ''}" data-action="missed">
-                      ✕ 0 Marks
-                    </button>
+                  <div class="question-group-points">
+                    ${(q.points || []).map((pt, idx) => {
+                      const statusClass = pt.status === 'hit' ? 'status-hit' : pt.status === 'partial' ? 'status-partial' : 'status-missed';
+                      return `
+                        <div class="criterion-card ${statusClass}" data-point-id="${pt.pointId}">
+                          <div class="criterion-top-row">
+                            <div class="criterion-num">Q${q.number} • Pt ${idx + 1}</div>
+                            <div class="criterion-score-badge">
+                              <span class="awarded-val">${pt.awardedMarks.toFixed(2)}</span> / ${pt.weight.toFixed(2)} Marks
+                            </div>
+                          </div>
+                          <div class="criterion-desc">${formatMathText(pt.pointText)}</div>
+                          <div class="criterion-evidence">
+                            <span class="evidence-icon">❝</span>
+                            <span class="evidence-quote">${formatMathText(pt.evidenceQuote)}</span>
+                          </div>
+                          <div class="criterion-justification">💡 <em>${pt.justification}</em></div>
+                          <div class="criterion-toggles">
+                            <button type="button" class="btn-toggle-status ${pt.status === 'hit' ? 'active-hit' : ''}" data-action="hit">✓ Full (${pt.weight.toFixed(2)})</button>
+                            <button type="button" class="btn-toggle-status ${pt.status === 'partial' ? 'active-partial' : ''}" data-action="partial">½ Half (${(pt.weight * 0.5).toFixed(2)})</button>
+                            <button type="button" class="btn-toggle-status ${pt.status === 'missed' ? 'active-missed' : ''}" data-action="missed">✕ 0 Marks</button>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
                   </div>
                 </div>
-              `;
-            }).join('')}
+              `).join('')}
+            ` : `
+              ${evalData.points.map((pt, idx) => {
+                const statusClass = pt.status === 'hit' ? 'status-hit' : pt.status === 'partial' ? 'status-partial' : 'status-missed';
+                return `
+                  <div class="criterion-card ${statusClass}" data-point-id="${pt.pointId}" data-index="${idx}">
+                    <div class="criterion-top-row">
+                      <div class="criterion-num">Point ${idx + 1}</div>
+                      <div class="criterion-score-badge">
+                        <span class="awarded-val">${pt.awardedMarks.toFixed(2)}</span> / ${pt.weight.toFixed(2)} Marks
+                      </div>
+                    </div>
+
+                    <div class="criterion-desc">${formatMathText(pt.pointText)}</div>
+
+                    <!-- Evidence citation from student handwriting -->
+                    <div class="criterion-evidence">
+                      <span class="evidence-icon">❝</span>
+                      <span class="evidence-quote">${formatMathText(pt.evidenceQuote)}</span>
+                    </div>
+
+                    <div class="criterion-justification">
+                      💡 <em>${pt.justification}</em>
+                    </div>
+
+                    <!-- Interactive override toggles for professor -->
+                    <div class="criterion-toggles">
+                      <button type="button" class="btn-toggle-status ${pt.status === 'hit' ? 'active-hit' : ''}" data-action="hit">
+                        ✓ Full (${pt.weight.toFixed(2)})
+                      </button>
+                      <button type="button" class="btn-toggle-status ${pt.status === 'partial' ? 'active-partial' : ''}" data-action="partial">
+                        ½ Half (${(pt.weight * 0.5).toFixed(2)})
+                      </button>
+                      <button type="button" class="btn-toggle-status ${pt.status === 'missed' ? 'active-missed' : ''}" data-action="missed">
+                        ✕ 0 Marks
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            `}
           </div>
         </div>
 

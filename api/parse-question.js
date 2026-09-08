@@ -62,27 +62,34 @@ export default async function handler(req, res) {
 
     const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
 
-    const prompt = `You are GradeCrow AI, an expert exam assistant (gradecrow.com).
-Look at this handwritten or printed image of an exam question, marking scheme, or rubric written by a teacher.
+    const prompt = `You are GradeCrow AI, an expert exam question paper scanner (gradecrow.com).
+Look at this handwritten or printed image of an exam question paper, marking scheme, or master rubric written by a teacher.
+
+The document may contain ONE question or MULTIPLE questions (e.g. Q1, Q2, Q3... up to Q10).
 
 Extract:
-1. The Question Title or Prompt.
-2. The Subject / Course Name (or "General" if not mentioned).
-3. The Maximum Marks / Total Score.
-4. Each Key Point / Expected Answer Criterion along with its allocated marks/weight.
-   If marks for individual points are not explicitly stated, divide the total marks evenly across the points.
-5. Key vocabulary keywords for each point.
+1. Overall Exam Title or Course Subject.
+2. Total Maximum Marks for the whole paper.
+3. Every individual Question (numbered Q1, Q2, etc.), its allocated max marks, and its granular key answer points/criteria with individual point weights.
+4. Relevant vocabulary keywords for each point.
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {
-  "question": "The full question text or title...",
-  "subject": "Subject or Course Name",
-  "maxMarks": 5.0,
-  "keyPoints": [
+  "examTitle": "Title of Exam Paper or Course Name",
+  "subject": "Subject Name",
+  "totalMaxMarks": 20.0,
+  "questions": [
     {
-      "text": "Description of criterion or expected concept",
-      "weight": 1.0,
-      "keywords": ["keyword 1", "keyword 2"]
+      "number": 1,
+      "title": "Q1: Full question 1 text...",
+      "maxMarks": 10.0,
+      "keyPoints": [
+        {
+          "text": "Criterion or expected step description",
+          "weight": 2.5,
+          "keywords": ["keyword1", "keyword2"]
+        }
+      ]
     }
   ]
 }`;
@@ -126,27 +133,44 @@ Respond ONLY with a valid JSON object matching this exact schema:
         }
 
         const parsed = JSON.parse(cleanedJson);
-        const maxMarks = typeof parsed.maxMarks === 'number' && parsed.maxMarks > 0 ? parsed.maxMarks : 5.0;
 
-        const points = (parsed.keyPoints || []).map((kp, idx) => ({
-          id: `pt-${idx + 1}-${Date.now().toString(36)}`,
-          text: kp.text || `Point ${idx + 1}`,
-          weight: typeof kp.weight === 'number' && kp.weight > 0 ? Number(kp.weight.toFixed(2)) : 1.0,
-          keywords: Array.isArray(kp.keywords) ? kp.keywords : []
-        }));
+        const rawQuestions = Array.isArray(parsed.questions) && parsed.questions.length > 0
+          ? parsed.questions
+          : [{ number: 1, title: parsed.question || 'Scanned Question', maxMarks: parsed.maxMarks || 5.0, keyPoints: parsed.keyPoints || [] }];
 
-        if (points.length === 0) {
-          points.push(
-            { id: `pt-1-${Date.now().toString(36)}`, text: 'Core concept explanation', weight: maxMarks / 2, keywords: [] },
-            { id: `pt-2-${Date.now().toString(36)}`, text: 'Key terminology and details', weight: maxMarks / 2, keywords: [] }
-          );
-        }
+        const formattedQuestions = rawQuestions.map((q, qIdx) => {
+          const qMaxMarks = typeof q.maxMarks === 'number' && q.maxMarks > 0 ? q.maxMarks : 5.0;
+          const points = (q.keyPoints || []).map((kp, kIdx) => ({
+            id: `kp-${qIdx + 1}-${kIdx + 1}-${Date.now().toString(36)}`,
+            text: kp.text || `Point ${kIdx + 1}`,
+            weight: typeof kp.weight === 'number' && kp.weight > 0 ? Number(kp.weight.toFixed(2)) : 1.0,
+            keywords: Array.isArray(kp.keywords) ? kp.keywords : []
+          }));
+
+          if (points.length === 0) {
+            points.push(
+              { id: `kp-${qIdx + 1}-1-${Date.now().toString(36)}`, text: 'Core concept explanation & working', weight: qMaxMarks / 2, keywords: [] },
+              { id: `kp-${qIdx + 1}-2-${Date.now().toString(36)}`, text: 'Key terminology & details', weight: qMaxMarks / 2, keywords: [] }
+            );
+          }
+
+          return {
+            id: `q-${qIdx + 1}-${Date.now().toString(36)}`,
+            number: q.number || (qIdx + 1),
+            title: q.title || `Question ${qIdx + 1}`,
+            maxMarks: qMaxMarks,
+            keyPoints: points
+          };
+        });
+
+        const totalMaxMarks = formattedQuestions.reduce((acc, q) => acc + q.maxMarks, 0);
 
         return res.status(200).json({
-          question: parsed.question || 'Scanned Question',
+          examTitle: parsed.examTitle || 'Scanned Exam Paper',
           subject: parsed.subject || 'General',
-          maxMarks: maxMarks,
-          keyPoints: points
+          totalMaxMarks: totalMaxMarks,
+          isMultiQuestion: true,
+          questions: formattedQuestions
         });
 
       } catch (err) {

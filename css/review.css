@@ -572,3 +572,105 @@
 .btn-accept-next:active {
   transform: translateY(0);
 }
+
+/* ==========================================================================
+   Multi-Question Exam Paper Breakdown Styling
+   ========================================================================== */
+.question-summary-bar {
+  background: var(--color-bg-subtle, #f8fafc);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-bar-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
+.question-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.q-score-pill {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.78rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.q-pill-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.q-pill-score {
+  color: var(--color-primary);
+}
+
+/* Question Group Card Accordion */
+.question-group-card {
+  background: white;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.question-group-header {
+  background: linear-gradient(135deg, rgba(0, 169, 145, 0.08), rgba(0, 169, 145, 0.02));
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.q-group-badge {
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.q-group-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  flex: 1;
+}
+
+.q-group-score {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  background: white;
+  padding: 3px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 169, 145, 0.3);
+}
+
+.question-group-points {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
