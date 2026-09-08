@@ -735,12 +735,11 @@
             <div class="capture-actions-grid">
               <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
               <input type="file" id="gallery-file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
-              
-              <!-- Take Photo Card -->
+                      <!-- Take Photo / Scan Document Card -->
               <div class="action-card-camera" id="btn-take-photo-direct">
                 <div class="action-card-icon">📸</div>
-                <div class="action-card-title">Take Photo</div>
-                <div class="action-card-subtitle">Snap student sheet with camera</div>
+                <div class="action-card-title">Scan Document / Take Photo</div>
+                <div class="action-card-subtitle">Launch mobile document camera or pick PDF / image</div>
               </div>
 
               <!-- Upload File Card -->
@@ -750,30 +749,13 @@
                 <div class="action-card-subtitle">Supports multi-page PDFs, JPG, PNG</div>
               </div>
             </div>
-
-            <!-- Live Camera Viewport -->
-            <div class="camera-viewport-container hidden" id="camera-viewport-box">
-              <video id="camera-video" playsinline autoplay muted class="camera-video"></video>
-              <canvas id="camera-canvas" class="hidden"></canvas>
-              <div class="camera-overlay">
-                <div class="camera-guide-frame">
-                  <div class="guide-text">Align Exam Paper within frame</div>
-                </div>
-              </div>
-              <div class="camera-controls">
-                <button type="button" class="btn-shutter" id="btn-snap-photo" title="Capture Photo">
-                  <span class="shutter-inner"></span>
-                </button>
-                <button type="button" class="btn-camera-close" id="btn-close-camera">✕</button>
-              </div>
-            </div>
           </div>
         `;
       } else {
         // STATE 2: Paper Loaded -> Preview with Multi-Page & Grade Button
         this.container.innerHTML = `
           <div class="capture-container-inner">
-            <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
+            <input type="file" id="camera-file-input" accept="image/*,.pdf" capture="environment" class="file-input-hidden" />
             <input type="file" id="gallery-file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
 
             <!-- Batch Queue Control Bar -->
@@ -852,11 +834,7 @@
 
       if (btnTakePhoto && cameraInput) {
         btnTakePhoto.addEventListener('click', () => {
-          if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-            cameraInput.click();
-          } else {
-            this.startCamera();
-          }
+          cameraInput.click();
         });
       }
 
