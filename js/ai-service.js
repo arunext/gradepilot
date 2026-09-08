@@ -30,13 +30,18 @@ export class AiEvaluationService {
   }
 
   /**
-   * Main evaluation entry point. Uses Live Gemini Vision API if key available,
+   * Main evaluation entry point. Uses Live Gemini Vision API or Vercel API if available,
    * otherwise falls back seamlessly to Intelligent Local Semantic Evaluator.
    */
-  async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta }) {
+  async evaluatePaper({ imageSrc, pages, rawText, rubric, sampleMeta }) {
+    // Standardize pages array
+    const pageList = (pages && pages.length > 0) 
+      ? pages 
+      : (imageSrc ? [{ pageNumber: 1, imageSrc }] : []);
+
     if (this.hasLiveApiKey()) {
       try {
-        const liveResult = await this.evaluateWithGeminiVision({ imageSrc, rawText, rubric, sampleMeta });
+        const liveResult = await this.evaluateWithGeminiVision({ imageSrc, pages: pageList, rawText, rubric, sampleMeta });
         return {
           ...liveResult,
           mode: 'gemini-live',
@@ -44,55 +49,84 @@ export class AiEvaluationService {
         };
       } catch (err) {
         console.warn('Gemini Live API failed, falling back to local intelligent engine:', err);
-        // Fallback to local
       }
+    }
+
+    // Try Vercel Serverless Function `/api/evaluate`
+    try {
+      const pagesBase64 = pageList.map(p => p.imageSrc).filter(Boolean);
+      const serverRes = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pagesBase64,
+          rubric
+        })
+      });
+
+      if (serverRes.ok) {
+        const serverData = await serverRes.json();
+        return serverData;
+      }
+    } catch (err) {
+      console.warn('Server API evaluation skipped/failed, using local evaluator:', err);
     }
 
     // Intelligent Offline Evaluator
     await new Promise(resolve => setTimeout(resolve, 850)); // realistic rapid latency feel
-    return this.evaluateIntelligentLocal({ imageSrc, rawText, rubric, sampleMeta });
+    return this.evaluateIntelligentLocal({ imageSrc, pages: pageList, rawText, rubric, sampleMeta });
   }
 
   /**
-   * Google Gemini Vision 1.5/2.0 Flash API Execution
+   * Google Gemini Vision API Execution with Multi-Page Support
    */
-  async evaluateWithGeminiVision({ imageSrc, rawText, rubric, sampleMeta }) {
-    // Extract base64 payload from data url or canvas
-    let base64Data = '';
-    let mimeType = 'image/jpeg';
+  async evaluateWithGeminiVision({ imageSrc, pages = [], rawText, rubric, sampleMeta }) {
+    const pageList = (pages && pages.length > 0) ? pages : [{ pageNumber: 1, imageSrc }];
+    
+    // Extract base64 image parts for all pages
+    const imageParts = pageList.map((p, idx) => {
+      const src = p.imageSrc || imageSrc;
+      let base64Data = '';
+      let mimeType = 'image/jpeg';
 
-    if (imageSrc.startsWith('data:image/svg+xml')) {
-      // For SVG sample sheets, convert SVG text or use rawText
-      base64Data = btoa(unescape(encodeURIComponent(decodeURIComponent(imageSrc.split(',')[1]))));
-      mimeType = 'image/svg+xml';
-    } else if (imageSrc.startsWith('data:')) {
-      const parts = imageSrc.split(',');
-      mimeType = parts[0].match(/:(.*?);/)[1] || 'image/jpeg';
-      base64Data = parts[1];
-    } else {
-      throw new Error('Unsupported image data format for Gemini API');
-    }
+      if (src.startsWith('data:image/svg+xml')) {
+        base64Data = btoa(unescape(encodeURIComponent(decodeURIComponent(src.split(',')[1]))));
+        mimeType = 'image/svg+xml';
+      } else if (src.startsWith('data:')) {
+        const parts = src.split(',');
+        mimeType = parts[0].match(/:(.*?);/)[1] || 'image/jpeg';
+        base64Data = parts[1];
+      } else {
+        throw new Error('Unsupported image data format for Gemini API');
+      }
 
-    const systemPrompt = `You are an expert University Medical School Professor in Anatomy & Physiology.
-Your task is to accurately transcribe the student's handwritten answer sheet from the image, strictly evaluate it against the provided Rubric Answer Key, and return a granular decimal score with evidence citations.
+      return {
+        inline_data: {
+          mime_type: mimeType === 'image/svg+xml' ? 'text/plain' : mimeType,
+          data: base64Data
+        }
+      };
+    });
+
+    const systemPrompt = `You are an expert Professor & Exam Evaluator across academic subjects (gradecrow.com).
+Look at the attached student answer sheet image(s) (${imageParts.length} page(s)).
 
 QUESTION: ${rubric.question}
-SUBJECT: ${rubric.subject || 'Medical Anatomy / Theory'}
+SUBJECT: ${rubric.subject || 'General Academic'}
 MAXIMUM MARKS: ${rubric.maxMarks}
 
 ANSWER KEY & RUBRIC POINTS:
 ${rubric.keyPoints.map((kp, i) => `${i + 1}. [ID: ${kp.id}] [Weight: ${kp.weight} marks] ${kp.text}`).join('\n')}
 
 INSTRUCTIONS:
-1. Extract and transcribe all handwritten text accurately.
-2. For each Rubric Key Point, determine if the student hit it completely ("hit"), partially ("partial"), or missed it completely ("missed").
-3. Award exact decimal marks for each point (e.g. 1.25, 0.75, 1.5).
-4. Extract the exact short quote/snippet from the student's paper as evidence.
-5. Provide a constructive 2-sentence summary feedback for the student.
+1. Extract and transcribe all handwritten text, LaTeX math equations, and diagram labels accurately.
+2. For each Rubric Key Point, evaluate if student hit ("hit"), partially hit ("partial"), or missed ("missed").
+3. Format formulas in LaTeX $$...$$ or $...$.
+4. Provide constructive feedback.
 
 Respond ONLY with valid JSON following this schema:
 {
-  "transcription": "Extracted student handwritten text...",
+  "transcription": "Extracted student handwritten text and LaTeX equations...",
   "overallSuggestedScore": 7.5,
   "maxMarks": 10.0,
   "feedbackSummary": "Well organized answer covering...",
@@ -102,7 +136,7 @@ Respond ONLY with valid JSON following this schema:
       "status": "hit" | "partial" | "missed",
       "awardedMarks": 1.5,
       "weight": 1.5,
-      "studentEvidenceQuote": "Exact quote from text or '(Not mentioned)'",
+      "studentEvidenceQuote": "[Page 1] Exact quote or formula",
       "justification": "Brief reason for awarded marks"
     }
   ]
@@ -115,12 +149,7 @@ Respond ONLY with valid JSON following this schema:
           role: 'user',
           parts: [
             { text: systemPrompt },
-            {
-              inline_data: {
-                mime_type: mimeType === 'image/svg+xml' ? 'text/plain' : mimeType,
-                data: base64Data
-              }
-            }
+            ...imageParts
           ]
         }
       ],

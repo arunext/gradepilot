@@ -680,14 +680,24 @@
     });
   }
 
-  // --- 4. PAPER CAPTURE & VIEWER (Clean Somhi-Inspired Component) ---
+  // --- 4. PAPER CAPTURE & VIEWER (Multi-Page & PDF Queue Ready) ---
   class PaperCapture {
     constructor(options = {}) {
       this.container = options.container;
       this.onCaptureCallback = options.onCapture || (() => {});
       this.onGradeRequested = options.onGradeRequested || (() => {});
+      
       this.currentImageSrc = null;
       this.currentMeta = null;
+      
+      // Multi-page state
+      this.pages = []; // [{ pageNumber: 1, imageSrc: '...' }, ...]
+      this.activePageIndex = 0;
+
+      // Batch queue state
+      this.batchQueue = []; // [{ meta, pages }, ...]
+      this.activeBatchIndex = 0;
+
       this.stream = null;
       this.zoom = 1;
       this.rotation = 0;
@@ -707,29 +717,41 @@
       if (!this.container) return;
 
       if (!this.currentImageSrc) {
-        // STATE 1: Ready to Upload / Take Photo (Clean Minimal Actions)
+        // STATE 1: Ready to Upload / Take Photo / Drop PDFs
         this.container.innerHTML = `
           <div class="capture-container-inner">
+            <!-- Batch Queue Control Bar (Hidden unless multiple student papers loaded) -->
+            <div class="batch-queue-bar hidden" id="batch-queue-bar">
+              <div class="batch-info">
+                <span class="batch-icon">📦</span>
+                <span class="batch-title">Batch Queue: Student <strong id="batch-current-num">1</strong> of <strong id="batch-total-num">1</strong></span>
+              </div>
+              <div class="batch-controls">
+                <button type="button" class="btn btn-xs btn-outline" id="btn-prev-batch" title="Previous Student Paper">◀ Prev Student</button>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-next-batch" title="Next Student Paper">Next Student ▶</button>
+              </div>
+            </div>
+
             <div class="capture-actions-grid">
               <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
-              <input type="file" id="gallery-file-input" accept="image/*" class="file-input-hidden" />
+              <input type="file" id="gallery-file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
               
               <!-- Take Photo Card -->
               <div class="action-card-camera" id="btn-take-photo-direct">
                 <div class="action-card-icon">📸</div>
                 <div class="action-card-title">Take Photo</div>
-                <div class="action-card-subtitle">Snap student sheet with phone camera</div>
+                <div class="action-card-subtitle">Snap student sheet with camera</div>
               </div>
 
               <!-- Upload File Card -->
               <div class="action-card-upload" id="btn-browse-file">
                 <div class="action-card-icon">📁</div>
-                <div class="action-card-title">Upload Image File</div>
-                <div class="action-card-subtitle">Select or drop JPG, PNG, HEIC</div>
+                <div class="action-card-title">Upload Image / PDF</div>
+                <div class="action-card-subtitle">Supports multi-page PDFs, JPG, PNG</div>
               </div>
             </div>
 
-            <!-- Live Camera Viewport (Hidden unless video stream is started on desktop) -->
+            <!-- Live Camera Viewport -->
             <div class="camera-viewport-container hidden" id="camera-viewport-box">
               <video id="camera-video" playsinline autoplay muted class="camera-video"></video>
               <canvas id="camera-canvas" class="hidden"></canvas>
@@ -748,11 +770,23 @@
           </div>
         `;
       } else {
-        // STATE 2: Paper Loaded -> Preview with Primary Grade Button
+        // STATE 2: Paper Loaded -> Preview with Multi-Page & Grade Button
         this.container.innerHTML = `
           <div class="capture-container-inner">
             <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
-            <input type="file" id="gallery-file-input" accept="image/*" class="file-input-hidden" />
+            <input type="file" id="gallery-file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
+
+            <!-- Batch Queue Control Bar -->
+            <div class="batch-queue-bar ${this.batchQueue.length > 1 ? '' : 'hidden'}" id="batch-queue-bar">
+              <div class="batch-info">
+                <span class="batch-icon">📦</span>
+                <span class="batch-title">Batch Queue: Student <strong id="batch-current-num">${this.activeBatchIndex + 1}</strong> of <strong id="batch-total-num">${this.batchQueue.length}</strong></span>
+              </div>
+              <div class="batch-controls">
+                <button type="button" class="btn btn-xs btn-outline" id="btn-prev-batch" title="Previous Student Paper">◀ Prev Student</button>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-next-batch" title="Next Student Paper">Next Student ▶</button>
+              </div>
+            </div>
 
             <div class="paper-viewer-card">
               <div class="viewer-header-bar">
@@ -760,6 +794,15 @@
                   <span class="viewer-roll-pill" id="paper-badge-roll">${this.currentMeta?.rollNo || 'STU-101'}</span>
                   <span class="viewer-student-label" id="paper-student-name">${this.currentMeta?.studentName || 'Student Paper'}</span>
                 </div>
+
+                <!-- Multi-Page Navigation Pill -->
+                <div class="page-nav-pill" id="page-nav-pill">
+                  <button type="button" class="btn-page-step" id="btn-prev-page" title="Previous Page">◀</button>
+                  <span class="page-indicator" id="page-indicator">Page ${this.activePageIndex + 1} of ${this.pages.length}</span>
+                  <button type="button" class="btn-page-step" id="btn-next-page" title="Next Page">▶</button>
+                  <button type="button" class="btn-add-page-chip" id="btn-add-page-trigger" title="Add another page">➕ Page</button>
+                </div>
+
                 <div class="viewer-controls-group">
                   <button type="button" class="btn-stage-tool" id="btn-zoom-out" title="Zoom Out">🔍-</button>
                   <button type="button" class="btn-stage-tool" id="btn-zoom-reset">100%</button>
@@ -775,12 +818,22 @@
                 <div class="viewer-drag-hint">💡 Drag to pan • Double-tap to zoom</div>
               </div>
 
+              <!-- Page Thumbnails Strip -->
+              <div class="page-thumbnails-bar ${this.pages.length > 1 ? '' : 'hidden'}" id="page-thumbnails-bar">
+                ${this.pages.map((p, idx) => `
+                  <button type="button" class="page-thumb ${idx === this.activePageIndex ? 'active' : ''}" data-idx="${idx}">
+                    <img src="${p.imageSrc}" alt="Page ${p.pageNumber}" />
+                    <span class="thumb-label">P${p.pageNumber}</span>
+                  </button>
+                `).join('')}
+              </div>
+
               <div class="viewer-bottom-action-bar">
                 <button type="button" class="btn-grade-primary" id="btn-grade-now">
                   <span>✨</span> Grade with AI ➔
                 </button>
                 <button type="button" class="btn-change-photo" id="btn-retake-photo">
-                  📸 Change Photo
+                  📸 Change / Add File
                 </button>
               </div>
             </div>
@@ -802,7 +855,6 @@
           if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
             cameraInput.click();
           } else {
-            // On desktop, try native camera viewport
             this.startCamera();
           }
         });
@@ -817,16 +869,38 @@
 
       if (btnRetake) {
         btnRetake.addEventListener('click', () => {
-          this.currentImageSrc = null;
-          this.currentMeta = null;
-          this.renderUI();
-          this.attachEvents();
+          if (galleryInput) galleryInput.click();
         });
       }
 
       if (btnGradeNow) {
         btnGradeNow.addEventListener('click', () => this.onGradeRequested());
       }
+
+      // Multi-Page Navigation Events
+      const btnPrevPage = this.container.querySelector('#btn-prev-page');
+      const btnNextPage = this.container.querySelector('#btn-next-page');
+      const btnAddPage = this.container.querySelector('#btn-add-page-trigger');
+
+      if (btnPrevPage) btnPrevPage.addEventListener('click', () => this.switchPage(this.activePageIndex - 1));
+      if (btnNextPage) btnNextPage.addEventListener('click', () => this.switchPage(this.activePageIndex + 1));
+      if (btnAddPage && galleryInput) {
+        btnAddPage.addEventListener('click', () => galleryInput.click());
+      }
+
+      // Batch Queue Events
+      const btnPrevBatch = this.container.querySelector('#btn-prev-batch');
+      const btnNextBatch = this.container.querySelector('#btn-next-batch');
+      if (btnPrevBatch) btnPrevBatch.addEventListener('click', () => this.switchBatch(this.activeBatchIndex - 1));
+      if (btnNextBatch) btnNextBatch.addEventListener('click', () => this.switchBatch(this.activeBatchIndex + 1));
+
+      // Thumbnails click
+      this.container.querySelectorAll('.page-thumb').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx, 10);
+          this.switchPage(idx);
+        });
+      });
 
       // Camera Viewfinder Events
       const btnSnap = this.container.querySelector('#btn-snap-photo');
@@ -905,42 +979,174 @@
       const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
       this.stopCamera();
 
-      this.setPaperImage(dataUrl, {
-        id: 'custom-photo-' + Date.now(),
-        studentName: 'Student (Camera Scan)',
-        rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
-        isCustom: true
-      });
-    }
-
-    handleFileSelect(files) {
-      if (!files || !files.length) return;
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.setPaperImage(e.target.result, {
-          id: 'uploaded-' + Date.now(),
-          studentName: file.name.replace(/\.[^/.]+$/, ''),
+      if (this.pages && this.pages.length > 0 && confirm('Append captured photo as Page ' + (this.pages.length + 1) + '?')) {
+        this.addPageToPaper(dataUrl);
+      } else {
+        this.setPaperImage(dataUrl, {
+          id: 'custom-photo-' + Date.now(),
+          studentName: 'Student (Camera Scan)',
           rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
           isCustom: true
         });
-      };
-      reader.readAsDataURL(file);
+      }
+    }
+
+    async handleFileSelect(fileList) {
+      if (!fileList || !fileList.length) return;
+      const files = Array.from(fileList);
+
+      // PDF rendering via pdf.js
+      const pdfFile = files.find(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+      if (pdfFile) {
+        try {
+          const pdfPages = await this.renderPdfFile(pdfFile);
+          if (pdfPages && pdfPages.length > 0) {
+            const rollNo = 'STU-' + Math.floor(1000 + Math.random() * 9000);
+            const meta = {
+              id: 'pdf-' + Date.now(),
+              studentName: pdfFile.name.replace(/\.[^/.]+$/, ""),
+              rollNo: rollNo,
+              isCustom: true
+            };
+            this.setMultiPagePaper(pdfPages, meta);
+            return;
+          }
+        } catch (pdfErr) {
+          console.error('PDF rendering error:', pdfErr);
+        }
+      }
+
+      const imageFiles = files.filter(f => f.type.startsWith('image/'));
+      if (!imageFiles.length) return;
+
+      if (imageFiles.length === 1) {
+        const file = imageFiles[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (this.pages && this.pages.length > 0 && confirm('Append uploaded image as Page ' + (this.pages.length + 1) + '?')) {
+            this.addPageToPaper(e.target.result);
+          } else {
+            this.setPaperImage(e.target.result, {
+              id: 'uploaded-' + Date.now(),
+              studentName: file.name.replace(/\.[^/.]+$/, ''),
+              rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
+              isCustom: true
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Multiple images -> Batch Queue
+        const readPromises = imageFiles.map(file => new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve({ name: file.name, dataUrl: e.target.result });
+          reader.readAsDataURL(file);
+        }));
+
+        const results = await Promise.all(readPromises);
+
+        this.batchQueue = results.map((res, idx) => ({
+          meta: {
+            id: `batch-${Date.now()}-${idx}`,
+            studentName: res.name.replace(/\.[^/.]+$/, ""),
+            rollNo: `STU-${1001 + idx}`,
+            isCustom: true
+          },
+          pages: [{ pageNumber: 1, imageSrc: res.dataUrl }]
+        }));
+
+        this.activeBatchIndex = 0;
+        this.loadBatchItem(0);
+      }
+    }
+
+    async renderPdfFile(file) {
+      if (!window.pdfjsLib) {
+        console.warn('PDF.js not available');
+        return [];
+      }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pageImages = [];
+
+      for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        pageImages.push(canvas.toDataURL('image/jpeg', 0.92));
+      }
+
+      return pageImages;
     }
 
     loadSample(sampleId) {
       const sample = SAMPLE_PAPERS.find(s => s.id === sampleId) || SAMPLE_PAPERS[0];
       const dataUrl = getSampleSvgDataUrl(sample.id);
+      this.batchQueue = [];
       this.setPaperImage(dataUrl, sample);
     }
 
     setPaperImage(imageSrc, meta) {
-      this.currentImageSrc = imageSrc;
+      this.setMultiPagePaper([imageSrc], meta);
+    }
+
+    setMultiPagePaper(imageSrcArray, meta) {
       this.currentMeta = meta;
+      this.pages = imageSrcArray.map((src, idx) => ({
+        pageNumber: idx + 1,
+        imageSrc: src
+      }));
+      this.activePageIndex = 0;
+      this.currentImageSrc = this.pages[0]?.imageSrc || '';
+
       this.renderUI();
       this.attachEvents();
       this.resetTransform();
-      this.onCaptureCallback({ imageSrc: this.currentImageSrc, meta: this.currentMeta });
+
+      this.onCaptureCallback({
+        imageSrc: this.currentImageSrc,
+        pages: this.pages,
+        meta: this.currentMeta
+      });
+    }
+
+    addPageToPaper(dataUrl) {
+      this.pages.push({
+        pageNumber: this.pages.length + 1,
+        imageSrc: dataUrl
+      });
+      this.switchPage(this.pages.length - 1);
+    }
+
+    switchPage(index) {
+      if (!this.pages || !this.pages.length) return;
+      if (index < 0 || index >= this.pages.length) return;
+
+      this.activePageIndex = index;
+      this.currentImageSrc = this.pages[index].imageSrc;
+      this.renderUI();
+      this.attachEvents();
+      this.resetTransform();
+    }
+
+    loadBatchItem(index) {
+      if (!this.batchQueue || !this.batchQueue.length) return;
+      if (index < 0 || index >= this.batchQueue.length) return;
+
+      this.activeBatchIndex = index;
+      const item = this.batchQueue[index];
+      this.setMultiPagePaper(item.pages.map(p => p.imageSrc), item.meta);
+    }
+
+    switchBatch(index) {
+      this.loadBatchItem(index);
     }
 
     adjustZoom(delta) {
@@ -1574,6 +1780,35 @@ Respond ONLY with a JSON object in this exact schema:
     }
   }
 
+  function formatMathText(text) {
+    if (!text) return '';
+    if (typeof window === 'undefined' || !window.katex) return text;
+
+    try {
+      // 1. Replace display math $$...$$
+      let formatted = text.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+        try {
+          return window.katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false });
+        } catch (e) {
+          return match;
+        }
+      });
+
+      // 2. Replace inline math $...$
+      formatted = formatted.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+        try {
+          return window.katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
+        } catch (e) {
+          return match;
+        }
+      });
+
+      return formatted;
+    } catch (e) {
+      return text;
+    }
+  }
+
   // --- 6. PROFESSOR REVIEW PANEL ---
   class ReviewPanel {
     constructor(options = {}) {
@@ -1672,7 +1907,7 @@ Respond ONLY with a JSON object in this exact schema:
           <!-- Summary Box -->
           <div class="feedback-summary-box">
             <div class="box-title">📝 AI Assessment Summary</div>
-            <p class="feedback-text">${evalData.feedbackSummary}</p>
+            <p class="feedback-text">${formatMathText(evalData.feedbackSummary)}</p>
           </div>
 
           <!-- OCR Transcript Drawer -->
@@ -1686,7 +1921,7 @@ Respond ONLY with a JSON object in this exact schema:
             <div class="drawer-content">
               ${this.isEditingTranscript 
                 ? `<textarea id="textarea-ocr-edit" class="transcript-editor" rows="4">${evalData.transcription}</textarea>`
-                : `<div class="transcript-preview">${evalData.transcription.replace(/\n/g, '<br/>')}</div>`}
+                : `<div class="transcript-preview">${formatMathText(evalData.transcription).replace(/\n/g, '<br/>')}</div>`}
             </div>
           </div>
 
@@ -1704,10 +1939,10 @@ Respond ONLY with a JSON object in this exact schema:
                     <div class="criterion-num">POINT ${idx + 1}</div>
                     <div class="criterion-score-badge"><strong>${pt.awardedMarks.toFixed(2)}</strong> / ${pt.weight.toFixed(2)} Marks</div>
                   </div>
-                  <div class="criterion-desc">${pt.pointText}</div>
+                  <div class="criterion-desc">${formatMathText(pt.pointText)}</div>
                   <div class="criterion-evidence">
                     <span>❝</span>
-                    <span>${pt.evidenceQuote}</span>
+                    <span>${formatMathText(pt.evidenceQuote)}</span>
                   </div>
                   <div class="criterion-justification">💡 <em>${pt.justification}</em></div>
                   <div class="criterion-toggles">
@@ -2824,6 +3059,7 @@ Respond ONLY with a JSON object in this exact schema:
       try {
         const result = await this.aiService.evaluatePaper({
           imageSrc: this.capture.currentImageSrc,
+          pages: this.capture.pages,
           rawText: this.capture.currentMeta?.rawText,
           rubric: rubric,
           sampleMeta: this.capture.currentMeta,
@@ -2893,10 +3129,10 @@ Respond ONLY with a JSON object in this exact schema:
             <div class="crow-scan-beam"></div>
           </div>
           <div class="loading-title">GradeCrow is Inspecting Paper</div>
-          <div class="loading-subtitle">${customStatus || 'Analyzing handwriting & question key...'}</div>
+          <div class="loading-subtitle">${customStatus || 'Analyzing handwriting, math formulas & rubric...'}</div>
           <div class="loading-steps-list">
             <div class="step-item active"><span class="step-dot"></span> 🦅 Crow-Eye OCR Handwriting Analysis...</div>
-            <div class="step-item active"><span class="step-dot"></span> ⚖️ Question Criteria & Marking Scheme...</div>
+            <div class="step-item active"><span class="step-dot"></span> ⚖️ Question Criteria, Math & Diagram Verification...</div>
             <div class="step-item active"><span class="step-dot"></span> ✍️ Decimal Score Calculation & Evidence Quotes...</div>
           </div>
         </div>
@@ -2906,6 +3142,18 @@ Respond ONLY with a JSON object in this exact schema:
     handleAcceptAndNext(record) {
       this.gradebook.addRecord(record);
       this.showNotification(`✓ Score logged: ${record.studentName} (${record.finalScore}/${record.maxMarks})`, 'success');
+
+      // Check if we have an active Batch Queue
+      if (this.capture.batchQueue && this.capture.batchQueue.length > 0) {
+        const nextBatchIdx = this.capture.activeBatchIndex + 1;
+        if (nextBatchIdx < this.capture.batchQueue.length) {
+          this.capture.switchBatch(nextBatchIdx);
+          this.reviewPanel.renderEmptyState();
+          this.updateHeaderStats();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
 
       // Clear current paper so teacher can snap/upload the next student sheet cleanly
       this.capture.currentImageSrc = null;

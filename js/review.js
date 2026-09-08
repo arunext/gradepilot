@@ -1,6 +1,35 @@
 // AnatomiGrade AI - Professor Review & Evaluation Panel Module
 import { renderIcon } from './icons.js';
 
+export function formatMathText(text) {
+  if (!text) return '';
+  if (typeof window === 'undefined' || !window.katex) return text;
+
+  try {
+    // 1. Replace display math $$...$$
+    let formatted = text.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+      try {
+        return window.katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false });
+      } catch (e) {
+        return match;
+      }
+    });
+
+    // 2. Replace inline math $...$
+    formatted = formatted.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+      try {
+        return window.katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
+      } catch (e) {
+        return match;
+      }
+    });
+
+    return formatted;
+  } catch (e) {
+    return text;
+  }
+}
+
 export class ReviewPanel {
   constructor(options = {}) {
     this.container = options.container;
@@ -113,7 +142,7 @@ export class ReviewPanel {
           <div class="box-title">
             <span>📝 AI Assessment Summary</span>
           </div>
-          <p class="feedback-text">${evalData.feedbackSummary || 'All key criteria evaluated.'}</p>
+          <p class="feedback-text">${formatMathText(evalData.feedbackSummary || 'All key criteria evaluated.')}</p>
         </div>
 
         <!-- Key Points Breakdown Checklist -->
@@ -126,7 +155,6 @@ export class ReviewPanel {
           <div class="criteria-list">
             ${evalData.points.map((pt, idx) => {
               const statusClass = pt.status === 'hit' ? 'status-hit' : pt.status === 'partial' ? 'status-partial' : 'status-missed';
-              const statusLabel = pt.status === 'hit' ? 'Hit (Full)' : pt.status === 'partial' ? 'Partial' : 'Missed';
               return `
                 <div class="criterion-card ${statusClass}" data-point-id="${pt.pointId}" data-index="${idx}">
                   <div class="criterion-top-row">
@@ -136,12 +164,12 @@ export class ReviewPanel {
                     </div>
                   </div>
 
-                  <div class="criterion-desc">${pt.pointText}</div>
+                  <div class="criterion-desc">${formatMathText(pt.pointText)}</div>
 
                   <!-- Evidence citation from student handwriting -->
                   <div class="criterion-evidence">
                     <span class="evidence-icon">❝</span>
-                    <span class="evidence-quote">${pt.evidenceQuote}</span>
+                    <span class="evidence-quote">${formatMathText(pt.evidenceQuote)}</span>
                   </div>
 
                   <div class="criterion-justification">
@@ -178,7 +206,7 @@ export class ReviewPanel {
             ${this.isEditingTranscript ? `
               <textarea id="textarea-ocr-edit" class="transcript-editor" rows="6">${evalData.transcription}</textarea>
             ` : `
-              <div class="transcript-preview">${evalData.transcription.replace(/\n/g, '<br/>')}</div>
+              <div class="transcript-preview">${formatMathText(evalData.transcription).replace(/\n/g, '<br/>')}</div>
             `}
           </div>
         </div>

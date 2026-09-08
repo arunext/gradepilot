@@ -54,23 +54,37 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { imageBase64, mimeType = 'image/jpeg', rubric } = req.body || {};
+    const { imageBase64, pagesBase64, mimeType = 'image/jpeg', rubric } = req.body || {};
 
-    if (!imageBase64 || !rubric) {
-      return res.status(400).json({ error: 'Missing imageBase64 or rubric data.' });
+    if ((!imageBase64 && (!pagesBase64 || pagesBase64.length === 0)) || !rubric) {
+      return res.status(400).json({ error: 'Missing imageBase64 / pagesBase64 or rubric data.' });
     }
 
-    const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
+    // Build array of clean base64 image strings for multi-page submissions
+    const rawPages = Array.isArray(pagesBase64) && pagesBase64.length > 0 
+      ? pagesBase64 
+      : [imageBase64];
+
+    const cleanPages = rawPages.map(img => 
+      img.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '')
+    );
 
     const prompt = `You are GradeCrow AI, an expert exam evaluation assistant (gradecrow.com).
-Look at this student's handwritten exam paper image.
-1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
-2. Evaluate the student's answer against the following question rubric and criteria.
-3. SCORING & PARTIAL MARKS RULES:
-   - "hit" (Full Marks = 100% of weight): The student provides the correct heading AND adequate explanation/details.
-   - "partial" (Partial/Half Marks = 50% of weight, e.g. 0.5 for 1.0M, 0.75 for 1.5M, 1.0 for 2.0M): Award partial marks whenever the student writes the correct heading, concept title, or key terminology, even if the detailed explanation is brief or absent. DO NOT award 0 marks if the correct heading or concept name is present!
-   - "missed" (0 Marks): The topic or heading is completely absent or incorrect.
-4. Extract the exact quote from the student's text as evidence.
+Look at the attached student handwritten exam paper image(s) (${cleanPages.length} page(s) attached).
+
+1. OCR TRANSCRIPTION & MATH/DIAGRAM HANDLING:
+   - Transcribe all handwritten text, math equations, derivations, and diagram labels across ALL pages.
+   - Convert all mathematical formulas, fractions, integrals, and equations into standard LaTeX notation (e.g. $$E=mc^2$$ or $$\\frac{a}{b}$$).
+   - Evaluate step-by-step mathematical reasoning. Award partial marks if method/formula application is correct even if final numerical calculation has minor arithmetic errors.
+   - For diagrams/visual answers, evaluate structural accuracy and presence of required labels.
+
+2. EVALUATION & SCORING RULES:
+   - "hit" (Full Marks = 100% of weight): Student provides correct heading/concept AND adequate detailed explanation or working.
+   - "partial" (Partial Marks = 50% of weight): Student writes correct heading, concept title, correct formula/method, or key terminology, even if working is incomplete. DO NOT award 0 marks if the correct concept/heading/formula is present!
+   - "missed" (0 Marks): Topic, formula, or concept is completely absent or wrong.
+
+3. EVIDENCE & CITATIONS:
+   - Extract exact quotes/snippets or LaTeX formula snippets as evidence. Mention page number if multi-page (e.g., "[Page 2] ...").
 
 QUESTION: ${rubric.question}
 SUBJECT: ${rubric.subject || 'General'}
@@ -79,24 +93,29 @@ MAXIMUM MARKS: ${rubric.maxMarks}
 RUBRIC KEY POINTS:
 ${(rubric.keyPoints || []).map((kp, idx) => `Point ${idx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
 
-Respond ONLY with a JSON object in this exact schema:
+Respond ONLY with a JSON object matching this schema:
 {
-  "transcription": "The full transcribed text of the student answer...",
+  "transcription": "The full transcribed text and LaTeX math formulas...",
   "suggestedScore": 3.5,
-  "feedbackSummary": "A concise 2-sentence summary of strengths and omissions.",
+  "feedbackSummary": "A concise 2-sentence summary of strengths, math accuracy, and omissions.",
   "points": [
     {
       "pointId": "${rubric.keyPoints?.[0]?.id || 'pt-1'}",
       "status": "partial",
       "awardedMarks": 0.5,
-      "evidenceQuote": "Exact quote or heading from handwritten text",
-      "justification": "Heading mentioned without full description; awarded partial marks."
+      "evidenceQuote": "[Page 1] Exact quote or LaTeX formula",
+      "justification": "Heading/formula mentioned; awarded partial marks."
     }
   ]
 }`;
 
     const modelsToTry = await getServerModels(serverApiKey);
     let lastError = null;
+
+    // Construct multi-part payload for Gemini Vision API
+    const imageParts = cleanPages.map(data => ({
+      inlineData: { mimeType: mimeType || 'image/jpeg', data }
+    }));
 
     for (const model of modelsToTry) {
       try {
@@ -109,7 +128,7 @@ Respond ONLY with a JSON object in this exact schema:
               role: 'user',
               parts: [
                 { text: prompt },
-                { inlineData: { mimeType: mimeType || 'image/jpeg', data: cleanBase64 } }
+                ...imageParts
               ]
             }],
             generationConfig: {

@@ -1,4 +1,4 @@
-// AnatomiGrade AI - Camera, Upload & Paper Viewer Module
+// AnatomiGrade AI - Camera, Upload & Paper Viewer Module (Multi-Page & PDF Queue Ready)
 import { getSampleSvgDataUrl, SAMPLE_PAPERS } from './samples.js';
 
 export class PaperCapture {
@@ -8,6 +8,15 @@ export class PaperCapture {
     
     this.currentImageSrc = null;
     this.currentMeta = null;
+    
+    // Multi-page state
+    this.pages = []; // [{ pageNumber: 1, imageSrc: '...' }, ...]
+    this.activePageIndex = 0;
+
+    // Batch queue state
+    this.batchQueue = []; // [{ meta, pages }, ...]
+    this.activeBatchIndex = 0;
+
     this.stream = null;
     this.isCameraActive = false;
 
@@ -46,14 +55,26 @@ export class PaperCapture {
         <!-- Top Toolbar / Tabs -->
         <div class="capture-tabs">
           <button type="button" class="tab-btn active" data-mode="presets">
-            <span class="tab-icon">📄</span> Sample Papers (4)
+            <span class="tab-icon">📄</span> Sample Papers (${SAMPLE_PAPERS.length})
           </button>
           <button type="button" class="tab-btn" data-mode="upload">
-            <span class="tab-icon">📁</span> Upload Image
+            <span class="tab-icon">📁</span> Upload Image / PDF
           </button>
           <button type="button" class="tab-btn" data-mode="camera">
             <span class="tab-icon">📷</span> Mobile Camera
           </button>
+        </div>
+
+        <!-- Batch Queue Control Bar (Hidden unless multiple student papers loaded) -->
+        <div class="batch-queue-bar hidden" id="batch-queue-bar">
+          <div class="batch-info">
+            <span class="batch-icon">📦</span>
+            <span class="batch-title">Batch Queue: Student <strong id="batch-current-num">1</strong> of <strong id="batch-total-num">1</strong></span>
+          </div>
+          <div class="batch-controls">
+            <button type="button" class="btn btn-xs btn-outline" id="btn-prev-batch" title="Previous Student Paper">◀ Prev Student</button>
+            <button type="button" class="btn btn-xs btn-outline" id="btn-next-batch" title="Next Student Paper">Next Student ▶</button>
+          </div>
         </div>
 
         <!-- Mode 1: Presets Selector Drawer -->
@@ -75,12 +96,14 @@ export class PaperCapture {
         <!-- Mode 2: Upload Zone -->
         <div class="capture-mode-pane hidden" id="pane-upload">
           <div class="dropzone" id="paper-dropzone">
-            <input type="file" id="file-input" accept="image/*" class="file-input-hidden" />
+            <input type="file" id="file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
             <div class="dropzone-content">
               <div class="dropzone-icon">📤</div>
-              <div class="dropzone-title">Drop student's handwritten answer sheet here</div>
-              <div class="dropzone-subtitle">or click to browse from device (JPG, PNG, HEIC)</div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-file">Browse File</button>
+              <div class="dropzone-title">Drop student handwritten answer sheets or PDFs here</div>
+              <div class="dropzone-subtitle">Supports multi-page PDFs, single/multiple JPG, PNG, WebP files</div>
+              <div class="dropzone-actions">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-file">Browse Image / PDF</button>
+              </div>
             </div>
           </div>
         </div>
@@ -118,6 +141,15 @@ export class PaperCapture {
               <span class="viewer-badge" id="paper-badge-roll">MED-2024-001</span>
               <span class="viewer-subtitle" id="paper-student-name">Anya Sharma</span>
             </div>
+
+            <!-- Multi-Page Navigation Pill -->
+            <div class="page-nav-pill" id="page-nav-pill">
+              <button type="button" class="btn-page-step" id="btn-prev-page" title="Previous Page">◀</button>
+              <span class="page-indicator" id="page-indicator">Page 1 of 1</span>
+              <button type="button" class="btn-page-step" id="btn-next-page" title="Next Page">▶</button>
+              <button type="button" class="btn-add-page-chip" id="btn-add-page-trigger" title="Add another page to this student paper">➕ Page</button>
+            </div>
+
             <div class="viewer-toolbar">
               <button type="button" class="btn-tool" id="btn-zoom-out" title="Zoom Out">🔍-</button>
               <button type="button" class="btn-tool" id="btn-zoom-reset" title="Reset Zoom">100%</button>
@@ -151,6 +183,11 @@ export class PaperCapture {
               <img id="active-paper-img" src="" alt="Student Handwritten Answer Paper" draggable="false" />
             </div>
             <div class="viewer-drag-hint">💡 Drag to pan • Pinch / Double-click to zoom</div>
+          </div>
+
+          <!-- Page Thumbnail Bar (Shown when paper has multiple pages) -->
+          <div class="page-thumbnails-bar hidden" id="page-thumbnails-bar">
+            <!-- Rendered dynamically -->
           </div>
         </div>
       </div>
@@ -229,6 +266,26 @@ export class PaperCapture {
         toolbar.classList.toggle('hidden');
       });
     }
+
+    // Multi-Page Navigation Events
+    const btnPrevPage = this.container.querySelector('#btn-prev-page');
+    const btnNextPage = this.container.querySelector('#btn-next-page');
+    const btnAddPage = this.container.querySelector('#btn-add-page-trigger');
+
+    if (btnPrevPage) btnPrevPage.addEventListener('click', () => this.switchPage(this.activePageIndex - 1));
+    if (btnNextPage) btnNextPage.addEventListener('click', () => this.switchPage(this.activePageIndex + 1));
+    if (btnAddPage) {
+      btnAddPage.addEventListener('click', () => {
+        const input = this.container.querySelector('#file-input');
+        if (input) input.click();
+      });
+    }
+
+    // Batch Queue Events
+    const btnPrevBatch = this.container.querySelector('#btn-prev-batch');
+    const btnNextBatch = this.container.querySelector('#btn-next-batch');
+    if (btnPrevBatch) btnPrevBatch.addEventListener('click', () => this.switchBatch(this.activeBatchIndex - 1));
+    if (btnNextBatch) btnNextBatch.addEventListener('click', () => this.switchBatch(this.activeBatchIndex + 1));
 
     // Filter Sliders
     const rangeContrast = this.container.querySelector('#range-contrast');
@@ -363,59 +420,236 @@ export class PaperCapture {
     this.switchMode('presets');
 
     const rollNo = 'ROLL-' + Math.floor(1000 + Math.random() * 9000);
-    this.setPaperImage(dataUrl, {
-      id: 'custom-photo-' + Date.now(),
-      studentName: 'Student (Camera Scan)',
-      rollNo: rollNo,
-      isCustom: true
-    });
-  }
-
-  handleFileSelect(files) {
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file (PNG, JPG, WebP).');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      const rollNo = 'ROLL-' + Math.floor(1000 + Math.random() * 9000);
+    
+    // If paper already active, append as new page
+    if (this.pages && this.pages.length > 0 && confirm('Append captured photo as Page ' + (this.pages.length + 1) + ' to current paper?')) {
+      this.addPageToPaper(dataUrl);
+    } else {
       this.setPaperImage(dataUrl, {
-        id: 'uploaded-' + Date.now(),
-        studentName: file.name.replace(/\.[^/.]+$/, ""),
+        id: 'custom-photo-' + Date.now(),
+        studentName: 'Student (Camera Scan)',
         rollNo: rollNo,
         isCustom: true
       });
-    };
-    reader.readAsDataURL(file);
+    }
+  }
+
+  async handleFileSelect(fileList) {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+
+    // 1. Handle PDF files using pdf.js
+    const pdfFile = files.find(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+    if (pdfFile) {
+      try {
+        const pdfPages = await this.renderPdfFile(pdfFile);
+        if (pdfPages && pdfPages.length > 0) {
+          const rollNo = 'ROLL-' + Math.floor(1000 + Math.random() * 9000);
+          const meta = {
+            id: 'pdf-' + Date.now(),
+            studentName: pdfFile.name.replace(/\.[^/.]+$/, ""),
+            rollNo: rollNo,
+            isCustom: true
+          };
+          this.setMultiPagePaper(pdfPages, meta);
+          return;
+        }
+      } catch (pdfErr) {
+        console.error('PDF rendering failed:', pdfErr);
+        alert('Could not render PDF. Please ensure file is valid or try uploading image files.');
+      }
+    }
+
+    // 2. Handle Image files
+    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) {
+      alert('Please select valid image files (JPG, PNG, WebP) or PDF documents.');
+      return;
+    }
+
+    if (imageFiles.length === 1) {
+      const file = imageFiles[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const rollNo = 'ROLL-' + Math.floor(1000 + Math.random() * 9000);
+        this.setPaperImage(dataUrl, {
+          id: 'uploaded-' + Date.now(),
+          studentName: file.name.replace(/\.[^/.]+$/, ""),
+          rollNo: rollNo,
+          isCustom: true
+        });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Multiple image files dropped -> Load as Batch Queue or Multi-Page
+      const readPromises = imageFiles.map(file => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({ name: file.name, dataUrl: e.target.result });
+        reader.readAsDataURL(file);
+      }));
+
+      const results = await Promise.all(readPromises);
+
+      // Create batch queue of student papers
+      const batchItems = results.map((res, idx) => ({
+        meta: {
+          id: `batch-${Date.now()}-${idx}`,
+          studentName: res.name.replace(/\.[^/.]+$/, ""),
+          rollNo: `ROLL-${1001 + idx}`,
+          isCustom: true
+        },
+        pages: [{ pageNumber: 1, imageSrc: res.dataUrl }]
+      }));
+
+      this.batchQueue = batchItems;
+      this.activeBatchIndex = 0;
+      this.loadBatchItem(0);
+    }
+  }
+
+  /**
+   * PDF.js Client-Side Page Renderer
+   */
+  async renderPdfFile(file) {
+    if (!window.pdfjsLib) {
+      throw new Error('PDF.js library not loaded in document.');
+    }
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pageImages = [];
+
+    for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.5 }); // crisp 1.5x scale
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      pageImages.push(dataUrl);
+    }
+
+    return pageImages;
   }
 
   loadSample(sampleId) {
     const sample = SAMPLE_PAPERS.find(s => s.id === sampleId) || SAMPLE_PAPERS[0];
     const dataUrl = getSampleSvgDataUrl(sample.id);
+    this.batchQueue = [];
+    this.updateBatchQueueBar();
     this.setPaperImage(dataUrl, sample);
   }
 
   setPaperImage(imageSrc, meta) {
-    this.currentImageSrc = imageSrc;
-    this.currentMeta = meta;
+    this.setMultiPagePaper([imageSrc], meta);
+  }
 
+  setMultiPagePaper(imageSrcArray, meta) {
+    this.currentMeta = meta;
+    this.pages = imageSrcArray.map((src, idx) => ({
+      pageNumber: idx + 1,
+      imageSrc: src
+    }));
+    this.activePageIndex = 0;
+    this.currentImageSrc = this.pages[0]?.imageSrc || '';
+
+    this.renderPageUI();
+    this.resetTransform();
+
+    this.onCaptureCallback({
+      imageSrc: this.currentImageSrc,
+      pages: this.pages,
+      meta: this.currentMeta
+    });
+  }
+
+  addPageToPaper(dataUrl) {
+    const newPageNum = this.pages.length + 1;
+    this.pages.push({
+      pageNumber: newPageNum,
+      imageSrc: dataUrl
+    });
+    this.switchPage(this.pages.length - 1);
+  }
+
+  switchPage(index) {
+    if (!this.pages || this.pages.length === 0) return;
+    if (index < 0 || index >= this.pages.length) return;
+
+    this.activePageIndex = index;
+    this.currentImageSrc = this.pages[index].imageSrc;
+    this.renderPageUI();
+  }
+
+  renderPageUI() {
     const img = this.container.querySelector('#active-paper-img');
     const rollBadge = this.container.querySelector('#paper-badge-roll');
     const nameLabel = this.container.querySelector('#paper-student-name');
+    const pageIndicator = this.container.querySelector('#page-indicator');
+    const thumbnailsBar = this.container.querySelector('#page-thumbnails-bar');
 
-    if (img) img.src = imageSrc;
-    if (rollBadge && meta.rollNo) rollBadge.textContent = meta.rollNo;
-    if (nameLabel && meta.studentName) nameLabel.textContent = meta.studentName;
+    if (img && this.currentImageSrc) img.src = this.currentImageSrc;
+    if (rollBadge && this.currentMeta?.rollNo) rollBadge.textContent = this.currentMeta.rollNo;
+    if (nameLabel && this.currentMeta?.studentName) nameLabel.textContent = this.currentMeta.studentName;
 
-    this.resetTransform();
-    this.onCaptureCallback({
-      imageSrc: this.currentImageSrc,
-      meta: this.currentMeta
-    });
+    if (pageIndicator) {
+      pageIndicator.textContent = `Page ${this.activePageIndex + 1} of ${this.pages.length}`;
+    }
+
+    // Thumbnails bar
+    if (thumbnailsBar) {
+      if (this.pages.length > 1) {
+        thumbnailsBar.classList.remove('hidden');
+        thumbnailsBar.innerHTML = this.pages.map((p, idx) => `
+          <button type="button" class="page-thumb ${idx === this.activePageIndex ? 'active' : ''}" data-idx="${idx}">
+            <img src="${p.imageSrc}" alt="Page ${p.pageNumber}" />
+            <span class="thumb-label">P${p.pageNumber}</span>
+          </button>
+        `).join('');
+
+        thumbnailsBar.querySelectorAll('.page-thumb').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx, 10);
+            this.switchPage(idx);
+          });
+        });
+      } else {
+        thumbnailsBar.classList.add('hidden');
+      }
+    }
+  }
+
+  loadBatchItem(index) {
+    if (!this.batchQueue || this.batchQueue.length === 0) return;
+    if (index < 0 || index >= this.batchQueue.length) return;
+
+    this.activeBatchIndex = index;
+    const item = this.batchQueue[index];
+    this.updateBatchQueueBar();
+    this.setMultiPagePaper(item.pages.map(p => p.imageSrc), item.meta);
+  }
+
+  switchBatch(index) {
+    this.loadBatchItem(index);
+  }
+
+  updateBatchQueueBar() {
+    const bar = this.container.querySelector('#batch-queue-bar');
+    if (!bar) return;
+    if (this.batchQueue.length > 1) {
+      bar.classList.remove('hidden');
+      const currentNum = this.container.querySelector('#batch-current-num');
+      const totalNum = this.container.querySelector('#batch-total-num');
+      if (currentNum) currentNum.textContent = this.activeBatchIndex + 1;
+      if (totalNum) totalNum.textContent = this.batchQueue.length;
+    } else {
+      bar.classList.add('hidden');
+    }
   }
 
   adjustZoom(delta) {
@@ -480,6 +714,7 @@ export class PaperCapture {
   getCurrentPaper() {
     return {
       imageSrc: this.currentImageSrc,
+      pages: this.pages,
       meta: this.currentMeta
     };
   }

@@ -173,6 +173,7 @@ class App {
     try {
       const result = await this.aiService.evaluatePaper({
         imageSrc: this.currentPaper.imageSrc,
+        pages: this.currentPaper.pages,
         rawText: this.currentPaper.meta?.rawText,
         rubric: rubric,
         sampleMeta: this.currentPaper.meta
@@ -205,13 +206,13 @@ class App {
     container.innerHTML = `
       <div class="evaluation-loading-card">
         <div class="loading-pulse-ring"></div>
-        <div class="loading-title">AnatomiGrade Vision AI Processing</div>
+        <div class="loading-title">GradeCrow Vision AI Processing</div>
         <div class="loading-steps-list">
           <div class="step-item active">
-            <span class="step-dot"></span> Extracting handwritten medical terminology & relations...
+            <span class="step-dot"></span> Transcribing handwriting across paper page(s)...
           </div>
           <div class="step-item active">
-            <span class="step-dot"></span> Performing strict semantic comparison with Answer Key...
+            <span class="step-dot"></span> Verifying mathematical formulas, LaTeX & diagrams...
           </div>
           <div class="step-item active">
             <span class="step-dot"></span> Calculating granular decimal score breakdown...
@@ -226,7 +227,19 @@ class App {
     this.gradebook.addRecord(record);
     this.showNotification(`✓ Grade logged for ${record.studentName} (${record.rollNo}): ${record.finalScore}/${record.maxMarks}`, 'success');
 
-    // 2. Advance to next sample paper or prepare next student roll
+    // 2. Check if we have an active Batch Queue
+    if (this.capture.batchQueue && this.capture.batchQueue.length > 0) {
+      const nextBatchIdx = this.capture.activeBatchIndex + 1;
+      if (nextBatchIdx < this.capture.batchQueue.length) {
+        this.capture.switchBatch(nextBatchIdx);
+        this.reviewPanel.renderEmptyState();
+        this.updateHeaderStats();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+
+    // 3. Advance to next sample paper or prepare next student roll
     this.currentSampleIndex = (this.currentSampleIndex + 1) % SAMPLE_PAPERS.length;
     const nextSample = SAMPLE_PAPERS[this.currentSampleIndex];
 
@@ -238,13 +251,13 @@ class App {
 
     this.capture.loadSample(nextSample.id);
 
-    // 3. Reset review panel for new evaluation
+    // Reset review panel for new evaluation
     this.reviewPanel.renderEmptyState();
 
-    // 4. Update header counters
+    // Update header counters
     this.updateHeaderStats();
 
-    // 5. Scroll back up to paper viewer if on mobile
+    // Scroll back up to paper viewer if on mobile
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
