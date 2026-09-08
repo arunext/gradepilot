@@ -54,23 +54,39 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { imageBase64, mimeType = 'image/jpeg' } = req.body || {};
+    const { pagesBase64, imageBase64, mimeType = 'image/jpeg' } = req.body || {};
 
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'Missing imageBase64 data.' });
+    const rawPages = (Array.isArray(pagesBase64) && pagesBase64.length > 0)
+      ? pagesBase64
+      : (imageBase64 ? [imageBase64] : []);
+
+    if (rawPages.length === 0) {
+      return res.status(400).json({ error: 'Missing imageBase64 or pagesBase64 data.' });
     }
 
-    const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
+    const imageParts = rawPages.map(pageStr => {
+      let pageMime = mimeType;
+      let clean = pageStr;
+      if (pageStr.startsWith('data:')) {
+        const match = pageStr.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+        if (match) pageMime = match[1];
+        clean = pageStr.replace(/^data:image\/[a-zA-Z+]+;base64,/, '');
+      }
+      clean = clean.replace(/[\r\n\s]+/g, '');
+      return {
+        inlineData: { mimeType: pageMime, data: clean }
+      };
+    });
 
     const prompt = `You are GradeCrow AI, an expert exam question paper scanner (gradecrow.com).
-Look at this handwritten or printed image of an exam question paper, marking scheme, or master rubric written by a teacher.
+Look at the attached handwritten or printed image(s) of an exam question paper (${imageParts.length} page(s)), marking scheme, or master rubric written by a teacher.
 
-The document may contain ONE question or MULTIPLE questions (e.g. Q1, Q2, Q3... up to Q10).
+The document may contain ONE question or MULTIPLE questions (e.g. Q1, Q2, Q3... up to Q20) across all pages.
 
 Extract:
 1. Overall Exam Title or Course Subject.
-2. Total Maximum Marks for the whole paper.
-3. Every individual Question (numbered Q1, Q2, etc.), its allocated max marks, and its granular key answer points/criteria with individual point weights.
+2. Total Maximum Marks for the whole paper across all questions.
+3. Every individual Question (numbered Q1, Q2, etc.) across all pages, its allocated max marks, and its granular key answer points/criteria with individual point weights.
 4. Relevant vocabulary keywords for each point.
 
 Respond ONLY with a valid JSON object matching this exact schema:
@@ -108,7 +124,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
               role: 'user',
               parts: [
                 { text: prompt },
-                { inlineData: { mimeType: mimeType || 'image/jpeg', data: cleanBase64 } }
+                ...imageParts
               ]
             }],
             generationConfig: {

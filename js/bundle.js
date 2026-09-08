@@ -1429,25 +1429,42 @@
       return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
     }
 
-    async parseQuestionSchemeFromImage({ imageSrc, progressCallback = () => {} }) {
-      progressCallback('Optimizing image & connecting to GradeCrow AI...');
-      const compressedSrc = await compressImageForGemini(imageSrc);
+    async parseQuestionSchemeFromImage({ imageSrc, pages = [], pagesBase64 = [], progressCallback = () => {} }) {
+      progressCallback('Optimizing image pages & connecting to GradeCrow AI...');
+
+      let pageList = [];
+      if (Array.isArray(pagesBase64) && pagesBase64.length > 0) {
+        pageList = pagesBase64;
+      } else if (Array.isArray(pages) && pages.length > 0) {
+        pageList = pages.map(p => typeof p === 'string' ? p : (p.imageSrc || p.src || ''));
+      } else if (imageSrc) {
+        pageList = [imageSrc];
+      }
+
+      const compressedPages = await Promise.all(
+        pageList.filter(Boolean).map(src => compressImageForGemini(src))
+      );
+
+      if (compressedPages.length === 0) {
+        throw new Error('No valid question paper image provided.');
+      }
 
       // 1. Try serverless route /api/parse-question
       try {
-        progressCallback('Reading handwritten question & points allocation...');
+        progressCallback(`Reading handwritten question paper (${compressedPages.length} page(s)) & points allocation...`);
         const serverRes = await fetch('/api/parse-question', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            imageBase64: compressedSrc,
+            pagesBase64: compressedPages,
+            imageBase64: compressedPages[0],
             mimeType: 'image/jpeg'
           })
         });
 
         if (serverRes.ok) {
           const parsed = await serverRes.json();
-          if (parsed && parsed.question && Array.isArray(parsed.keyPoints)) {
+          if (parsed && (parsed.questions || parsed.question)) {
             return parsed;
           }
         }
@@ -1459,30 +1476,41 @@
       if (this.hasLiveApiKey()) {
         try {
           const activeKey = this.getApiKey();
-          const cleanBase64 = compressedSrc.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
           const modelsToTry = await this.getWorkingModels(activeKey);
           
+          const imageParts = compressedPages.map(src => {
+            const cleanBase64 = src.replace(/^data:image\/[a-zA-Z+]+;base64,/, '').replace(/[\r\n\s]+/g, '');
+            return { inlineData: { mimeType: 'image/jpeg', data: cleanBase64 } };
+          });
+
           const prompt = `You are GradeCrow AI, an expert exam assistant (gradecrow.com).
-Look at this handwritten or printed image of an exam question, marking scheme, or rubric written by a teacher.
+Look at the attached handwritten or printed image(s) of an exam question paper (${imageParts.length} page(s)), marking scheme, or rubric written by a teacher.
+
+The document may contain ONE question or MULTIPLE questions (e.g. Q1, Q2, Q3... up to Q20) across all pages.
 
 Extract:
-1. The Question Title or Prompt.
-2. The Subject / Course Name (or "General" if not mentioned).
-3. The Maximum Marks / Total Score.
-4. Each Key Point / Expected Answer Criterion along with its allocated marks/weight.
-   If marks for individual points are not explicitly stated, divide the total marks evenly across the points.
-5. Key vocabulary keywords for each point.
+1. Overall Exam Title or Course Subject.
+2. Total Maximum Marks for the whole paper across all questions.
+3. Every individual Question (numbered Q1, Q2, etc.) across all pages, its allocated max marks, and its granular key answer points/criteria with individual point weights.
+4. Relevant vocabulary keywords for each point.
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {
-  "question": "The full question text or title...",
-  "subject": "Subject or Course Name",
-  "maxMarks": 5.0,
-  "keyPoints": [
+  "examTitle": "Title of Exam Paper or Course Name",
+  "subject": "Subject Name",
+  "totalMaxMarks": 20.0,
+  "questions": [
     {
-      "text": "Description of criterion or expected concept",
-      "weight": 1.0,
-      "keywords": ["keyword 1", "keyword 2"]
+      "number": 1,
+      "title": "Q1: Full question 1 text...",
+      "maxMarks": 10.0,
+      "keyPoints": [
+        {
+          "text": "Criterion or expected step description",
+          "weight": 2.5,
+          "keywords": ["keyword1", "keyword2"]
+        }
+      ]
     }
   ]
 }`;
@@ -1497,7 +1525,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
                   role: 'user',
                   parts: [
                     { text: prompt },
-                    { inlineData: { mimeType: 'image/jpeg', data: cleanBase64 } }
+                    ...imageParts
                   ]
                 }],
                 generationConfig: { temperature: 0.1 }
@@ -1510,16 +1538,29 @@ Respond ONLY with a valid JSON object matching this exact schema:
               if (text) {
                 if (text.includes('```')) text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
                 const parsed = JSON.parse(text);
-                return {
-                  question: parsed.question || 'Scanned Question',
-                  subject: parsed.subject || 'General',
-                  maxMarks: typeof parsed.maxMarks === 'number' ? parsed.maxMarks : 5.0,
-                  keyPoints: (parsed.keyPoints || []).map((kp, idx) => ({
-                    id: `pt-${idx + 1}-${Date.now().toString(36)}`,
-                    text: kp.text || `Point ${idx + 1}`,
+                const rawQuestions = Array.isArray(parsed.questions) && parsed.questions.length > 0
+                  ? parsed.questions
+                  : [{ number: 1, title: parsed.question || 'Scanned Question', maxMarks: parsed.maxMarks || 5.0, keyPoints: parsed.keyPoints || [] }];
+
+                const formattedQuestions = rawQuestions.map((q, qIdx) => ({
+                  id: `q-${qIdx + 1}-${Date.now().toString(36)}`,
+                  number: q.number || (qIdx + 1),
+                  title: q.title || `Question ${qIdx + 1}`,
+                  maxMarks: typeof q.maxMarks === 'number' ? q.maxMarks : 5.0,
+                  keyPoints: (q.keyPoints || []).map((kp, kIdx) => ({
+                    id: `kp-${qIdx + 1}-${kIdx + 1}-${Date.now().toString(36)}`,
+                    text: kp.text || `Point ${kIdx + 1}`,
                     weight: typeof kp.weight === 'number' ? Number(kp.weight.toFixed(2)) : 1.0,
                     keywords: Array.isArray(kp.keywords) ? kp.keywords : []
                   }))
+                }));
+
+                return {
+                  examTitle: parsed.examTitle || 'Scanned Exam Paper',
+                  subject: parsed.subject || 'General',
+                  totalMaxMarks: formattedQuestions.reduce((acc, q) => acc + q.maxMarks, 0),
+                  isMultiQuestion: true,
+                  questions: formattedQuestions
                 };
               }
             }
@@ -1531,13 +1572,31 @@ Respond ONLY with a valid JSON object matching this exact schema:
 
       // 3. Fallback dummy structure if offline
       return {
-        question: 'Scanned Question (OCR offline)',
+        examTitle: 'Scanned Exam Paper (OCR offline)',
         subject: 'General Course',
-        maxMarks: 5.0,
-        keyPoints: [
-          { id: `pt-1-${Date.now().toString(36)}`, text: 'Core concept explanation (1.5 marks)', weight: 1.5, keywords: [] },
-          { id: `pt-2-${Date.now().toString(36)}`, text: 'Key terminology & definitions (1.5 marks)', weight: 1.5, keywords: [] },
-          { id: `pt-3-${Date.now().toString(36)}`, text: 'Examples or detailed mechanism (2.0 marks)', weight: 2.0, keywords: [] }
+        totalMaxMarks: 10.0,
+        isMultiQuestion: true,
+        questions: [
+          {
+            id: `q-1-${Date.now().toString(36)}`,
+            number: 1,
+            title: 'Q1: Core anatomical concepts & diagrams',
+            maxMarks: 5.0,
+            keyPoints: [
+              { id: `pt-1-1-${Date.now().toString(36)}`, text: 'Core concept explanation (2.5 marks)', weight: 2.5, keywords: [] },
+              { id: `pt-1-2-${Date.now().toString(36)}`, text: 'Key terminology & definitions (2.5 marks)', weight: 2.5, keywords: [] }
+            ]
+          },
+          {
+            id: `q-2-${Date.now().toString(36)}`,
+            number: 2,
+            title: 'Q2: Clinical correlations & mechanism',
+            maxMarks: 5.0,
+            keyPoints: [
+              { id: `pt-2-1-${Date.now().toString(36)}`, text: 'Clinical presentation and pathology (2.5 marks)', weight: 2.5, keywords: [] },
+              { id: `pt-2-2-${Date.now().toString(36)}`, text: 'Treatment principles & outcomes (2.5 marks)', weight: 2.5, keywords: [] }
+            ]
+          }
         ]
       };
     }
@@ -2897,18 +2956,71 @@ Respond ONLY with a JSON object in this exact schema:
       const schemeDynamicStatus = document.getElementById('scheme-dynamic-status');
       const schemeModalFooter = document.getElementById('scheme-modal-footer');
 
-      this.currentSchemeSrc = null;
+      this.currentSchemePages = [];
+      this.activeSchemePageIndex = 0;
+
+      const schemePageBadge = document.getElementById('scheme-page-badge');
+      const schemeThumbnailsContainer = document.getElementById('scheme-thumbnails-container');
+      const btnAddSchemePage = document.getElementById('btn-add-scheme-page');
+
+      const updateSchemePreviewUI = () => {
+        if (!this.currentSchemePages || this.currentSchemePages.length === 0) {
+          this.currentSchemeSrc = null;
+          if (schemePreviewImg) schemePreviewImg.src = '';
+          schemePreviewArea?.classList.add('hidden');
+          schemePlaceholder?.classList.remove('hidden');
+          if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
+          return;
+        }
+
+        schemePlaceholder?.classList.add('hidden');
+        schemePreviewArea?.classList.remove('hidden');
+        if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = false;
+
+        const count = this.currentSchemePages.length;
+        if (schemePageBadge) {
+          schemePageBadge.textContent = count === 1 ? '📄 1 Page Loaded' : `📄 Question Paper (${count} Pages Loaded)`;
+        }
+
+        if (this.activeSchemePageIndex >= count) this.activeSchemePageIndex = count - 1;
+        if (this.activeSchemePageIndex < 0) this.activeSchemePageIndex = 0;
+
+        this.currentSchemeSrc = this.currentSchemePages[this.activeSchemePageIndex];
+        if (schemePreviewImg) schemePreviewImg.src = this.currentSchemeSrc;
+
+        if (schemeThumbnailsContainer) {
+          if (count <= 1) {
+            schemeThumbnailsContainer.innerHTML = '';
+            schemeThumbnailsContainer.classList.add('hidden');
+          } else {
+            schemeThumbnailsContainer.classList.remove('hidden');
+            schemeThumbnailsContainer.innerHTML = this.currentSchemePages.map((src, idx) => `
+              <div class="scheme-thumb-item ${idx === this.activeSchemePageIndex ? 'active' : ''}" data-index="${idx}" style="cursor: pointer; border: 2px solid ${idx === this.activeSchemePageIndex ? 'var(--color-primary)' : '#e2e8f0'}; border-radius: 6px; overflow: hidden; position: relative; width: 44px; height: 56px; flex-shrink: 0; background: #000;">
+                <img src="${src}" style="width: 100%; height: 100%; object-fit: cover;" />
+                <span style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.65rem; text-align: center; font-weight: 700;">${idx + 1}</span>
+              </div>
+            `).join('');
+
+            schemeThumbnailsContainer.querySelectorAll('.scheme-thumb-item').forEach(el => {
+              el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(el.dataset.index, 10);
+                this.activeSchemePageIndex = idx;
+                updateSchemePreviewUI();
+              });
+            });
+          }
+        }
+      };
 
       const openScanSchemeModal = () => {
-        this.currentSchemeSrc = null;
-        if (schemePreviewImg) schemePreviewImg.src = '';
-        schemePreviewArea?.classList.add('hidden');
-        schemePlaceholder?.classList.remove('hidden');
+        this.currentSchemePages = [];
+        this.activeSchemePageIndex = 0;
+        updateSchemePreviewUI();
         schemeUploadBox?.classList.remove('hidden');
         schemeModalDesc?.classList.remove('hidden');
         schemeModalFooter?.classList.remove('hidden');
         schemeScanningStage?.classList.add('hidden');
-        if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
         modalScanScheme?.classList.remove('hidden');
       };
 
@@ -2916,42 +3028,83 @@ Respond ONLY with a JSON object in this exact schema:
       btnCloseScanScheme?.addEventListener('click', () => modalScanScheme?.classList.add('hidden'));
       btnCancelScanScheme?.addEventListener('click', () => modalScanScheme?.classList.add('hidden'));
 
-      const handleSchemeFileSelected = (file) => {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.currentSchemeSrc = e.target.result;
-          if (schemePreviewImg) schemePreviewImg.src = this.currentSchemeSrc;
-          schemePlaceholder?.classList.add('hidden');
-          schemePreviewArea?.classList.remove('hidden');
-          if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = false;
-        };
-        reader.readAsDataURL(file);
+      let isAppendingPages = false;
+
+      const handleSchemeFilesSelected = async (fileList, append = false) => {
+        if (!fileList || !fileList.length) return;
+        const files = Array.from(fileList);
+        if (!append) {
+          this.currentSchemePages = [];
+        }
+
+        const newPages = [];
+
+        // Check if PDF file uploaded
+        const pdfFile = files.find(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+        if (pdfFile) {
+          try {
+            const pdfPages = await this.renderPdfFile(pdfFile);
+            if (pdfPages && pdfPages.length > 0) {
+              newPages.push(...pdfPages);
+            }
+          } catch (pdfErr) {
+            console.error('Scheme PDF rendering error:', pdfErr);
+            this.showNotification('Error reading PDF file: ' + pdfErr.message, 'error');
+          }
+        } else {
+          // Images
+          const imageFiles = files.filter(f => f.type.startsWith('image/'));
+          for (const imgFile of imageFiles) {
+            const dataUrl = await new Promise(resolve => {
+              const r = new FileReader();
+              r.onload = e => resolve(e.target.result);
+              r.readAsDataURL(imgFile);
+            });
+            if (dataUrl) newPages.push(dataUrl);
+          }
+        }
+
+        if (newPages.length > 0) {
+          this.currentSchemePages.push(...newPages);
+          this.activeSchemePageIndex = append ? (this.currentSchemePages.length - newPages.length) : 0;
+          updateSchemePreviewUI();
+        }
       };
 
       btnTriggerSchemeCamera?.addEventListener('click', (e) => {
         e.stopPropagation();
+        isAppendingPages = false;
         inputSchemeCamera?.click();
       });
       btnTriggerSchemeFile?.addEventListener('click', (e) => {
         e.stopPropagation();
+        isAppendingPages = false;
+        inputSchemeFile?.click();
+      });
+      btnAddSchemePage?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isAppendingPages = true;
         inputSchemeFile?.click();
       });
 
-      inputSchemeCamera?.addEventListener('change', (e) => handleSchemeFileSelected(e.target.files?.[0]));
-      inputSchemeFile?.addEventListener('change', (e) => handleSchemeFileSelected(e.target.files?.[0]));
+      inputSchemeCamera?.addEventListener('change', (e) => {
+        handleSchemeFilesSelected(e.target.files, isAppendingPages);
+        e.target.value = '';
+      });
+      inputSchemeFile?.addEventListener('change', (e) => {
+        handleSchemeFilesSelected(e.target.files, isAppendingPages);
+        e.target.value = '';
+      });
 
       btnRetakeScheme?.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.currentSchemeSrc = null;
-        if (schemePreviewImg) schemePreviewImg.src = '';
-        schemePreviewArea?.classList.add('hidden');
-        schemePlaceholder?.classList.remove('hidden');
-        if (btnSubmitScanScheme) btnSubmitScanScheme.disabled = true;
+        this.currentSchemePages = [];
+        this.activeSchemePageIndex = 0;
+        updateSchemePreviewUI();
       });
 
       btnSubmitScanScheme?.addEventListener('click', async () => {
-        if (!this.currentSchemeSrc) return;
+        if (!this.currentSchemePages || this.currentSchemePages.length === 0) return;
         btnSubmitScanScheme.disabled = true;
 
         // Show Animated Crow Scanning Stage & hide input form
@@ -2960,9 +3113,10 @@ Respond ONLY with a JSON object in this exact schema:
         schemeModalFooter?.classList.add('hidden');
         schemeScanningStage?.classList.remove('hidden');
 
+        const pageCount = this.currentSchemePages.length;
         const scanMessages = [
-          '🦅 Crow-Eye OCR analyzing handwritten question & point scheme...',
-          '⚖️ Reading point allocations (1 mark, 1.5 marks, 2 marks)...',
+          `🦅 Crow-Eye OCR analyzing ${pageCount} page(s) of handwritten question paper...`,
+          '⚖️ Reading marks allocation (1 mark, 1.5 marks, 2 marks) across all questions...',
           '🧠 Extracting key concepts & required vocabulary...',
           '✍️ Formulating editable Question Checklist...'
         ];
@@ -2975,7 +3129,8 @@ Respond ONLY with a JSON object in this exact schema:
 
         try {
           const parsed = await this.aiService.parseQuestionSchemeFromImage({
-            imageSrc: this.currentSchemeSrc,
+            pagesBase64: this.currentSchemePages,
+            imageSrc: this.currentSchemePages[0],
             progressCallback: (msg) => {
               if (schemeDynamicStatus) schemeDynamicStatus.textContent = msg;
             }
@@ -2985,7 +3140,7 @@ Respond ONLY with a JSON object in this exact schema:
           this.rubricManager.loadScannedQuestion(parsed);
           modalScanScheme?.classList.add('hidden');
           this.switchView('rubric');
-          this.showNotification(`✓ Question & marking scheme scanned! You can edit any point below.`, 'success');
+          this.showNotification(`✓ ${pageCount} page(s) of question & marking scheme scanned! You can edit any point below.`, 'success');
         } catch (err) {
           clearInterval(statusInterval);
           console.error(err);

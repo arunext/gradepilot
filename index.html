@@ -214,37 +214,46 @@
       </div>
       <div class="modal-body">
         <p class="text-secondary" id="scheme-modal-desc" style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.75rem;">
-          Snap a photo of your handwritten or printed question paper with its marks allocation (e.g. <em>"1 mark for point x, 2 marks for point y..."</em>). GradeCrow will convert it into an editable question format.
+          Snap photos or upload multi-page PDFs / images of your handwritten or printed question paper with marks allocation (e.g. <em>"Q1: 10 marks, Q2: 5 marks..."</em>). GradeCrow AI will read all pages in one pass.
         </p>
 
         <!-- Capture / Upload Area for Scheme -->
         <div class="scheme-upload-box" id="scheme-upload-box" style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; background: #fafbfc; cursor: pointer; transition: all 0.2s;">
-          <input type="file" id="input-scheme-file" accept="image/*" style="display: none;" />
+          <input type="file" id="input-scheme-file" accept="image/*,.pdf" multiple style="display: none;" />
           <input type="file" id="input-scheme-camera" accept="image/*" capture="environment" style="display: none;" />
           
           <div id="scheme-upload-placeholder">
             <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📝</div>
             <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.25rem;">
-              Take a Photo or Upload Image
+              Take Photos, Upload Images, or PDF
             </div>
             <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 1rem;">
-              Handwritten notes, question papers, or syllabus marking keys
+              Multi-page PDFs, handwritten question papers, or master marking schemes
             </div>
             <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
               <button type="button" class="btn btn-primary btn-sm" id="btn-trigger-scheme-camera">
-                📸 Take Photo
+                📸 Snap Photo
               </button>
               <button type="button" class="btn btn-secondary btn-sm" id="btn-trigger-scheme-file">
-                📁 Upload Image
+                📁 Upload Images / PDF
               </button>
             </div>
           </div>
 
           <div id="scheme-preview-area" class="hidden" style="margin-top: 0.5rem;">
-            <img id="scheme-preview-img" src="" alt="Scheme Preview" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 0.75rem;" />
-            <div>
+            <div id="scheme-page-badge" style="display: inline-block; padding: 4px 12px; background: rgba(0, 169, 145, 0.12); color: var(--color-primary); border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 0.75rem;">
+              📄 1 Page Loaded
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+              <img id="scheme-preview-img" src="" alt="Scheme Preview" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+            </div>
+            <div id="scheme-thumbnails-container" style="display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 8px; justify-content: center; margin-bottom: 0.75rem;"></div>
+            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-add-scheme-page">
+                ➕ Add Page
+              </button>
               <button type="button" class="btn btn-secondary btn-sm" id="btn-retake-scheme">
-                🔄 Change Image
+                🔄 Clear & Reset
               </button>
             </div>
           </div>
