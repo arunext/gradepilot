@@ -1571,6 +1571,12 @@ Messages are encrypted with key so hackers cannot read packets.`,
       this.renderUI();
       this.attachEvents();
       this.resetTransform();
+
+      this.onCaptureCallback({
+        imageSrc: this.currentImageSrc,
+        pages: this.pages,
+        meta: this.currentMeta
+      });
     }
 
     loadBatchItem(index) {
@@ -1715,16 +1721,32 @@ Messages are encrypted with key so hackers cannot read packets.`,
       return ['gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
     }
 
-    async evaluatePaper({ imageSrc, rawText, rubric, sampleMeta, progressCallback = () => {} }) {
+    async evaluatePaper({ imageSrc, pages = [], pagesBase64 = [], rawText, rubric, sampleMeta, progressCallback = () => {} }) {
       const isCustomPhoto = Boolean(sampleMeta?.isCustom || (imageSrc && !imageSrc.startsWith('data:image/svg+xml')));
       let geminiError = null;
+
+      // Extract all page image strings for multi-page answer sheet evaluation
+      let pageList = [];
+      if (Array.isArray(pagesBase64) && pagesBase64.length > 0) {
+        pageList = pagesBase64;
+      } else if (Array.isArray(pages) && pages.length > 0) {
+        pageList = pages.map(p => typeof p === 'string' ? p : (p.imageSrc || p.src || ''));
+      } else if (imageSrc) {
+        pageList = [imageSrc];
+      }
+
+      pageList = pageList.filter(Boolean);
+      const compressedPages = await Promise.all(
+        pageList.map(src => compressImageForGemini(src))
+      );
+
+      const mainImageSrc = compressedPages[0] || imageSrc;
 
       // 1. If Live Custom Gemini API Key is available, perform Multimodal Vision OCR directly on the client
       if (this.hasLiveApiKey()) {
         try {
-          progressCallback('Transcribing handwriting with GradeCrow AI (Custom Key)...');
-          const compressedSrc = await compressImageForGemini(imageSrc);
-          const visionResult = await this.evaluateWithGeminiVision({ imageSrc: compressedSrc, rubric, progressCallback });
+          progressCallback(`Transcribing handwriting across ${compressedPages.length} page(s) with GradeCrow AI...`);
+          const visionResult = await this.evaluateWithGeminiVision({ imageSrc: mainImageSrc, pages: compressedPages, rubric, progressCallback });
           if (visionResult) {
             return {
               ...visionResult,
@@ -1739,13 +1761,13 @@ Messages are encrypted with key so hackers cannot read packets.`,
 
       // 2. Otherwise, attempt serverless endpoint /api/evaluate (using owner's server-side GEMINI_API_KEY)
       try {
-        progressCallback('Connecting to GradeCrow AI Cloud...');
-        const compressedSrc = await compressImageForGemini(imageSrc);
+        progressCallback(`Connecting to GradeCrow AI Cloud (${compressedPages.length} page(s))...`);
         const serverRes = await fetch('/api/evaluate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            imageBase64: compressedSrc,
+            pagesBase64: compressedPages,
+            imageBase64: mainImageSrc,
             mimeType: 'image/jpeg',
             rubric
           })
@@ -1772,7 +1794,7 @@ Messages are encrypted with key so hackers cannot read packets.`,
       // 3. Fallback to Intelligent Local Semantic Concept Engine
       progressCallback('Evaluating student answer sheet & criteria attachments...');
       await new Promise(r => setTimeout(r, 200));
-      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc, isCustomPhoto, geminiError });
+      return this.evaluateIntelligentLocal({ rawText, rubric, sampleMeta, imageSrc: mainImageSrc, isCustomPhoto, geminiError });
     }
 
     async parseQuestionSchemeFromImage({ imageSrc, pages = [], pagesBase64 = [], progressCallback = () => {} }) {
@@ -1947,56 +1969,66 @@ Respond ONLY with a valid JSON object matching this exact schema:
       };
     }
 
-    async evaluateWithGeminiVision({ imageSrc, rubric, progressCallback }) {
+    async evaluateWithGeminiVision({ imageSrc, pages = [], rubric, progressCallback = () => {} }) {
       const activeKey = this.getApiKey();
       if (!activeKey) throw new Error('API key is empty.');
 
-      let base64Data = '';
-      let mimeType = 'image/jpeg';
+      let rawPages = (Array.isArray(pages) && pages.length > 0)
+        ? pages.map(p => typeof p === 'string' ? p : (p.imageSrc || p.src || ''))
+        : [imageSrc];
 
-      const commaIdx = imageSrc.indexOf(',');
-      if (commaIdx >= 0) {
-        const meta = imageSrc.substring(0, commaIdx);
-        base64Data = imageSrc.substring(commaIdx + 1).replace(/[\r\n\s]+/g, '');
-        const m = meta.match(/data:([^;]+)/);
-        if (m && m[1] && !m[1].includes('svg')) {
-          mimeType = m[1];
+      rawPages = rawPages.filter(Boolean);
+      if (rawPages.length === 0) throw new Error('No image data found.');
+
+      const imageParts = rawPages.map(src => {
+        let mimeType = 'image/jpeg';
+        let base64Data = '';
+        const commaIdx = src.indexOf(',');
+        if (commaIdx >= 0) {
+          const meta = src.substring(0, commaIdx);
+          base64Data = src.substring(commaIdx + 1).replace(/[\r\n\s]+/g, '');
+          const m = meta.match(/data:([^;]+)/);
+          if (m && m[1] && !m[1].includes('svg')) {
+            mimeType = m[1];
+          }
+        } else {
+          base64Data = src.replace(/[\r\n\s]+/g, '');
         }
-      } else {
-        base64Data = imageSrc.replace(/[\r\n\s]+/g, '');
-      }
+        return { inlineData: { mimeType, data: base64Data } };
+      });
 
-      if (!base64Data) throw new Error('No image data found.');
+      const keyPointsList = (rubric.keyPoints && rubric.keyPoints.length > 0)
+        ? rubric.keyPoints
+        : (rubric.questions || []).flatMap(q => q.keyPoints || []);
 
       const prompt = `You are GradeCrow AI, an expert exam evaluation assistant (gradecrow.com).
-Look at this student's handwritten exam paper image.
-1. Transcribe the entire handwritten text on the paper accurately into the transcription field.
-2. Evaluate the student's answer against the following question rubric and criteria.
+Look at the attached student handwritten exam paper image(s) (${imageParts.length} page(s) attached).
+1. Transcribe the entire handwritten text on the paper across ALL pages accurately into the transcription field.
+2. Evaluate the student's answer against the following question rubric and criteria across ALL pages.
 3. SCORING & PARTIAL MARKS RULES:
    - "hit" (Full Marks = 100% of weight): The student provides the correct heading AND adequate explanation/details.
-   - "partial" (Partial/Half Marks = 50% of weight, e.g. 0.5 for 1.0M, 0.75 for 1.5M, 1.0 for 2.0M): Award partial marks whenever the student writes the correct heading, concept title, or key terminology, even if the detailed explanation is brief or absent. DO NOT award 0 marks if the correct heading or concept name is present!
-   - "missed" (0 Marks): The topic or heading is completely absent or incorrect.
-4. Extract the exact quote from the student's text as evidence.
+   - "partial" (Partial/Half Marks = 50% of weight): Award partial marks whenever the student writes the correct heading, concept title, or key terminology, even if detailed explanation is brief or absent.
+   - "missed" (0 Marks): Topic or heading is completely absent across all pages.
+4. Extract the exact quote from the student's text as evidence (mention page number if multi-page e.g. "[Page 2] ...").
 
-QUESTION: ${rubric.question}
-SUBJECT: ${rubric.subject || 'General'}
+QUESTION / SUBJECT: ${rubric.question} (${rubric.subject || 'General'})
 MAXIMUM MARKS: ${rubric.maxMarks}
 
 RUBRIC KEY POINTS:
-${rubric.keyPoints.map((kp, idx) => `Point ${idx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
+${keyPointsList.map((kp, idx) => `Point ${idx + 1} [ID: ${kp.id}] [Weight: ${kp.weight}]: ${kp.text}`).join('\n')}
 
 Respond ONLY with a JSON object in this exact schema:
 {
-  "transcription": "The full transcribed text of the student answer...",
+  "transcription": "The full transcribed text of the student answer across all pages...",
   "suggestedScore": 3.5,
-  "feedbackSummary": "A concise 2-sentence summary of strengths and omissions.",
+  "feedbackSummary": "A concise 2-sentence summary of strengths and omissions across pages.",
   "points": [
     {
-      "pointId": "${rubric.keyPoints[0]?.id || 'pt-1'}",
+      "pointId": "${keyPointsList[0]?.id || 'pt-1'}",
       "status": "partial",
       "awardedMarks": 0.5,
-      "evidenceQuote": "Exact quote or heading from handwritten text",
-      "justification": "Heading mentioned without full description; awarded partial marks."
+      "evidenceQuote": "[Page 1] Exact quote or formula",
+      "justification": "Heading mentioned on page 1; awarded partial marks."
     }
   ]
 }`;
@@ -2015,7 +2047,7 @@ Respond ONLY with a JSON object in this exact schema:
                 role: 'user',
                 parts: [
                   { text: prompt },
-                  { inlineData: { mimeType: mimeType, data: base64Data } }
+                  ...imageParts
                 ]
               }],
               generationConfig: {

@@ -128,10 +128,19 @@ Respond ONLY with a JSON object matching this schema:
     const modelsToTry = await getServerModels(serverApiKey);
     let lastError = null;
 
-    // Construct multi-part payload for Gemini Vision API
-    const imageParts = cleanPages.map(data => ({
-      inlineData: { mimeType: mimeType || 'image/jpeg', data }
-    }));
+    const imageParts = rawPages.map(pageStr => {
+      let pageMime = mimeType || 'image/jpeg';
+      let clean = pageStr;
+      if (pageStr.startsWith('data:')) {
+        const match = pageStr.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+        if (match) pageMime = match[1];
+        clean = pageStr.replace(/^data:image\/[a-zA-Z+]+;base64,/, '');
+      }
+      clean = clean.replace(/[\r\n\s]+/g, '');
+      return {
+        inlineData: { mimeType: pageMime, data: clean }
+      };
+    });
 
     for (const model of modelsToTry) {
       try {
