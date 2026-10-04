@@ -179,7 +179,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
           };
         });
 
-        const totalMaxMarks = formattedQuestions.reduce((acc, q) => acc + q.maxMarks, 0);
+        const totalMaxMarks = (formattedQuestions || []).reduce((acc, q) => acc + (q?.maxMarks || 0), 0);
 
         return res.status(200).json({
           examTitle: parsed.examTitle || 'Scanned Exam Paper',

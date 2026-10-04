@@ -206,12 +206,12 @@ Respond ONLY with a JSON object matching this schema:
           };
         });
 
-        const calculatedTotal = pointsList.reduce((sum, p) => sum + p.awardedMarks, 0);
+        const calculatedTotal = (pointsList || []).reduce((sum, p) => sum + (p?.awardedMarks || 0), 0);
 
         // Group evaluated points by question for clean UI rendering
         const questionEvaluations = questionsList.map(q => {
           const qPoints = pointsList.filter(p => p.questionId === q.id || p.questionNumber === q.number);
-          const qScore = qPoints.reduce((sum, p) => sum + p.awardedMarks, 0);
+          const qScore = (qPoints || []).reduce((sum, p) => sum + (p?.awardedMarks || 0), 0);
           return {
             questionId: q.id,
             number: q.number,

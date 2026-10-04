@@ -96,6 +96,66 @@ export const PRESET_RUBRICS = [
     ]
   },
   {
+    id: 'preset-multi-cs-exam',
+    subject: 'Computer Science & AI Master Paper',
+    question: 'Comprehensive CS & Artificial Intelligence Examination (5 Questions)',
+    examTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+    maxMarks: 25.0,
+    isMultiQuestion: true,
+    questions: [
+      {
+        id: 'cs-q1',
+        number: 1,
+        title: 'Q1: Explain the mathematical concept of Backpropagation in Deep Neural Networks and state the chain rule formula.',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'csq1-1', text: 'Forward pass computes loss L; backward pass calculates partial derivatives dL/dw propagating error back.', weight: 2.5, keywords: ['forward pass', 'loss', 'backward pass', 'gradient', 'partial derivative', 'loss function'] },
+          { id: 'csq1-2', text: 'Chain rule formula: dL/dw = (dL/da)*(da/dz)*(dz/dw) and gradient descent weight update w = w - eta*(dL/dw).', weight: 2.5, keywords: ['chain rule', 'gradient descent', 'learning rate', 'eta', 'weight update', 'delta'] }
+        ]
+      },
+      {
+        id: 'cs-q2',
+        number: 2,
+        title: 'Q2: Analyze the average and worst-case time and space complexity of QuickSort vs MergeSort.',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'csq2-1', text: 'MergeSort: Average & Worst Time O(N log N), Space O(N) for merge buffer arrays.', weight: 2.5, keywords: ['mergesort', 'n log n', 'o(n log n)', 'space o(n)', 'divide and conquer'] },
+          { id: 'csq2-2', text: 'QuickSort: Average Time O(N log N), Worst Time O(N^2) for poor pivot selection, Space O(log N) recursion stack.', weight: 2.5, keywords: ['quicksort', 'pivot', 'o(n^2)', 'worst case', 'recursion stack'] }
+        ]
+      },
+      {
+        id: 'cs-q3',
+        number: 3,
+        title: 'Q3: Define the ACID properties in Relational Database Management Systems (RDBMS).',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'csq3-1', text: 'Atomicity & Consistency: All-or-nothing transaction execution; maintains valid state and foreign key constraints.', weight: 2.5, keywords: ['atomicity', 'all or nothing', 'consistency', 'valid state', 'rollback', 'constraints'] },
+          { id: 'csq3-2', text: 'Isolation & Durability: Concurrent transactions execute independently (locking/MVCC); committed data persists in non-volatile WAL.', weight: 2.5, keywords: ['isolation', 'durability', 'concurrency', 'locks', 'committed', 'wal', 'non-volatile'] }
+        ]
+      },
+      {
+        id: 'cs-q4',
+        number: 4,
+        title: 'Q4: Explain the four core Object-Oriented Programming (OOP) principles with clear definitions.',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'csq4-1', text: 'Encapsulation & Abstraction: Hiding internal state behind private access modifiers and exposing interfaces.', weight: 2.5, keywords: ['encapsulation', 'abstraction', 'private', 'interface', 'hiding', 'getters'] },
+          { id: 'csq4-2', text: 'Inheritance & Polymorphism: Subclassing parent classes; method overriding/overloading allowing dynamic dispatch.', weight: 2.5, keywords: ['inheritance', 'polymorphism', 'overriding', 'overloading', 'subclass', 'parent class'] }
+        ]
+      },
+      {
+        id: 'cs-q5',
+        number: 5,
+        title: 'Q5: Describe RSA Public Key Cryptography and explain how asymmetric key pairs enable secure communication.',
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'csq5-1', text: 'Key Generation: Prime selection p, q; modulus n = p*q, totient phi(n); public key (e,n), private key (d,n).', weight: 2.5, keywords: ['rsa', 'prime', 'public key', 'private key', 'totient', 'modulo', 'asymmetric'] },
+          { id: 'csq5-2', text: 'Encryption & Decryption: Ciphertext c = m^e mod n and plaintext recovery m = c^d mod n.', weight: 2.5, keywords: ['ciphertext', 'plaintext', 'encryption', 'decryption', 'm^e mod n', 'c^d mod n'] }
+        ]
+      }
+    ]
+  },
+  {
     id: 'preset-brachial-plexus',
     subject: 'Human Anatomy - Single Question',
     question: 'Describe the formation, relations, branches, and applied anatomy of the Brachial Plexus.',
@@ -131,7 +191,7 @@ export function getNormalizedRubricQuestions(rubric) {
 export class RubricManager {
   constructor() {
     this.customRubrics = this.loadCustomRubrics();
-    this.currentRubric = PRESET_RUBRICS[0]; // Default to Multi-Question Medical Exam
+    this.currentRubric = PRESET_RUBRICS[0]; // Default to first preset
     this.listeners = [];
   }
 
@@ -170,7 +230,27 @@ export class RubricManager {
   }
 
   getRubric() {
+    if (this.currentRubric) {
+      if ((!this.currentRubric.keyPoints || this.currentRubric.keyPoints.length === 0) && Array.isArray(this.currentRubric.questions)) {
+        this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+      }
+    }
     return this.currentRubric;
+  }
+
+  getTotalPointsWeight() {
+    const rubric = this.getRubric();
+    if (!rubric) return 0;
+    const points = (rubric.keyPoints && rubric.keyPoints.length > 0)
+      ? rubric.keyPoints
+      : (rubric.questions || []).flatMap(q => q.keyPoints || []);
+    return points.reduce((sum, kp) => sum + (parseFloat(kp.weight) || 0), 0);
+  }
+
+  isWeightBalanced() {
+    const total = this.getTotalPointsWeight();
+    const max = this.getRubric()?.maxMarks || 25.0;
+    return Math.abs(total - max) < 0.05;
   }
 
   setPreset(presetId) {
@@ -178,6 +258,9 @@ export class RubricManager {
     const found = all.find(p => p.id === presetId);
     if (found) {
       this.currentRubric = JSON.parse(JSON.stringify(found));
+      if (!this.currentRubric.keyPoints && Array.isArray(this.currentRubric.questions)) {
+        this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+      }
       this.notify();
       return true;
     }
@@ -227,6 +310,8 @@ export class RubricManager {
         keyPoints: parsedData.keyPoints || []
       }];
     }
+
+    this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
 
     this.saveCurrentAsPreset();
     this.notify();

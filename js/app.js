@@ -136,6 +136,9 @@ class App {
   }
 
   onPaperChanged() {
+    if (this.currentPaper?.meta?.questionId) {
+      this.rubricManager.setPreset(this.currentPaper.meta.questionId);
+    }
     this.updateActiveRubricBanner();
   }
 

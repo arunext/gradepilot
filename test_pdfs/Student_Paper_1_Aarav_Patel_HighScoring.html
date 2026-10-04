@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Answer Sheet - Aarav Patel (CS-2026-001)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;600;700&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Caveat', 'Comic Sans MS', cursive, sans-serif;
+      background: #fffdfa;
+      color: #1d4ed8;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .paper-page {
+      width: 210mm;
+      min-height: 297mm;
+      box-sizing: border-box;
+      position: relative;
+      padding: 45mm 15mm 20mm 30mm; /* Extra left margin for red vertical line */
+      background: #fffdfa;
+    }
+
+    /* Red vertical left margin line */
+    .margin-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 25mm;
+      width: 1.5px;
+      background: #f87171;
+    }
+
+    .margin-line-secondary {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 26.5mm;
+      width: 0.8px;
+      background: rgba(248, 113, 113, 0.4);
+    }
+
+    /* Ruled notebook horizontal lines */
+    .ruled-bg {
+      position: absolute;
+      top: 40mm;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: repeating-linear-gradient(#fffdfa, #fffdfa 9.5mm, #cbd5e1 9.5mm, #cbd5e1 9.8mm);
+      z-index: 1;
+    }
+
+    .paper-header {
+      position: absolute;
+      top: 10mm;
+      left: 30mm;
+      right: 15mm;
+      z-index: 10;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .school-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+
+    .header-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-top: 4px;
+      color: #475569;
+    }
+
+    .student-badge {
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .expected-badge {
+      font-weight: 700;
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .content-body {
+      position: relative;
+      z-index: 5;
+      margin-top: 5mm;
+      font-size: 20px;
+      line-height: 9.8mm; /* Exactly match ruled lines spacing */
+      letter-spacing: 0.3px;
+      transform: rotate(-0.4deg);
+    }
+
+    .line-item {
+      min-height: 9.8mm;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .line-header {
+      font-weight: 700;
+      font-size: 22px;
+      text-decoration: underline;
+      margin-top: 4mm;
+    }
+
+    .line-indent {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="margin-line"></div>
+  <div class="margin-line-secondary"></div>
+  <div class="ruled-bg"></div>
+
+  <div class="paper-page">
+    
+    <div class="paper-header">
+      <div class="school-title">FACULTY OF COMPUTER SCIENCE & AI - INTERNAL ASSESSMENT</div>
+      <div class="header-details">
+        <div>
+          Student: <strong class="student-badge">Aarav Patel</strong> | Roll No: <strong class="student-badge">CS-2026-001</strong><br>
+          Subject: <strong>CS & AI Master Paper (CS-501)</strong>
+        </div>
+        <div style="text-align: right;">
+          Date: 04-Oct-2026<br>
+          <span class="expected-badge">Target Score: 24.25 / 25.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="line-item line-header ">Ans Sheet: CS &amp; AI Master Exam - Aarav Patel (Roll: CS-2026-001)</div><div class="line-item  "></div><div class="line-item line-header ">Q1: Backpropagation in Deep Neural Networks</div><div class="line-item  ">Forward pass computes network activations z = w*x + b and prediction y_hat. Loss L is computed against target y using loss function.</div><div class="line-item  ">Backward pass computes partial derivatives of loss wrt weights using chain rule:</div><div class="line-item  ">dL/dw = (dL/da) * (da/dz) * (dz/dw)</div><div class="line-item  ">Where dz/dw = x. Gradient descent updates weights: w = w - eta * (dL/dw).</div><div class="line-item  ">Error gradients propagate backward layer by layer from output to input.</div><div class="line-item  "></div><div class="line-item line-header ">Q2: Time &amp; Space Complexity: QuickSort vs MergeSort</div><div class="line-item  line-indent">1. MergeSort:</div><div class="line-item  line-indent">- Divide &amp; Conquer algorithm splitting array into sub-buffers.</div><div class="line-item  line-indent">- Average Time: O(N log N)</div><div class="line-item  line-indent">- Worst Time: O(N log N) (guaranteed balanced splitting)</div><div class="line-item  line-indent">- Space: O(N) auxiliary array space for merging sub-arrays.</div><div class="line-item  line-indent">2. QuickSort:</div><div class="line-item  line-indent">- Partitioning algorithm around chosen pivot element.</div><div class="line-item  line-indent">- Average Time: O(N log N)</div><div class="line-item  line-indent">- Worst Time: O(N^2) occurs when array is already sorted and worst pivot (min/max) is selected.</div><div class="line-item  line-indent">- Space: O(log N) for call stack recursion (in-place partitioning).</div><div class="line-item  "></div><div class="line-item line-header ">Q3: ACID Properties in Relational Databases (RDBMS)</div><div class="line-item  line-indent">- Atomicity: Transactions are &#039;all or nothing&#039;. If any operation fails, entire transaction rolls back to initial state.</div><div class="line-item  line-indent">- Consistency: Database transitions from one valid state to another, maintaining all schema constraints and foreign keys.</div><div class="line-item  line-indent">- Isolation: Concurrent transactions execute without inter-thread interference (achieved via locking or MVCC).</div><div class="line-item  line-indent">- Durability: Once committed, data changes are written to non-volatile storage (WAL log) and persist across system crashes.</div><div class="line-item  "></div><div class="line-item line-header ">Q4: Core Object-Oriented Programming (OOP) Principles</div><div class="line-item  line-indent">1. Encapsulation: Bundling data (private fields) and methods together, exposing access via public getters/setters.</div><div class="line-item  line-indent">2. Abstraction: Hiding complex implementation details using abstract classes and interfaces.</div><div class="line-item  line-indent">3. Inheritance: Reusing code where child subclass derives attributes and behaviors from a parent base class.</div><div class="line-item  line-indent">4. Polymorphism: Ability of objects to take multiple forms through method overriding (runtime) and method overloading (compile-time).</div><div class="line-item  "></div><div class="line-item line-header ">Q5: RSA Public Key Cryptography &amp; Asymmetric Security</div><div class="line-item  ">Select primes p, q. Compute modulus n = p*q and totient phi(n) = (p-1)*(q-1).</div><div class="line-item  ">Choose public key exponent e coprime to phi(n). Compute private key d such that e*d = 1 mod phi(n).</div><div class="line-item  line-indent">- Encryption: Ciphertext c = m^e mod n using Public Key (e, n).</div><div class="line-item  line-indent">- Decryption: Plaintext message m = c^d mod n using Private Key (d, n).</div><div class="line-item  ">Asymmetric mechanics allow sender to encrypt with public key without knowing private secret.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

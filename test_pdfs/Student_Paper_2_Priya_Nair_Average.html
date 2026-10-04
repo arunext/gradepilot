@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Answer Sheet - Priya Nair (CS-2026-002)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;600;700&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Caveat', 'Comic Sans MS', cursive, sans-serif;
+      background: #fffdfa;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .paper-page {
+      width: 210mm;
+      min-height: 297mm;
+      box-sizing: border-box;
+      position: relative;
+      padding: 45mm 15mm 20mm 30mm; /* Extra left margin for red vertical line */
+      background: #fffdfa;
+    }
+
+    /* Red vertical left margin line */
+    .margin-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 25mm;
+      width: 1.5px;
+      background: #f87171;
+    }
+
+    .margin-line-secondary {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 26.5mm;
+      width: 0.8px;
+      background: rgba(248, 113, 113, 0.4);
+    }
+
+    /* Ruled notebook horizontal lines */
+    .ruled-bg {
+      position: absolute;
+      top: 40mm;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: repeating-linear-gradient(#fffdfa, #fffdfa 9.5mm, #cbd5e1 9.5mm, #cbd5e1 9.8mm);
+      z-index: 1;
+    }
+
+    .paper-header {
+      position: absolute;
+      top: 10mm;
+      left: 30mm;
+      right: 15mm;
+      z-index: 10;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .school-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+
+    .header-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-top: 4px;
+      color: #475569;
+    }
+
+    .student-badge {
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .expected-badge {
+      font-weight: 700;
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .content-body {
+      position: relative;
+      z-index: 5;
+      margin-top: 5mm;
+      font-size: 20px;
+      line-height: 9.8mm; /* Exactly match ruled lines spacing */
+      letter-spacing: 0.3px;
+      transform: rotate(-0.6deg);
+    }
+
+    .line-item {
+      min-height: 9.8mm;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .line-header {
+      font-weight: 700;
+      font-size: 22px;
+      text-decoration: underline;
+      margin-top: 4mm;
+    }
+
+    .line-indent {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="margin-line"></div>
+  <div class="margin-line-secondary"></div>
+  <div class="ruled-bg"></div>
+
+  <div class="paper-page">
+    
+    <div class="paper-header">
+      <div class="school-title">FACULTY OF COMPUTER SCIENCE & AI - INTERNAL ASSESSMENT</div>
+      <div class="header-details">
+        <div>
+          Student: <strong class="student-badge">Priya Nair</strong> | Roll No: <strong class="student-badge">CS-2026-002</strong><br>
+          Subject: <strong>CS & AI Master Paper (CS-501)</strong>
+        </div>
+        <div style="text-align: right;">
+          Date: 04-Oct-2026<br>
+          <span class="expected-badge">Target Score: 16.50 / 25.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="line-item line-header ">Ans Sheet: CS &amp; AI Master Exam - Priya Nair (Roll: CS-2026-002)</div><div class="line-item  "></div><div class="line-item line-header ">Q1: Backpropagation</div><div class="line-item  ">Backpropagation is used in deep learning to train neural networks.</div><div class="line-item  ">It consists of forward pass to compute output and loss function, and backward pass to update weights.</div><div class="line-item  ">Weights are adjusted using gradient descent method w = w - eta * gradient.</div><div class="line-item  ">It calculates how much each node contributed to final error.</div><div class="line-item  "></div><div class="line-item line-header ">Q2: QuickSort vs MergeSort Complexity</div><div class="line-item  ">MergeSort divides array into two halves, sorts them, and merges back.</div><div class="line-item  ">Time complexity is O(N log N) in all cases (best, average, worst). Space complexity is O(N).</div><div class="line-item  ">QuickSort picks a pivot element and partitions array around it.</div><div class="line-item  ">Average time complexity is O(N log N). Space complexity is O(1) in-place.</div><div class="line-item  ">Worst case time is O(N^2) when array is sorted.</div><div class="line-item  "></div><div class="line-item line-header ">Q3: Database ACID Properties</div><div class="line-item  ">ACID stands for:</div><div class="line-item  line-indent">- Atomicity: All operations in transaction succeed or fail together.</div><div class="line-item  line-indent">- Consistency: Data remains consistent before and after transaction.</div><div class="line-item  line-indent">- Isolation: Multiple users reading/writing database do not clash.</div><div class="line-item  line-indent">- Durability: Saved data is retained permanently on hard drive.</div><div class="line-item  "></div><div class="line-item line-header ">Q4: OOP Principles</div><div class="line-item  line-indent">1. Encapsulation: Keeping variables private in a class so outside code cannot modify directly.</div><div class="line-item  line-indent">2. Inheritance: Subclass inherits properties from parent class using extends keyword.</div><div class="line-item  line-indent">3. Polymorphism: Same function name behaving differently depending on arguments or class type.</div><div class="line-item  line-indent">4. Abstraction: Hiding background details from user.</div><div class="line-item  "></div><div class="line-item line-header ">Q5: RSA Public Key Cryptography</div><div class="line-item  ">RSA uses asymmetric cryptography with a public key for encryption and a private key for decryption.</div><div class="line-item  ">Public key is shared with everyone, while private key is kept secret by owner.</div><div class="line-item  ">Sender encrypts message using recipient&#039;s public key. Only holder of private key can decrypt ciphertext.</div><div class="line-item  ">Uses prime numbers p and q to create large modulus n.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Answer Sheet - Rohan Gupta (CS-2026-003)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;600;700&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Caveat', 'Comic Sans MS', cursive, sans-serif;
+      background: #fffdfa;
+      color: #334155;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .paper-page {
+      width: 210mm;
+      min-height: 297mm;
+      box-sizing: border-box;
+      position: relative;
+      padding: 45mm 15mm 20mm 30mm; /* Extra left margin for red vertical line */
+      background: #fffdfa;
+    }
+
+    /* Red vertical left margin line */
+    .margin-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 25mm;
+      width: 1.5px;
+      background: #f87171;
+    }
+
+    .margin-line-secondary {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 26.5mm;
+      width: 0.8px;
+      background: rgba(248, 113, 113, 0.4);
+    }
+
+    /* Ruled notebook horizontal lines */
+    .ruled-bg {
+      position: absolute;
+      top: 40mm;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: repeating-linear-gradient(#fffdfa, #fffdfa 9.5mm, #cbd5e1 9.5mm, #cbd5e1 9.8mm);
+      z-index: 1;
+    }
+
+    .paper-header {
+      position: absolute;
+      top: 10mm;
+      left: 30mm;
+      right: 15mm;
+      z-index: 10;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .school-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+
+    .header-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-top: 4px;
+      color: #475569;
+    }
+
+    .student-badge {
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .expected-badge {
+      font-weight: 700;
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .content-body {
+      position: relative;
+      z-index: 5;
+      margin-top: 5mm;
+      font-size: 20px;
+      line-height: 9.8mm; /* Exactly match ruled lines spacing */
+      letter-spacing: 0.3px;
+      transform: rotate(-1deg);
+    }
+
+    .line-item {
+      min-height: 9.8mm;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .line-header {
+      font-weight: 700;
+      font-size: 22px;
+      text-decoration: underline;
+      margin-top: 4mm;
+    }
+
+    .line-indent {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="margin-line"></div>
+  <div class="margin-line-secondary"></div>
+  <div class="ruled-bg"></div>
+
+  <div class="paper-page">
+    
+    <div class="paper-header">
+      <div class="school-title">FACULTY OF COMPUTER SCIENCE & AI - INTERNAL ASSESSMENT</div>
+      <div class="header-details">
+        <div>
+          Student: <strong class="student-badge">Rohan Gupta</strong> | Roll No: <strong class="student-badge">CS-2026-003</strong><br>
+          Subject: <strong>CS & AI Master Paper (CS-501)</strong>
+        </div>
+        <div style="text-align: right;">
+          Date: 04-Oct-2026<br>
+          <span class="expected-badge">Target Score: 8.75 / 25.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="line-item line-header ">Ans Sheet: CS &amp; AI Master Exam - Rohan Gupta (Roll: CS-2026-003)</div><div class="line-item  "></div><div class="line-item line-header ">Q1: Backpropagation in Neural Nets</div><div class="line-item  ">Backpropagation adjusts neural net weights using loss function.</div><div class="line-item  ">It uses back propagation of errors from output layer back to input nodes.</div><div class="line-item  ">If loss is high, weights are changed.</div><div class="line-item  "></div><div class="line-item line-header ">Q2: QuickSort and MergeSort</div><div class="line-item  ">QuickSort is fast sorting algorithm with time complexity O(N).</div><div class="line-item  ">MergeSort splits array into halves and has time complexity O(N log N).</div><div class="line-item  ">MergeSort uses extra memory space. QuickSort is faster for array sorting.</div><div class="line-item  "></div><div class="line-item line-header ">Q3: ACID Properties</div><div class="line-item  ">A = Atomicity</div><div class="line-item  ">C = Consistency</div><div class="line-item  ">I = Isolation</div><div class="line-item  ">D = Durability</div><div class="line-item  ">Transactions in SQL database must be ACID compliant so database does not crash during power loss.</div><div class="line-item  "></div><div class="line-item line-header ">Q4: OOP Concepts</div><div class="line-item  ">Classes and Objects are main OOP concepts.</div><div class="line-item  ">Inheritance allows class to inherit methods.</div><div class="line-item  ">Encapsulation wraps variables in class.</div><div class="line-item  "></div><div class="line-item line-header ">Q5: RSA Cryptography</div><div class="line-item  ">RSA is security algorithm used in HTTPS and internet passwords.</div><div class="line-item  ">It generates public and private key pairs.</div><div class="line-item  ">Messages are encrypted with key so hackers cannot read packets.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

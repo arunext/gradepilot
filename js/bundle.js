@@ -404,6 +404,142 @@
   a) Isovolumetric Relaxation: Semilunar valves close producing S2 sound.
   b) Rapid Ventricular Filling: AV valves open.`,
       inkColor: '#0369a1'
+    },
+    {
+      id: 'sample-6',
+      studentName: 'Aarav Patel',
+      rollNo: 'CS-2026-001',
+      subject: 'Computer Science & AI Master Paper',
+      questionId: 'preset-multi-cs-exam',
+      questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+      maxScore: 25.0,
+      expectedScore: 24.25,
+      description: 'High-Scoring Paper (24.25/25): Comprehensive derivations, exact complexity analysis, and formal cryptography equations.',
+      rawText: `Ans Sheet: CS & AI Master Exam - Aarav Patel (Roll: CS-2026-001)
+
+Q1: Backpropagation in Deep Neural Networks
+Forward pass computes network activations z = w*x + b and prediction y_hat. Loss L is computed against target y using loss function.
+Backward pass computes partial derivatives of loss wrt weights using chain rule:
+dL/dw = (dL/da) * (da/dz) * (dz/dw)
+Where dz/dw = x. Gradient descent updates weights: w = w - eta * (dL/dw).
+Error gradients propagate backward layer by layer from output to input.
+
+Q2: Time & Space Complexity: QuickSort vs MergeSort
+1. MergeSort:
+- Divide & Conquer algorithm splitting array into sub-buffers.
+- Average Time: O(N log N)
+- Worst Time: O(N log N) (guaranteed balanced splitting)
+- Space: O(N) auxiliary array space for merging sub-arrays.
+2. QuickSort:
+- Partitioning algorithm around chosen pivot element.
+- Average Time: O(N log N)
+- Worst Time: O(N^2) occurs when array is already sorted and worst pivot (min/max) is selected.
+- Space: O(log N) for call stack recursion (in-place partitioning).
+
+Q3: ACID Properties in Relational Databases (RDBMS)
+- Atomicity: Transactions are 'all or nothing'. If any operation fails, entire transaction rolls back to initial state.
+- Consistency: Database transitions from one valid state to another, maintaining all schema constraints and foreign keys.
+- Isolation: Concurrent transactions execute without inter-thread interference (achieved via locking or MVCC).
+- Durability: Once committed, data changes are written to non-volatile storage (WAL log) and persist across system crashes.
+
+Q4: Core Object-Oriented Programming (OOP) Principles
+1. Encapsulation: Bundling data (private fields) and methods together, exposing access via public getters/setters.
+2. Abstraction: Hiding complex implementation details using abstract classes and interfaces.
+3. Inheritance: Reusing code where child subclass derives attributes and behaviors from a parent base class.
+4. Polymorphism: Ability of objects to take multiple forms through method overriding (runtime) and method overloading (compile-time).
+
+Q5: RSA Public Key Cryptography & Asymmetric Security
+Select primes p, q. Compute modulus n = p*q and totient phi(n) = (p-1)*(q-1).
+Choose public key exponent e coprime to phi(n). Compute private key d such that e*d = 1 mod phi(n).
+- Encryption: Ciphertext c = m^e mod n using Public Key (e, n).
+- Decryption: Plaintext message m = c^d mod n using Private Key (d, n).
+Asymmetric mechanics allow sender to encrypt with public key without knowing private secret.`,
+      inkColor: '#1d4ed8'
+    },
+    {
+      id: 'sample-7',
+      studentName: 'Priya Nair',
+      rollNo: 'CS-2026-002',
+      subject: 'Computer Science & AI Master Paper',
+      questionId: 'preset-multi-cs-exam',
+      questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+      maxScore: 25.0,
+      expectedScore: 16.50,
+      description: 'Average Paper (16.50/25): Good core concepts, but omits chain rule breakdown and RSA modular exponentiation formulas.',
+      rawText: `Ans Sheet: CS & AI Master Exam - Priya Nair (Roll: CS-2026-002)
+
+Q1: Backpropagation
+Backpropagation is used in deep learning to train neural networks.
+It consists of forward pass to compute output and loss function, and backward pass to update weights.
+Weights are adjusted using gradient descent method w = w - eta * gradient.
+It calculates how much each node contributed to final error.
+
+Q2: QuickSort vs MergeSort Complexity
+MergeSort divides array into two halves, sorts them, and merges back.
+Time complexity is O(N log N) in all cases (best, average, worst). Space complexity is O(N).
+QuickSort picks a pivot element and partitions array around it.
+Average time complexity is O(N log N). Space complexity is O(1) in-place.
+Worst case time is O(N^2) when array is sorted.
+
+Q3: Database ACID Properties
+ACID stands for:
+- Atomicity: All operations in transaction succeed or fail together.
+- Consistency: Data remains consistent before and after transaction.
+- Isolation: Multiple users reading/writing database do not clash.
+- Durability: Saved data is retained permanently on hard drive.
+
+Q4: OOP Principles
+1. Encapsulation: Keeping variables private in a class so outside code cannot modify directly.
+2. Inheritance: Subclass inherits properties from parent class using extends keyword.
+3. Polymorphism: Same function name behaving differently depending on arguments or class type.
+4. Abstraction: Hiding background details from user.
+
+Q5: RSA Public Key Cryptography
+RSA uses asymmetric cryptography with a public key for encryption and a private key for decryption.
+Public key is shared with everyone, while private key is kept secret by owner.
+Sender encrypts message using recipient's public key. Only holder of private key can decrypt ciphertext.
+Uses prime numbers p and q to create large modulus n.`,
+      inkColor: '#0f172a'
+    },
+    {
+      id: 'sample-8',
+      studentName: 'Rohan Gupta',
+      rollNo: 'CS-2026-003',
+      subject: 'Computer Science & AI Master Paper',
+      questionId: 'preset-multi-cs-exam',
+      questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+      maxScore: 25.0,
+      expectedScore: 8.75,
+      description: 'Low-Scoring / Incomplete Paper (8.75/25): Brief answers with incorrect O(N) complexity claim and omitted OOP concepts.',
+      rawText: `Ans Sheet: CS & AI Master Exam - Rohan Gupta (Roll: CS-2026-003)
+
+Q1: Backpropagation in Neural Nets
+Backpropagation adjusts neural net weights using loss function.
+It uses back propagation of errors from output layer back to input nodes.
+If loss is high, weights are changed.
+
+Q2: QuickSort and MergeSort
+QuickSort is fast sorting algorithm with time complexity O(N).
+MergeSort splits array into halves and has time complexity O(N log N).
+MergeSort uses extra memory space. QuickSort is faster for array sorting.
+
+Q3: ACID Properties
+A = Atomicity
+C = Consistency
+I = Isolation
+D = Durability
+Transactions in SQL database must be ACID compliant so database does not crash during power loss.
+
+Q4: OOP Concepts
+Classes and Objects are main OOP concepts.
+Inheritance allows class to inherit methods.
+Encapsulation wraps variables in class.
+
+Q5: RSA Cryptography
+RSA is security algorithm used in HTTPS and internet passwords.
+It generates public and private key pairs.
+Messages are encrypted with key so hackers cannot read packets.`,
+      inkColor: '#334155'
     }
   ];
 
@@ -422,6 +558,116 @@
 
   // --- 3. PRESETS & RUBRIC MANAGER ---
   const PRESET_RUBRICS = [
+    {
+      id: 'preset-6-question-master',
+      subject: 'Human Physiology & Clinical Science Paper',
+      question: 'Master 6-Question Exam Paper (30 Marks total)',
+      examTitle: 'Comprehensive Master Exam Paper (6 Questions, 30 Marks)',
+      maxMarks: 30.0,
+      isMultiQuestion: true,
+      isExampleMaster: true,
+      questions: [
+        {
+          id: 'master-q1',
+          number: 1,
+          title: 'Q1: Describe the formation, trunks, divisions, cords, and terminal branches of the Brachial Plexus with applied clinical anatomy.',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Roots: Ventral rami of C5, C6, C7, C8, T1.',
+            '• Trunks: C5+C6 form Upper Trunk; C7 forms Middle Trunk; C8+T1 form Lower Trunk.',
+            '• Divisions: Each trunk splits into Anterior (flexor) and Posterior (extensor) divisions.',
+            '• Cords: Lateral (C5-C7), Posterior (C5-T1), Medial (C8-T1) around axillary artery.',
+            '• Clinical: Erb-Duchenne palsy (C5-C6 / Waiter\'s tip hand) & Klumpke palsy (C8-T1 / Claw hand).'
+          ],
+          keyPoints: [
+            { id: 'mq1-1', text: 'Roots & Trunks: Ventral rami C5-T1 form Upper (C5-C6), Middle (C7), and Lower (C8-T1) trunks.', weight: 1.5, keywords: ['ventral rami', 'c5', 'c6', 'c7', 'c8', 't1', 'upper trunk', 'middle trunk', 'lower trunk'] },
+            { id: 'mq1-2', text: 'Divisions & Cords: Anterior/posterior divisions form Lateral, Medial, and Posterior cords around axillary artery.', weight: 1.5, keywords: ['anterior division', 'posterior division', 'lateral cord', 'medial cord', 'posterior cord', 'axillary artery'] },
+            { id: 'mq1-3', text: 'Terminal Nerves & Applied: Radial, Median, Ulnar, Musculocutaneous, Axillary; Erb palsy (waiter tip) & Klumpke palsy (claw hand).', weight: 2.0, keywords: ['musculocutaneous', 'radial', 'median', 'axillary', 'ulnar', 'erb', 'klumpke', 'waiter tip', 'claw hand'] }
+          ]
+        },
+        {
+          id: 'master-q2',
+          number: 2,
+          title: 'Q2: Explain the events of the Cardiac Cycle with emphasis on ventricular pressure changes, volume curves, and heart sounds.',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Total Duration: 0.8 seconds (75 bpm); Systole ~0.3s, Diastole ~0.5s.',
+            '• Isovolumetric Contraction: All 4 valves closed, pressure rises rapidly; AV valve closure creates S1 (Lubb).',
+            '• Ejection Phase: Semilunar valves open, blood pumped into aorta/pulmonary trunk.',
+            '• Isovolumetric Relaxation: Semilunar valve closure creates S2 (Dupp) at start of diastole.'
+          ],
+          keyPoints: [
+            { id: 'mq2-1', text: 'Cycle Timing: 0.8s total duration; Atrial systole (0.1s), Ventricular systole (0.3s), Ventricular diastole (0.4s).', weight: 1.5, keywords: ['0.8s', 'systole', 'diastole', '75 bpm', 'timing'] },
+            { id: 'mq2-2', text: 'Isovolumetric Contraction & S1: All 4 valves closed, steep pressure rise, AV valve closure produces S1 (Lubb).', weight: 1.75, keywords: ['isovolumetric contraction', 's1', 'lubb', 'av valves', 'mitral'] },
+            { id: 'mq2-3', text: 'Isovolumetric Relaxation & S2: Semilunar valve closure produces S2 (Dupp); rapid passive ventricular filling.', weight: 1.75, keywords: ['isovolumetric relaxation', 's2', 'dupp', 'semilunar valves', 'passive filling'] }
+          ]
+        },
+        {
+          id: 'master-q3',
+          number: 3,
+          title: 'Q3: Detail the histology of the Glomerular Filtration Barrier and the factors determining Glomerular Filtration Rate (GFR).',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Fenestrated Endothelium: Capillary pores (70-100nm) block blood cells.',
+            '• Basement Membrane (GBM): Type IV collagen & negatively charged heparan sulfate block plasma proteins.',
+            '• Podocytes: Visceral epithelial cells with interdigitating pedicels & slit diaphragms.',
+            '• Normal GFR: ~125 mL/min (~180 L/day), governed by net Starling hydrostatic & oncotic pressure gradients.'
+          ],
+          keyPoints: [
+            { id: 'mq3-1', text: 'Filtration Barrier Layers: 1. Fenestrated endothelium, 2. Glomerular basement membrane (GBM), 3. Podocytes with slit diaphragms.', weight: 2.5, keywords: ['fenestrated', 'endothelium', 'gbm', 'podocytes', 'pedicels', 'slit diaphragm'] },
+            { id: 'mq3-2', text: 'Starling Forces & GFR: Net Filtration Pressure NFP = (P_GC - P_BS) - pi_GC; Normal GFR = 125 mL/min.', weight: 2.5, keywords: ['starling forces', 'hydrostatic pressure', 'oncotic pressure', '125 ml/min', 'gfr'] }
+          ]
+        },
+        {
+          id: 'master-q4',
+          number: 4,
+          title: 'Q4: Describe chemical synaptic transmission at the neuromuscular junction (NMJ) from action potential arrival to muscle contraction.',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Presynaptic: Action potential triggers voltage-gated Ca2+ influx -> exocytosis of Acetylcholine (ACh).',
+            '• Synaptic Cleft: ACh diffuses across 20nm gap and binds nicotinic ACh receptors on motor end-plate.',
+            '• Postsynaptic: Na+ influx produces End-Plate Potential (EPP) -> triggers muscular action potential.',
+            '• Termination: Acetylcholinesterase (AChE) rapidly hydrolyzes ACh to choline and acetate.'
+          ],
+          keyPoints: [
+            { id: 'mq4-1', text: 'Presynaptic Events: AP opens voltage-gated Ca2+ channels; Ca2+ influx triggers ACh exocytosis into synaptic cleft.', weight: 2.5, keywords: ['action potential', 'ca2+ channels', 'calcium influx', 'acetylcholine', 'exocytosis'] },
+            { id: 'mq4-2', text: 'Postsynaptic Events & Termination: ACh binds nAChR causing Na+ entry, producing EPP; Acetylcholinesterase (AChE) hydrolyzes ACh.', weight: 2.5, keywords: ['nicotinic achr', 'end plate potential', 'epp', 'na+ entry', 'acetylcholinesterase'] }
+          ]
+        },
+        {
+          id: 'master-q5',
+          number: 5,
+          title: 'Q5: Explain Oxygen transport in blood via Hemoglobin, the Oxygen-Hemoglobin Dissociation Curve, and the Bohr Effect.',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Hemoglobin Binding: Tetramer binding 4 O2 molecules; 1.34 mL O2 per gram Hb.',
+            '• Sigmoidal Curve: Sigmoidal shape reflects positive cooperativity in subunit oxygen binding.',
+            '• Bohr Effect (Right Shift): Increased H+ (low pH), high pCO2, elevated temperature, and 2,3-BPG decrease O2 affinity.',
+            '• Physiological Advantage: Facilitates O2 unloading in actively metabolizing peripheral tissues.'
+          ],
+          keyPoints: [
+            { id: 'mq5-1', text: 'Hemoglobin Binding & Capacity: Hb holds 4 O2 molecules; 1.34 mL O2/g Hb; Sigmoidal cooperative binding curve.', weight: 2.5, keywords: ['hemoglobin', '4 o2', '1.34 ml', 'sigmoidal curve', 'cooperative binding'] },
+            { id: 'mq5-2', text: 'Rightward Shift (Bohr Effect): Elevated CO2, H+ (low pH), Temp, and 2,3-BPG shift curve right, enhancing O2 release.', weight: 2.5, keywords: ['bohr effect', 'right shift', 'high co2', 'low ph', 'high temp', '2 3-bpg'] }
+          ]
+        },
+        {
+          id: 'master-q6',
+          number: 6,
+          title: 'Q6: Compare the cellular origin, metabolic effects, and regulation of Insulin and Glucagon in blood glucose homeostasis.',
+          maxMarks: 5.0,
+          sampleAnswers: [
+            '• Origin: Insulin from Pancreatic Islet Beta cells; Glucagon from Alpha cells.',
+            '• Stimulus: High blood glucose stimulates insulin; Hypoglycemia stimulates glucagon.',
+            '• Insulin Action: Promotes GLUT4 translocation, glycogenesis, lipogenesis, and cellular amino acid uptake.',
+            '• Glucagon Action: Stimulates hepatic glycogenolysis, gluconeogenesis, and lipolysis to raise blood sugar.'
+          ],
+          keyPoints: [
+            { id: 'mq6-1', text: 'Insulin (Beta Cells): Secreted during hyperglycemia; promotes GLUT4 translocation, glycogenesis, and glucose uptake.', weight: 2.5, keywords: ['beta cells', 'insulin', 'glut4', 'glycogenesis', 'glucose uptake', 'hyperglycemia'] },
+            { id: 'mq6-2', text: 'Glucagon (Alpha Cells): Secreted during hypoglycemia; stimulates hepatic glycogenolysis, gluconeogenesis, and lipolysis.', weight: 2.5, keywords: ['alpha cells', 'glucagon', 'hypoglycemia', 'glycogenolysis', 'gluconeogenesis', 'lipolysis'] }
+          ]
+        }
+      ]
+    },
     {
       id: 'preset-multi-med-exam',
       subject: 'Medical Sciences Master Paper',
@@ -517,6 +763,66 @@
       ]
     },
     {
+      id: 'preset-multi-cs-exam',
+      subject: 'Computer Science & AI Master Paper',
+      question: 'Comprehensive CS & Artificial Intelligence Examination (5 Questions)',
+      examTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+      maxMarks: 25.0,
+      isMultiQuestion: true,
+      questions: [
+        {
+          id: 'cs-q1',
+          number: 1,
+          title: 'Q1: Explain the mathematical concept of Backpropagation in Deep Neural Networks and state the chain rule formula.',
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'csq1-1', text: 'Forward pass computes loss L; backward pass calculates partial derivatives dL/dw propagating error back.', weight: 2.5, keywords: ['forward pass', 'loss', 'backward pass', 'gradient', 'partial derivative', 'loss function'] },
+            { id: 'csq1-2', text: 'Chain rule formula: dL/dw = (dL/da)*(da/dz)*(dz/dw) and gradient descent weight update w = w - eta*(dL/dw).', weight: 2.5, keywords: ['chain rule', 'gradient descent', 'learning rate', 'eta', 'weight update', 'delta'] }
+          ]
+        },
+        {
+          id: 'cs-q2',
+          number: 2,
+          title: 'Q2: Analyze the average and worst-case time and space complexity of QuickSort vs MergeSort.',
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'csq2-1', text: 'MergeSort: Average & Worst Time O(N log N), Space O(N) for merge buffer arrays.', weight: 2.5, keywords: ['mergesort', 'n log n', 'o(n log n)', 'space o(n)', 'divide and conquer'] },
+            { id: 'csq2-2', text: 'QuickSort: Average Time O(N log N), Worst Time O(N^2) for poor pivot selection, Space O(log N) recursion stack.', weight: 2.5, keywords: ['quicksort', 'pivot', 'o(n^2)', 'worst case', 'recursion stack'] }
+          ]
+        },
+        {
+          id: 'cs-q3',
+          number: 3,
+          title: 'Q3: Define the ACID properties in Relational Database Management Systems (RDBMS).',
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'csq3-1', text: 'Atomicity & Consistency: All-or-nothing transaction execution; maintains valid state and foreign key constraints.', weight: 2.5, keywords: ['atomicity', 'all or nothing', 'consistency', 'valid state', 'rollback', 'constraints'] },
+            { id: 'csq3-2', text: 'Isolation & Durability: Concurrent transactions execute independently (locking/MVCC); committed data persists in non-volatile WAL.', weight: 2.5, keywords: ['isolation', 'durability', 'concurrency', 'locks', 'committed', 'wal', 'non-volatile'] }
+          ]
+        },
+        {
+          id: 'cs-q4',
+          number: 4,
+          title: 'Q4: Explain the four core Object-Oriented Programming (OOP) principles with clear definitions.',
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'csq4-1', text: 'Encapsulation & Abstraction: Hiding internal state behind private access modifiers and exposing interfaces.', weight: 2.5, keywords: ['encapsulation', 'abstraction', 'private', 'interface', 'hiding', 'getters'] },
+            { id: 'csq4-2', text: 'Inheritance & Polymorphism: Subclassing parent classes; method overriding/overloading allowing dynamic dispatch.', weight: 2.5, keywords: ['inheritance', 'polymorphism', 'overriding', 'overloading', 'subclass', 'parent class'] }
+          ]
+        },
+        {
+          id: 'cs-q5',
+          number: 5,
+          title: 'Q5: Describe RSA Public Key Cryptography and explain how asymmetric key pairs enable secure communication.',
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'csq5-1', text: 'Key Generation: Prime selection p, q; modulus n = p*q, totient phi(n); public key (e,n), private key (d,n).', weight: 2.5, keywords: ['rsa', 'prime', 'public key', 'private key', 'totient', 'modulo', 'asymmetric'] },
+            { id: 'csq5-2', text: 'Encryption & Decryption: Ciphertext c = m^e mod n and plaintext recovery m = c^d mod n.', weight: 2.5, keywords: ['ciphertext', 'plaintext', 'encryption', 'decryption', 'm^e mod n', 'c^d mod n'] }
+          ]
+        }
+      ]
+    },
+    {
       id: 'preset-brachial-plexus',
       subject: 'Human Anatomy - Upper Limb',
       question: 'Describe the formation, relations, branches, and applied anatomy of the Brachial Plexus.',
@@ -550,6 +856,9 @@
     constructor() {
       this.customRubrics = this.loadCustomRubrics();
       this.currentRubric = this.loadStoredRubric() || JSON.parse(JSON.stringify(PRESET_RUBRICS[0]));
+      if (this.currentRubric && !this.currentRubric.keyPoints && Array.isArray(this.currentRubric.questions)) {
+        this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+      }
       this.listeners = [];
     }
 
@@ -585,7 +894,14 @@
       this.listeners.forEach(fn => fn(this.currentRubric));
     }
 
-    getRubric() { return this.currentRubric; }
+    getRubric() {
+      if (this.currentRubric) {
+        if ((!this.currentRubric.keyPoints || this.currentRubric.keyPoints.length === 0) && Array.isArray(this.currentRubric.questions)) {
+          this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+        }
+      }
+      return this.currentRubric;
+    }
 
     createNewBlankQuestion() {
       const newId = 'custom-' + Date.now().toString(36);
@@ -663,6 +979,19 @@
           }))
         }))
       };
+
+      if (this.currentRubric.questions.length === 0) {
+        this.currentRubric.questions = [{
+          id: 'q-1',
+          number: 1,
+          title: parsedData.question || 'Question 1',
+          maxMarks: parsedData.maxMarks || 5.0,
+          keyPoints: parsedData.keyPoints || []
+        }];
+      }
+
+      this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+
       this.saveCurrentAsPreset();
       this.notify();
       return this.currentRubric;
@@ -672,6 +1001,9 @@
       const found = this.getAllRubrics().find(p => p.id === presetId);
       if (found) {
         this.currentRubric = JSON.parse(JSON.stringify(found));
+        if (!this.currentRubric.keyPoints && Array.isArray(this.currentRubric.questions)) {
+          this.currentRubric.keyPoints = this.currentRubric.questions.flatMap(q => q.keyPoints || []);
+        }
         this.notify();
         return true;
       }
@@ -690,6 +1022,7 @@
 
     addKeyPoint(text = '', weight = 1.0, keywords = []) {
       const newId = 'point-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+      if (!this.currentRubric.keyPoints) this.currentRubric.keyPoints = [];
       this.currentRubric.keyPoints.push({
         id: newId,
         text: text || 'New key criteria / concept point...',
@@ -701,6 +1034,7 @@
     }
 
     updateKeyPoint(id, { text, weight, keywords }) {
+      if (!this.currentRubric.keyPoints) return false;
       const point = this.currentRubric.keyPoints.find(p => p.id === id);
       if (point) {
         if (text !== undefined) point.text = text;
@@ -720,20 +1054,25 @@
     }
 
     removeKeyPoint(id) {
-      if (this.currentRubric.keyPoints.length <= 1) return false;
+      if (!this.currentRubric.keyPoints || this.currentRubric.keyPoints.length <= 1) return false;
       this.currentRubric.keyPoints = this.currentRubric.keyPoints.filter(p => p.id !== id);
       this.notify();
       return true;
     }
 
     rebalanceWeights() {
-      const totalMax = this.currentRubric.maxMarks || 5.0;
-      const count = this.currentRubric.keyPoints.length;
+      const rubric = this.getRubric();
+      const points = (rubric?.keyPoints && rubric.keyPoints.length > 0)
+        ? rubric.keyPoints
+        : (rubric?.questions || []).flatMap(q => q.keyPoints || []);
+
+      const totalMax = rubric?.maxMarks || 5.0;
+      const count = points.length;
       if (count === 0) return;
       const baseWeight = Number((totalMax / count).toFixed(2));
       let currentSum = 0;
       
-      this.currentRubric.keyPoints.forEach((pt, idx) => {
+      points.forEach((pt, idx) => {
         if (idx === count - 1) {
           pt.weight = Number((totalMax - currentSum).toFixed(2));
         } else {
@@ -745,11 +1084,18 @@
     }
 
     getTotalPointsWeight() {
-      return this.currentRubric.keyPoints.reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0);
+      const rubric = this.getRubric();
+      if (!rubric) return 0;
+      const points = (rubric.keyPoints && rubric.keyPoints.length > 0)
+        ? rubric.keyPoints
+        : (rubric.questions || []).flatMap(q => q.keyPoints || []);
+      return (points || []).reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0);
     }
 
     isWeightBalanced() {
-      return Math.abs(this.getTotalPointsWeight() - this.currentRubric.maxMarks) < 0.05;
+      const rubric = this.getRubric();
+      const max = rubric?.maxMarks || 25.0;
+      return Math.abs(this.getTotalPointsWeight() - max) < 0.05;
     }
   }
 
@@ -1558,7 +1904,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
                 return {
                   examTitle: parsed.examTitle || 'Scanned Exam Paper',
                   subject: parsed.subject || 'General',
-                  totalMaxMarks: formattedQuestions.reduce((acc, q) => acc + q.maxMarks, 0),
+                  totalMaxMarks: (formattedQuestions || []).reduce((acc, q) => acc + (q.maxMarks || 0), 0),
                   isMultiQuestion: true,
                   questions: formattedQuestions
                 };
@@ -1727,7 +2073,7 @@ Respond ONLY with a JSON object in this exact schema:
             };
           });
 
-          const calculatedTotal = pointsList.reduce((sum, p) => sum + p.awardedMarks, 0);
+          const calculatedTotal = (pointsList || []).reduce((sum, p) => sum + (p.awardedMarks || 0), 0);
 
           return {
             transcription: parsed.transcription || '(Handwriting transcribed by Gemini Vision)',
@@ -2197,7 +2543,7 @@ Respond ONLY with a JSON object in this exact schema:
         point.justification = 'Marked 0.';
       }
 
-      const recalculated = this.currentEvaluation.points.reduce((acc, p) => acc + p.awardedMarks, 0);
+      const recalculated = (this.currentEvaluation?.points || []).reduce((acc, p) => acc + (p.awardedMarks || 0), 0);
       const max = this.currentRubric?.maxMarks || 5.0;
       this.finalScore = Math.min(max, Math.max(0, Number(recalculated.toFixed(2))));
       this.isOverridden = true;
@@ -3151,6 +3497,133 @@ Respond ONLY with a JSON object in this exact schema:
         }
       });
 
+      // View 6-Question Example Paper Modal logic
+      const modalViewExample = document.getElementById('modal-view-example-paper');
+      const btnCloseViewExample = document.getElementById('btn-close-view-example');
+      const btnCloseExampleModalFooter = document.getElementById('btn-close-example-modal-footer');
+      const btnLoadExamplePaper = document.getElementById('btn-load-example-paper-into-rubric');
+      const examplePaperModalBody = document.getElementById('example-paper-modal-body');
+
+      const btnQuickViewExample = document.getElementById('btn-quick-view-example');
+      const btnPillsViewExample = document.getElementById('btn-pills-view-example');
+
+      const renderExamplePaperModalContent = () => {
+        const examplePreset = PRESET_RUBRICS.find(p => p.id === 'preset-6-question-master') || PRESET_RUBRICS[0];
+        const questions = examplePreset.questions || [];
+
+        let html = `
+          <div style="background: linear-gradient(135deg, rgba(0, 169, 145, 0.08) 0%, rgba(31, 37, 46, 0.03) 100%); border: 1px solid rgba(0, 169, 145, 0.25); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-primary); background: rgba(0,169,145,0.15); padding: 3px 10px; border-radius: 20px;">
+                  ${examplePreset.subject || 'Human Physiology & Clinical Science'}
+                </span>
+                <h4 style="margin: 8px 0 2px; font-size: 1.15rem; color: var(--text-main); font-weight: 800;">
+                  ${examplePreset.examTitle || examplePreset.question}
+                </h4>
+                <p style="margin: 0; font-size: 0.82rem; color: var(--text-secondary);">
+                  Complete exam structure showing 6 questions, score weights, keyword vocabulary, and model answer bullets.
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <span style="background: var(--color-primary); color: #fff; padding: 5px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(0,169,145,0.3);">
+                  🏆 30.0 Total Marks
+                </span>
+                <span style="background: #1F252E; color: #fff; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
+                  📝 6 Questions
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="example-questions-list" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        `;
+
+        questions.forEach((q) => {
+          html += `
+            <div class="example-question-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 1.1rem; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <h5 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: var(--text-main); line-height: 1.4;">
+                  ${q.title}
+                </h5>
+                <span style="flex-shrink: 0; background: rgba(0, 169, 145, 0.12); color: var(--color-primary); font-weight: 800; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem;">
+                  ${q.maxMarks.toFixed(1)} Marks
+                </span>
+              </div>
+
+              <!-- Answer Criteria & Points Breakdown -->
+              <div style="margin-bottom: 0.75rem;">
+                <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.4rem; letter-spacing: 0.04em;">
+                  🎯 Answer Criteria & Point Allocation:
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          `;
+
+          (q.keyPoints || []).forEach((kp, kIdx) => {
+            html += `
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; background: #f8fafc; padding: 8px 12px; border-radius: 8px; border-left: 3px solid var(--color-primary);">
+                <div style="font-size: 0.85rem; color: var(--text-main); font-weight: 500; line-height: 1.35;">
+                  <strong>Point ${kIdx + 1}:</strong> ${kp.text}
+                  ${kp.keywords && kp.keywords.length > 0 ? `
+                    <div style="margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap;">
+                      ${kp.keywords.map(kw => `<span style="font-size: 0.7rem; background: #e2e8f0; color: #334155; padding: 1px 6px; border-radius: 4px;">#${kw}</span>`).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+                <span style="font-size: 0.78rem; font-weight: 800; color: var(--color-primary); background: #ffffff; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(0,169,145,0.3); flex-shrink: 0;">
+                  +${kp.weight.toFixed(2)} M
+                </span>
+              </div>
+            `;
+          });
+
+          html += `
+                </div>
+              </div>
+          `;
+
+          if (q.sampleAnswers && q.sampleAnswers.length > 0) {
+            html += `
+              <div style="background: #f0fdfa; border: 1px dashed rgba(0, 169, 145, 0.35); border-radius: 8px; padding: 0.75rem 1rem;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: #0d9488; margin-bottom: 0.35rem;">
+                  💡 Model Answer Bullets & Key Concepts:
+                </div>
+                <ul style="margin: 0; padding-left: 1.1rem; font-size: 0.82rem; color: #134e4a; line-height: 1.5;">
+                  ${q.sampleAnswers.map(ans => `<li>${ans}</li>`).join('')}
+                </ul>
+              </div>
+            `;
+          }
+
+          html += `</div>`;
+        });
+
+        html += `</div>`;
+        return html;
+      };
+
+      const openExampleModal = () => {
+        if (examplePaperModalBody) {
+          examplePaperModalBody.innerHTML = renderExamplePaperModalContent();
+        }
+        modalViewExample?.classList.remove('hidden');
+      };
+
+      this.openExampleModal = openExampleModal;
+
+      btnQuickViewExample?.addEventListener('click', openExampleModal);
+      btnPillsViewExample?.addEventListener('click', openExampleModal);
+      btnCloseViewExample?.addEventListener('click', () => modalViewExample?.classList.add('hidden'));
+      btnCloseExampleModalFooter?.addEventListener('click', () => modalViewExample?.classList.add('hidden'));
+
+      btnLoadExamplePaper?.addEventListener('click', () => {
+        const examplePreset = PRESET_RUBRICS.find(p => p.id === 'preset-6-question-master') || PRESET_RUBRICS[0];
+        this.rubricManager.setMultiQuestionRubric(examplePreset);
+        modalViewExample?.classList.add('hidden');
+        this.switchView('rubric');
+        this.showNotification(`✓ Loaded Master 6-Question Exam Paper (30 Marks total)!`, 'success');
+      });
+
       // Test Key button
       btnTestApiKey?.addEventListener('click', async () => {
         const keyVal = inputApiKey ? inputApiKey.value.trim() : '';
@@ -3477,6 +3950,9 @@ Respond ONLY with a JSON object in this exact schema:
               <p class="text-secondary" style="font-size: 0.85rem;">Configure question details and point-by-point marking checklist for AI grading.</p>
             </div>
             <div class="preset-action-bar">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-view-example-paper-editor" title="View 6-Question Example Paper with Keys & Scores">
+                👁️ View Example
+              </button>
               <button type="button" class="btn btn-secondary btn-sm" id="btn-scan-scheme-from-editor">
                 📸 Scan Scheme
               </button>
@@ -3594,6 +4070,10 @@ Respond ONLY with a JSON object in this exact schema:
       c.querySelector('#select-rubric-preset')?.addEventListener('change', (e) => {
         this.rubricManager.setPreset(e.target.value);
         this.showNotification('Question loaded!', 'info');
+      });
+
+      c.querySelector('#btn-view-example-paper-editor')?.addEventListener('click', () => {
+        this.openExampleModal?.();
       });
 
       c.querySelector('#input-rubric-subject')?.addEventListener('input', (e) => {

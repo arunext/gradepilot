@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CS & AI Master Exam - Question Paper & Rubric Key Page</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 15mm 15mm 15mm 15mm;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      line-height: 1.5;
+      background: #ffffff;
+      padding: 0;
+      margin: 0;
+    }
+
+    .exam-header {
+      border-bottom: 2.5px solid #0f172a;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .university-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+
+    .exam-meta {
+      font-size: 13px;
+      color: #475569;
+      margin-top: 4px;
+    }
+
+    .marks-badge {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #0f766e;
+      text-align: right;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #00a991;
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-top: 20px;
+      margin-bottom: 14px;
+    }
+
+    .question-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      background: #fafafa;
+      page-break-inside: avoid;
+    }
+
+    .q-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 14px;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .q-title {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .q-marks {
+      color: #00a991;
+      font-weight: 700;
+    }
+
+    .rubric-list {
+      margin-top: 10px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .rubric-item {
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+
+    .rubric-weight {
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .keywords-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+
+    .watermark-footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="exam-header">
+    <div>
+      <div class="university-title">Faculty of Computer Science & Artificial Intelligence</div>
+      <div class="exam-meta">
+        <strong>Subject:</strong> Computer Science & AI Master Paper (CS-501)<br>
+        <strong>Examination:</strong> Internal Master Assessment | <strong>Duration:</strong> 60 Mins
+      </div>
+    </div>
+    <div class="marks-badge">
+      Total Questions: 5<br>
+      Max Marks: 25.0
+    </div>
+  </div>
+
+  <div class="section-title">Official Answer Key & Grading Rubric Specifications</div>
+
+  <!-- Q1 -->
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-title">Q1: Explain the mathematical concept of Backpropagation in Deep Neural Networks and state the chain rule formula.</span>
+      <span class="q-marks">[5.0 Marks]</span>
+    </div>
+    <ul class="rubric-list">
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 1:</strong> Forward pass computes loss L; backward pass calculates partial derivatives dL/dw propagating error gradient back layer by layer.
+        <br><span class="keywords-tag">Keywords: forward pass, loss, backward pass, gradient, partial derivative</span>
+      </li>
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 2:</strong> Chain rule application dL/dw = (dL/da)*(da/dz)*(dz/dw) and gradient descent weight update w = w - eta*(dL/dw).
+        <br><span class="keywords-tag">Keywords: chain rule, gradient descent, learning rate, eta, weight update</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-title">Q2: Analyze the average and worst-case time and space complexity of QuickSort vs MergeSort.</span>
+      <span class="q-marks">[5.0 Marks]</span>
+    </div>
+    <ul class="rubric-list">
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 1:</strong> MergeSort: Average & Worst Time O(N log N), Space O(N) for merge buffer sub-arrays.
+        <br><span class="keywords-tag">Keywords: mergesort, n log n, space o(n), divide and conquer</span>
+      </li>
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 2:</strong> QuickSort: Average Time O(N log N), Worst Time O(N^2) for poor pivot selection, Space O(log N) recursion stack.
+        <br><span class="keywords-tag">Keywords: quicksort, pivot, o(n^2), worst case, recursion stack</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-title">Q3: Define the ACID properties in Relational Database Management Systems (RDBMS).</span>
+      <span class="q-marks">[5.0 Marks]</span>
+    </div>
+    <ul class="rubric-list">
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 1:</strong> Atomicity & Consistency: All-or-nothing transaction execution; maintains valid state and constraints.
+        <br><span class="keywords-tag">Keywords: atomicity, all or nothing, consistency, valid state, rollback</span>
+      </li>
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 2:</strong> Isolation & Durability: Concurrent transactions execute independently (locking/MVCC); committed data persists in non-volatile WAL.
+        <br><span class="keywords-tag">Keywords: isolation, durability, concurrency, locks, committed, wal</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-title">Q4: Explain the four core Object-Oriented Programming (OOP) principles with clear definitions.</span>
+      <span class="q-marks">[5.0 Marks]</span>
+    </div>
+    <ul class="rubric-list">
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 1:</strong> Encapsulation & Abstraction: Hiding internal state behind private access modifiers; exposing public interfaces.
+        <br><span class="keywords-tag">Keywords: encapsulation, abstraction, private, interface, hiding</span>
+      </li>
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 2:</strong> Inheritance & Polymorphism: Subclassing parent classes; method overriding/overloading allowing dynamic dispatch.
+        <br><span class="keywords-tag">Keywords: inheritance, polymorphism, overriding, overloading, subclass</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-title">Q5: Describe RSA Public Key Cryptography and explain how asymmetric key pairs enable secure communication.</span>
+      <span class="q-marks">[5.0 Marks]</span>
+    </div>
+    <ul class="rubric-list">
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 1:</strong> Key Generation: Prime selection p, q; modulus n = p*q, totient phi(n); public key (e,n), private key (d,n).
+        <br><span class="keywords-tag">Keywords: rsa, prime, public key, private key, totient, modulo</span>
+      </li>
+      <li class="rubric-item">
+        <span class="rubric-weight">[2.5 Marks]</span> <strong>Criterion 2:</strong> Encryption & Decryption: Ciphertext c = m^e mod n and plaintext recovery m = c^d mod n.
+        <br><span class="keywords-tag">Keywords: ciphertext, plaintext, encryption, decryption, m^e mod n</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="watermark-footer">
+    GradePilot AI Exam Platform — Master Key Page & Question Paper Specification (CS-501)
+  </div>
+
+</body>
+</html>

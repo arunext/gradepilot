@@ -116,7 +116,7 @@ SUBJECT: ${rubric.subject || 'General Academic'}
 MAXIMUM MARKS: ${rubric.maxMarks}
 
 ANSWER KEY & RUBRIC POINTS:
-${rubric.keyPoints.map((kp, i) => `${i + 1}. [ID: ${kp.id}] [Weight: ${kp.weight} marks] ${kp.text}`).join('\n')}
+${((rubric.keyPoints && rubric.keyPoints.length > 0) ? rubric.keyPoints : (rubric.questions || []).flatMap(q => q.keyPoints || [])).map((kp, i) => `${i + 1}. [ID: ${kp.id}] [Weight: ${kp.weight} marks] ${kp.text}`).join('\n')}
 
 INSTRUCTIONS:
 1. Extract and transcribe all handwritten text, LaTeX math equations, and diagram labels accurately.
@@ -207,7 +207,11 @@ Respond ONLY with valid JSON following this schema:
     const pointsEval = [];
     let totalScore = 0;
 
-    rubric.keyPoints.forEach(kp => {
+    const keyPointsToEval = (rubric.keyPoints && rubric.keyPoints.length > 0)
+      ? rubric.keyPoints
+      : (rubric.questions || []).flatMap(q => q.keyPoints || []);
+
+    keyPointsToEval.forEach(kp => {
       const weight = Number(parseFloat(kp.weight || 1.0).toFixed(2));
       const keywords = (kp.keywords && kp.keywords.length > 0)
         ? kp.keywords

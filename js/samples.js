@@ -302,6 +302,148 @@ Radial nerve injury gives wrist drop.`,
     diagramType: null,
     inkColor: '#334155',
     slant: -4
+  },
+  {
+    id: 'sample-6',
+    studentName: 'Aarav Patel',
+    rollNo: 'CS-2026-001',
+    subject: 'Computer Science & AI Master Paper',
+    questionId: 'preset-multi-cs-exam',
+    questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+    maxScore: 25.0,
+    expectedScore: 24.25,
+    description: 'High-Scoring Paper (24.25/25): Comprehensive derivations, exact complexity analysis, and formal cryptography equations.',
+    rawText: `Ans Sheet: CS & AI Master Exam - Aarav Patel (Roll: CS-2026-001)
+
+Q1: Backpropagation in Deep Neural Networks
+Forward pass computes network activations z = w*x + b and prediction y_hat. Loss L is computed against target y using loss function.
+Backward pass computes partial derivatives of loss wrt weights using chain rule:
+dL/dw = (dL/da) * (da/dz) * (dz/dw)
+Where dz/dw = x. Gradient descent updates weights: w = w - eta * (dL/dw).
+Error gradients propagate backward layer by layer from output to input.
+
+Q2: Time & Space Complexity: QuickSort vs MergeSort
+1. MergeSort:
+- Divide & Conquer algorithm splitting array into sub-buffers.
+- Average Time: O(N log N)
+- Worst Time: O(N log N) (guaranteed balanced splitting)
+- Space: O(N) auxiliary array space for merging sub-arrays.
+2. QuickSort:
+- Partitioning algorithm around chosen pivot element.
+- Average Time: O(N log N)
+- Worst Time: O(N^2) occurs when array is already sorted and worst pivot (min/max) is selected.
+- Space: O(log N) for call stack recursion (in-place partitioning).
+
+Q3: ACID Properties in Relational Databases (RDBMS)
+- Atomicity: Transactions are 'all or nothing'. If any operation fails, entire transaction rolls back to initial state.
+- Consistency: Database transitions from one valid state to another, maintaining all schema constraints and foreign keys.
+- Isolation: Concurrent transactions execute without inter-thread interference (achieved via locking or MVCC).
+- Durability: Once committed, data changes are written to non-volatile storage (WAL log) and persist across system crashes.
+
+Q4: Core Object-Oriented Programming (OOP) Principles
+1. Encapsulation: Bundling data (private fields) and methods together, exposing access via public getters/setters.
+2. Abstraction: Hiding complex implementation details using abstract classes and interfaces.
+3. Inheritance: Reusing code where child subclass derives attributes and behaviors from a parent base class.
+4. Polymorphism: Ability of objects to take multiple forms through method overriding (runtime) and method overloading (compile-time).
+
+Q5: RSA Public Key Cryptography & Asymmetric Security
+Select primes p, q. Compute modulus n = p*q and totient phi(n) = (p-1)*(q-1).
+Choose public key exponent e coprime to phi(n). Compute private key d such that e*d = 1 mod phi(n).
+- Encryption: Ciphertext c = m^e mod n using Public Key (e, n).
+- Decryption: Plaintext message m = c^d mod n using Private Key (d, n).
+Asymmetric mechanics allow sender to encrypt with public key without knowing private secret.`,
+    diagramType: null,
+    inkColor: '#1d4ed8',
+    slant: -1.5
+  },
+  {
+    id: 'sample-7',
+    studentName: 'Priya Nair',
+    rollNo: 'CS-2026-002',
+    subject: 'Computer Science & AI Master Paper',
+    questionId: 'preset-multi-cs-exam',
+    questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+    maxScore: 25.0,
+    expectedScore: 16.50,
+    description: 'Average Paper (16.50/25): Good core concepts, but omits chain rule breakdown and RSA modular exponentiation formulas.',
+    rawText: `Ans Sheet: CS & AI Master Exam - Priya Nair (Roll: CS-2026-002)
+
+Q1: Backpropagation
+Backpropagation is used in deep learning to train neural networks.
+It consists of forward pass to compute output and loss function, and backward pass to update weights.
+Weights are adjusted using gradient descent method w = w - eta * gradient.
+It calculates how much each node contributed to final error.
+
+Q2: QuickSort vs MergeSort Complexity
+MergeSort divides array into two halves, sorts them, and merges back.
+Time complexity is O(N log N) in all cases (best, average, worst). Space complexity is O(N).
+QuickSort picks a pivot element and partitions array around it.
+Average time complexity is O(N log N). Space complexity is O(1) in-place.
+Worst case time is O(N^2) when array is sorted.
+
+Q3: Database ACID Properties
+ACID stands for:
+- Atomicity: All operations in transaction succeed or fail together.
+- Consistency: Data remains consistent before and after transaction.
+- Isolation: Multiple users reading/writing database do not clash.
+- Durability: Saved data is retained permanently on hard drive.
+
+Q4: OOP Principles
+1. Encapsulation: Keeping variables private in a class so outside code cannot modify directly.
+2. Inheritance: Subclass inherits properties from parent class using extends keyword.
+3. Polymorphism: Same function name behaving differently depending on arguments or class type.
+4. Abstraction: Hiding background details from user.
+
+Q5: RSA Public Key Cryptography
+RSA uses asymmetric cryptography with a public key for encryption and a private key for decryption.
+Public key is shared with everyone, while private key is kept secret by owner.
+Sender encrypts message using recipient's public key. Only holder of private key can decrypt ciphertext.
+Uses prime numbers p and q to create large modulus n.`,
+    diagramType: null,
+    inkColor: '#0f172a',
+    slant: -2.0
+  },
+  {
+    id: 'sample-8',
+    studentName: 'Rohan Gupta',
+    rollNo: 'CS-2026-003',
+    subject: 'Computer Science & AI Master Paper',
+    questionId: 'preset-multi-cs-exam',
+    questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+    maxScore: 25.0,
+    expectedScore: 8.75,
+    description: 'Low-Scoring / Incomplete Paper (8.75/25): Brief answers with incorrect O(N) complexity claim and omitted OOP concepts.',
+    rawText: `Ans Sheet: CS & AI Master Exam - Rohan Gupta (Roll: CS-2026-003)
+
+Q1: Backpropagation in Neural Nets
+Backpropagation adjusts neural net weights using loss function.
+It uses back propagation of errors from output layer back to input nodes.
+If loss is high, weights are changed.
+
+Q2: QuickSort and MergeSort
+QuickSort is fast sorting algorithm with time complexity O(N).
+MergeSort splits array into halves and has time complexity O(N log N).
+MergeSort uses extra memory space. QuickSort is faster for array sorting.
+
+Q3: ACID Properties
+A = Atomicity
+C = Consistency
+I = Isolation
+D = Durability
+Transactions in SQL database must be ACID compliant so database does not crash during power loss.
+
+Q4: OOP Concepts
+Classes and Objects are main OOP concepts.
+Inheritance allows class to inherit methods.
+Encapsulation wraps variables in class.
+
+Q5: RSA Cryptography
+RSA is security algorithm used in HTTPS and internet passwords.
+It generates public and private key pairs.
+Messages are encrypted with key so hackers cannot read packets.`,
+    diagramType: null,
+    inkColor: '#334155',
+    slant: -3.5
   }
 ];
 
