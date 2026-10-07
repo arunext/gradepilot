@@ -202,16 +202,21 @@
 
     loadData() {
       const todayStr = new Date().toISOString().slice(0, 10);
+      const bonusScans = parseInt(localStorage.getItem('gradecrow_bonus_scans') || '0', 10);
       try {
         const stored = localStorage.getItem('gradecrow_daily_credits');
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && parsed.date === todayStr) {
+            if (bonusScans > 0 && parsed.maxScans < (this.DAILY_LIMIT + bonusScans)) {
+              parsed.maxScans = this.DAILY_LIMIT + bonusScans;
+              this.saveData(parsed);
+            }
             return parsed;
           }
         }
       } catch (e) {}
-      const fresh = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT };
+      const fresh = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT + bonusScans };
       this.saveData(fresh);
       return fresh;
     }
@@ -222,11 +227,21 @@
       } catch (e) {}
     }
 
+    addBonusCredits(amount) {
+      const currentBonus = parseInt(localStorage.getItem('gradecrow_bonus_scans') || '0', 10);
+      const newBonus = currentBonus + amount;
+      localStorage.setItem('gradecrow_bonus_scans', newBonus.toString());
+      this.data.maxScans = (this.data.maxScans || this.DAILY_LIMIT) + amount;
+      this.saveData(this.data);
+      return this.getRemaining(false);
+    }
+
     getRemaining(hasCustomKey = false) {
       if (hasCustomKey) return Infinity;
       const todayStr = new Date().toISOString().slice(0, 10);
       if (this.data.date !== todayStr) {
-        this.data = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT };
+        const bonusScans = parseInt(localStorage.getItem('gradecrow_bonus_scans') || '0', 10);
+        this.data = { date: todayStr, scansUsed: 0, maxScans: this.DAILY_LIMIT + bonusScans };
         this.saveData(this.data);
       }
       return Math.max(0, this.data.maxScans - (this.data.scansUsed || 0));
@@ -3139,11 +3154,60 @@ Respond ONLY with a JSON object in this exact schema:
       }
     }
 
+    async redeemCoupon(couponCode) {
+      if (!couponCode) return { success: false, message: 'Please enter a coupon code.' };
+      const code = couponCode.trim().toUpperCase();
+      const validCoupons = ['REDDIT100', 'TEACHERS100', 'REDDITINDIA'];
+      
+      if (!validCoupons.includes(code)) {
+        return { success: false, message: 'Invalid or expired promo code.' };
+      }
+
+      if (localStorage.getItem('gradecrow_coupon_' + code) === 'true') {
+        return { success: false, message: `Promo code ${code} has already been claimed on this device.` };
+      }
+
+      // Add 100 scans to guest credit manager
+      this.creditManager.addBonusCredits(100);
+
+      // If user is authenticated with Supabase, credit their database profile as well
+      if (this.authManager.profile) {
+        const cur = this.authManager.profile.credits_balance || 0;
+        this.authManager.profile.credits_balance = cur + 100;
+        if (this.authManager.client) {
+          try {
+            await this.authManager.client.from('profiles').update({ credits_balance: cur + 100 }).eq('id', this.authManager.profile.id);
+            await this.authManager.client.from('credit_transactions').insert({
+              user_id: this.authManager.profile.id,
+              amount: 100,
+              type: 'promo_coupon',
+              description: `Reddit Promo: ${code}`
+            });
+          } catch (e) {
+            console.warn('Coupon profile credit error:', e);
+          }
+        }
+      }
+
+      localStorage.setItem('gradecrow_coupon_' + code, 'true');
+      this.updateCreditsBadge();
+      const msg = `🎉 Promo ${code} applied! 100 Free Exam Paper Scans added to your balance.`;
+      this.showNotification(msg, 'success');
+      return { success: true, message: msg };
+    }
+
     init() {
-      // Detect Referral Code in URL
+      // Detect Coupon or Referral Code in URL
       const urlParams = new URLSearchParams(window.location.search);
+      const couponParam = urlParams.get('coupon') || urlParams.get('promo') || (urlParams.get('ref')?.toUpperCase().startsWith('REDDIT') ? urlParams.get('ref') : null);
+      if (couponParam) {
+        setTimeout(() => {
+          this.redeemCoupon(couponParam);
+        }, 800);
+      }
+
       const refCode = urlParams.get('ref');
-      if (refCode) {
+      if (refCode && !refCode.toUpperCase().startsWith('REDDIT')) {
         localStorage.setItem('gradecrow_ref_code', refCode.trim().toUpperCase());
         setTimeout(() => {
           this.showNotification(`🎁 Referral invite active! Sign in with Google to claim +100 bonus scans.`, 'success');
@@ -3479,6 +3543,38 @@ Respond ONLY with a JSON object in this exact schema:
           const scans = btn.dataset.scans;
           this.buyCreditPack(pack, amount, scans);
         });
+      });
+
+      // Coupon Redemption Button Handlers
+      const btnApplyCoupon = document.getElementById('btn-apply-coupon');
+      const inputCoupon = document.getElementById('input-coupon-code');
+      const couponFeedback = document.getElementById('coupon-feedback');
+
+      btnApplyCoupon?.addEventListener('click', async () => {
+        const val = inputCoupon?.value;
+        const res = await this.redeemCoupon(val);
+        if (couponFeedback) {
+          couponFeedback.textContent = res.message;
+          couponFeedback.style.color = res.success ? '#065f46' : '#b91c1c';
+        }
+      });
+
+      const btnApplyCouponLimit = document.getElementById('btn-apply-coupon-limit');
+      const inputCouponLimit = document.getElementById('input-coupon-code-limit');
+      const couponFeedbackLimit = document.getElementById('coupon-feedback-limit');
+
+      btnApplyCouponLimit?.addEventListener('click', async () => {
+        const val = inputCouponLimit?.value;
+        const res = await this.redeemCoupon(val);
+        if (couponFeedbackLimit) {
+          couponFeedbackLimit.textContent = res.message;
+          couponFeedbackLimit.style.color = res.success ? '#065f46' : '#b91c1c';
+        }
+        if (res.success) {
+          setTimeout(() => {
+            document.getElementById('modal-credits-limit')?.classList.add('hidden');
+          }, 1500);
+        }
       });
 
       // Mandatory Legal & Compliance Modals

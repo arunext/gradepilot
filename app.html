@@ -454,6 +454,20 @@
 
         </div>
 
+        <!-- Redeem Coupon Code Box -->
+        <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #e6f7f5; border: 1.5px dashed #99f6e4; border-radius: 12px; text-align: left;">
+          <div style="font-size: 0.82rem; font-weight: 800; color: #065f46; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <span>🎟️</span> Have a Coupon or Reddit Promo Code?
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="input-coupon-code" class="input-control" placeholder="e.g. REDDIT100" style="text-transform: uppercase; font-weight: 700; flex: 1; font-size: 0.85rem; padding: 6px 10px; background: white;" />
+            <button type="button" class="btn btn-primary btn-sm" id="btn-apply-coupon" style="font-weight: 700; white-space: nowrap;">
+              Redeem 100 Scans
+            </button>
+          </div>
+          <div id="coupon-feedback" style="font-size: 0.78rem; margin-top: 4px; font-weight: 700; min-height: 18px;"></div>
+        </div>
+
         <div style="margin-top: 1rem; text-align: center; font-size: 0.75rem; color: var(--text-muted);">
           🔒 Secured via Razorpay & UPI • Instant credit activation to your Google account
         </div>
@@ -490,6 +504,21 @@
         <p class="text-secondary" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
           You've used your current free scans. Get more scans to keep grading!
         </p>
+
+        <!-- Quick Coupon Box in Limit Modal -->
+        <div style="margin-bottom: 1rem; padding: 0.75rem; background: #e6f7f5; border: 1.5px dashed #99f6e4; border-radius: 10px; text-align: left;">
+          <div style="font-size: 0.78rem; font-weight: 800; color: #065f46; margin-bottom: 4px;">
+            🎟️ Redeem Promo Code (e.g. REDDIT100)
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="input-coupon-code-limit" class="input-control" placeholder="REDDIT100" style="text-transform: uppercase; font-weight: 700; flex: 1; font-size: 0.82rem; padding: 5px 8px; background: white;" />
+            <button type="button" class="btn btn-primary btn-sm" id="btn-apply-coupon-limit" style="font-weight: 700; font-size: 0.78rem; padding: 5px 10px;">
+              Apply Code
+            </button>
+          </div>
+          <div id="coupon-feedback-limit" style="font-size: 0.75rem; margin-top: 4px; font-weight: 700;"></div>
+        </div>
+
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
           <button type="button" class="btn btn-primary" id="btn-open-pricing-from-limit" style="font-weight: 700;">
             🪙 Buy Credits (Starting at ₹49)

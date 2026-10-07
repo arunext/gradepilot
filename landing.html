@@ -865,6 +865,17 @@
       const item = btn.closest('.faq-item');
       item.classList.toggle('open');
     }
+
+    // Auto-forward coupon/promo query parameters to app links
+    (function forwardPromoParams() {
+      const params = new URLSearchParams(window.location.search);
+      const promo = params.get('coupon') || params.get('promo') || params.get('ref');
+      if (promo) {
+        document.querySelectorAll('a[href="/app"]').forEach(a => {
+          a.href = `/app?coupon=${encodeURIComponent(promo)}`;
+        });
+      }
+    })();
   </script>
 </body>
 </html>
