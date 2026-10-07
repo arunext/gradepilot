@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>GradeCrow AI — Grade Handwritten Exam Papers in Seconds</title>
+  <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors. Snap handwritten exam papers, match against your rubric key, and award accurate marks in seconds." />
+  
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+
+  <!-- Fonts & Stylesheet -->
+  <link rel="stylesheet" href="css/landing.css?v=1.0" />
+
+  <!-- Open Graph Meta Tags for Social & Ad Preview -->
+  <meta property="og:title" content="GradeCrow AI — Grade Handwritten Exams in Seconds" />
+  <meta property="og:description" content="Sharp eyes. Fair marks. Zero grading fatigue. Grade paper answer sheets instantly with Multimodal Vision AI." />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Header -->
+  <header class="landing-header">
+    <div class="header-container">
+      <a href="landing.html" class="brand-link">
+        <div class="brand-badge">
+          <!-- Crow Mascot Icon -->
+          <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
+            <polygon points="16,2 27,6 16,10 5,6" fill="#1F252E"/>
+            <polygon points="16,10 24,7 24,9 16,12 8,9 8,7" fill="#00a991"/>
+            <line x1="24" y1="8" x2="26" y2="13" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="26" cy="13" r="1" fill="#f59e0b"/>
+            <path d="M10 11C10 8.5 13 8 16 8C20 8 22 10.5 22 14C22 18 19 22 16 28C14 28 11 25 10 21C9.5 19 10 13 10 11Z" fill="#1F252E"/>
+            <polygon points="21,13 28,15.5 21,17" fill="#f59e0b"/>
+            <circle cx="16.5" cy="14.5" r="3.2" stroke="#00a991" stroke-width="1.4" fill="white"/>
+            <circle cx="16.5" cy="14.5" r="1.5" fill="#1F252E"/>
+          </svg>
+        </div>
+        <div class="brand-title">GradeCrow <span class="brand-tag-pill">AI</span></div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="#screenshots" class="nav-link">Screenshots & Demo</a></li>
+        <li><a href="#features" class="nav-link">Key Features</a></li>
+        <li><a href="#pricing" class="nav-link">Pricing</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
+      </ul>
+
+      <a href="index.html" class="nav-cta-btn">
+        <span>⚡</span> Try Live Demo Free
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section (High-Impact Headline & Visual Preview) -->
+  <section class="hero-section">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-container">
+      
+      <!-- Left Column: Copywriting & CTAs -->
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span>🦅</span> Built for Teachers & University Professors
+        </div>
+        <h1 class="hero-headline">
+          Grade Handwritten Exam Papers in Seconds with <span class="gradient-text">AI Vision</span>
+        </h1>
+        <p class="hero-subheadline">
+          Upload your question key, snap student answer sheets, and let GradeCrow AI transcribe handwriting and award fair, rubric-anchored marks—with 1-tap teacher override control.
+        </p>
+
+        <div class="hero-actions">
+          <a href="index.html" class="btn-hero-primary">
+            <span>🚀</span> Try Free Scan Demo ➔
+          </a>
+          <a href="#screenshots" class="btn-hero-secondary">
+            <span>📜</span> View Sample Papers
+          </a>
+        </div>
+
+        <div class="hero-trust-row">
+          <div class="hero-trust-item"><span>✓</span> 5 Free Daily AI Scans</div>
+          <div class="hero-trust-item"><span>✓</span> Reads Cursive & Messy Ink</div>
+          <div class="hero-trust-item"><span>✓</span> Export CSV Gradebooks</div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Live Preview Card -->
+      <div class="hero-visual-card">
+        <div class="hero-visual-header">
+          <div class="hero-status-tag">
+            <span style="width: 8px; height: 8px; background: #2dd4bf; border-radius: 50%;"></span>
+            Gemini Vision OCR Active
+          </div>
+          <div class="hero-score-badge">
+            24.25 / 25.0 Marks (97%)
+          </div>
+        </div>
+
+        <div class="hero-paper-preview-split">
+          <!-- Left preview: Rubric & Question -->
+          <div class="preview-box">
+            <div class="preview-box-title">
+              <span>📋 Question Key</span>
+              <span style="font-size: 0.7rem; color: #64748b;">CS & AI Master Exam</span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px;">Q1: Neural Backpropagation</div>
+            <div style="font-size: 0.75rem; color: #475569; margin-bottom: 6px;">Derive chain rule gradients dL/dw and weight update rule w = w - eta * gradient.</div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <span class="pill-hit">✓ Chain Rule (+2.0)</span>
+              <span class="pill-hit">✓ Activation z (+1.5)</span>
+              <span class="pill-hit">✓ Weight Update (+1.5)</span>
+            </div>
+          </div>
+
+          <!-- Right preview: Handwritten Answer Evaluation -->
+          <div class="preview-box">
+            <div class="preview-box-title">
+              <span>✍️ Handwritten Sheet</span>
+              <span style="font-size: 0.7rem; color: #10b981; font-weight: 700;">Aarav Patel</span>
+            </div>
+            <div class="handwriting-sample">
+              "dL/dw = (dL/da) * (da/dz) * (dz/dw) where dz/dw = x. w = w - eta * dL/dw"
+            </div>
+            <div style="margin-top: 8px;">
+              <div class="eval-item">
+                <span>Chain Rule Derivation</span>
+                <span class="pill-hit">✓ Full (+2.0)</span>
+              </div>
+              <div class="eval-item">
+                <span>Weight Update Formula</span>
+                <span class="pill-hit">✓ Full (+1.5)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3-Step "How It Works" Section -->
+  <section class="section-wrapper" id="how-it-works">
+    <div class="section-header">
+      <span class="section-eyebrow">3-Step Simple Process</span>
+      <h2 class="section-title">How GradeCrow AI Works</h2>
+      <p class="section-desc">
+        Designed for busy educators who want fast, objective grading without complex ML tools.
+      </p>
+    </div>
+
+    <div class="steps-grid">
+      
+      <!-- STEP 1 -->
+      <div class="step-timeline-card">
+        <div class="step-card-number">01</div>
+        <div class="step-icon-wrapper">📋</div>
+        <h3 class="step-card-title">Snap or Select Question & Rubric Key</h3>
+        <p class="step-card-desc">
+          Take a photo of your printed exam paper, scan a handwritten scheme, or pick a preset template. GradeCrow AI extracts questions, max marks, and key criteria automatically.
+        </p>
+        <div class="step-mock-preview">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-weight: 700; color: #0f172a;">Computer Science Exam</span>
+            <span class="mock-pill-badge">5 Questions • 25.0 Marks</span>
+          </div>
+          <div style="font-size: 0.75rem; color: #64748b;">Includes Backpropagation, MergeSort vs QuickSort, ACID, OOP & RSA equations</div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-timeline-card">
+        <div class="step-card-number">02</div>
+        <div class="step-icon-wrapper">📸</div>
+        <h3 class="step-card-title">Capture Student Answer Sheets</h3>
+        <p class="step-card-desc">
+          Snap student paper answer sheets directly with your phone camera or upload images/PDFs. Works with cursive handwriting, medical terminology, and scribbles.
+        </p>
+        <div class="step-mock-preview">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">📱</span>
+            <div>
+              <div style="font-weight: 700; color: #0f172a;">Mobile Rear Camera</div>
+              <div style="font-size: 0.75rem; color: #64748b;">Instant 1-tap capture or multi-page answer sheet uploads</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-timeline-card">
+        <div class="step-card-number">03</div>
+        <div class="step-icon-wrapper">📊</div>
+        <h3 class="step-card-title">Instant AI Evaluation & Gradebook Sync</h3>
+        <p class="step-card-desc">
+          Get line-by-line mark breakdowns with cited quotes as proof. Adjust scores in 1 tap with step chips (<code style="background: #e0f2fe; padding: 2px 4px; border-radius: 4px; color: #0369a1;">+0.5</code>, <code style="background: #fee2e2; padding: 2px 4px; border-radius: 4px; color: #b91c1c;">-1.0</code>), then export to CSV.
+        </p>
+        <div class="step-mock-preview">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-weight: 700; color: #10b981;">Score: 24.25 / 25.0</span>
+            <span style="font-size: 0.75rem; color: #00a991; font-weight: 700;">📥 Export CSV</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Screenshots & Paper Showcase Section -->
+  <section class="section-wrapper" id="screenshots" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+    <div class="section-header">
+      <span class="section-eyebrow">Real Paper Screenshots</span>
+      <h2 class="section-title">See GradeCrow AI in Action</h2>
+      <p class="section-desc">
+        Explore actual question papers, evaluated handwritten answer sheets, and class gradebooks.
+      </p>
+    </div>
+
+    <div class="showcase-container">
+      
+      <!-- Tab Navigation -->
+      <div class="showcase-tabs-nav">
+        <button type="button" class="showcase-tab-btn active" onclick="switchShowcaseTab(event, 'tab-cs-exam')">
+          <span>📋</span> Question & Rubric Key
+        </button>
+        <button type="button" class="showcase-tab-btn" onclick="switchShowcaseTab(event, 'tab-high-score')">
+          <span>✍️</span> High-Scoring Answer Paper (24.25/25)
+        </button>
+        <button type="button" class="showcase-tab-btn" onclick="switchShowcaseTab(event, 'tab-avg-score')">
+          <span>📝</span> Average Answer Paper (16.50/25)
+        </button>
+        <button type="button" class="showcase-tab-btn" onclick="switchShowcaseTab(event, 'tab-gradebook')">
+          <span>📊</span> Class Gradebook & Analytics
+        </button>
+      </div>
+
+      <!-- Tab Panel 1: Question & Rubric Key -->
+      <div class="showcase-tab-panel active" id="tab-cs-exam">
+        <div class="screenshot-paper-frame">
+          <div class="paper-header-strip">
+            <div class="paper-title-text">Computer Science & AI Master Examination Key</div>
+            <div class="paper-score-pill">5 Questions • 25.0 Total Marks</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            
+            <div style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <h4 style="color: #00a991; font-size: 0.95rem; margin-bottom: 6px;">Q1: Neural Backpropagation (5.0 Marks)</h4>
+              <p style="font-size: 0.82rem; color: #475569; margin-bottom: 8px;">Describe forward/backward pass, loss function, and weight updates via chain rule.</p>
+              <div style="font-size: 0.78rem; background: #f8fafc; padding: 8px; border-radius: 6px; border-left: 3px solid #00a991;">
+                <strong>Key Criteria:</strong> Chain rule partial derivatives (dL/dw = dL/da * da/dz * dz/dw), gradient descent (w = w - eta * gradient).
+              </div>
+            </div>
+
+            <div style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <h4 style="color: #00a991; font-size: 0.95rem; margin-bottom: 6px;">Q2: Complexity: QuickSort vs MergeSort (5.0 Marks)</h4>
+              <p style="font-size: 0.82rem; color: #475569; margin-bottom: 8px;">Compare average/worst case time and space complexity.</p>
+              <div style="font-size: 0.78rem; background: #f8fafc; padding: 8px; border-radius: 6px; border-left: 3px solid #00a991;">
+                <strong>Key Criteria:</strong> MergeSort O(N log N) time & O(N) space; QuickSort O(N log N) avg, O(N^2) worst time & O(log N) stack space.
+              </div>
+            </div>
+
+            <div style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <h4 style="color: #00a991; font-size: 0.95rem; margin-bottom: 6px;">Q3: Database ACID Properties (5.0 Marks)</h4>
+              <p style="font-size: 0.82rem; color: #475569; margin-bottom: 8px;">Define Atomicity, Consistency, Isolation, and Durability.</p>
+              <div style="font-size: 0.78rem; background: #f8fafc; padding: 8px; border-radius: 6px; border-left: 3px solid #00a991;">
+                <strong>Key Criteria:</strong> All-or-nothing rollback, schema invariants, concurrency isolation (locking/MVCC), WAL durability.
+              </div>
+            </div>
+
+            <div style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <h4 style="color: #00a991; font-size: 0.95rem; margin-bottom: 6px;">Q5: RSA Public Key Cryptography (5.0 Marks)</h4>
+              <p style="font-size: 0.82rem; color: #475569; margin-bottom: 8px;">Explain asymmetric encryption, keys, and modular exponentiation formula.</p>
+              <div style="font-size: 0.78rem; background: #f8fafc; padding: 8px; border-radius: 6px; border-left: 3px solid #00a991;">
+                <strong>Key Criteria:</strong> Modulus n = p*q, totient phi(n), public key c = m^e mod n, private key m = c^d mod n.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Panel 2: High Scoring Student Paper -->
+      <div class="showcase-tab-panel" id="tab-high-score">
+        <div class="screenshot-paper-frame">
+          <div class="paper-header-strip">
+            <div>
+              <span class="paper-title-text">Student: Aarav Patel (Roll: CS-2026-001)</span>
+              <div style="font-size: 0.8rem; color: #64748b;">CS & AI Master Examination</div>
+            </div>
+            <div class="paper-score-pill">Score: 24.25 / 25.0 (97.0%)</div>
+          </div>
+
+          <div style="background: #fffdfa; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; position: relative;">
+            <div style="font-family: 'Caveat', cursive; font-size: 1.2rem; color: #1e3a8a; line-height: 1.6;">
+              <p style="font-weight: bold;">Q1: Backpropagation in Deep Neural Networks</p>
+              <p>Forward pass computes network activations z = w*x + b and prediction y_hat. Loss L is computed against target y using loss function.</p>
+              <p>Backward pass computes partial derivatives of loss wrt weights using chain rule:</p>
+              <p style="margin-left: 20px; font-weight: bold; color: #047857;">dL/dw = (dL/da) * (da/dz) * (dz/dw)  where dz/dw = x</p>
+              <p>Gradient descent updates weights: w = w - eta * (dL/dw).</p>
+            </div>
+          </div>
+
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; margin-bottom: 8px;">🦅 AI Vision Evaluation Breakdown</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px dashed #e2e8f0;">
+                <span>Q1: Backpropagation Chain Rule & Update</span>
+                <span style="color: #065f46; font-weight: 800;">5.0 / 5.0 Marks (✓ Full)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px dashed #e2e8f0;">
+                <span>Q2: QuickSort vs MergeSort Complexity Analysis</span>
+                <span style="color: #065f46; font-weight: 800;">4.75 / 5.0 Marks (✓ Full)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px dashed #e2e8f0;">
+                <span>Q3: ACID Properties & WAL Log Persistence</span>
+                <span style="color: #065f46; font-weight: 800;">5.0 / 5.0 Marks (✓ Full)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0;">
+                <span>Q5: RSA Encryption Equation c = m^e mod n</span>
+                <span style="color: #065f46; font-weight: 800;">4.50 / 5.0 Marks (✓ Full)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tab Panel 3: Average Scoring Student Paper -->
+      <div class="showcase-tab-panel" id="tab-avg-score">
+        <div class="screenshot-paper-frame">
+          <div class="paper-header-strip">
+            <div>
+              <span class="paper-title-text">Student: Priya Nair (Roll: CS-2026-002)</span>
+              <div style="font-size: 0.8rem; color: #64748b;">CS & AI Master Examination</div>
+            </div>
+            <div class="paper-score-pill" style="background: #fef3c7; color: #92400e;">Score: 16.50 / 25.0 (66.0%)</div>
+          </div>
+
+          <div style="background: #fffdfa; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
+            <div style="font-family: 'Caveat', cursive; font-size: 1.2rem; color: #0f172a; line-height: 1.6;">
+              <p style="font-weight: bold;">Q1: Backpropagation</p>
+              <p>Backpropagation is used in deep learning to train neural networks. It consists of forward pass to compute output and loss function, and backward pass to update weights. Weights are adjusted using gradient descent w = w - eta * gradient.</p>
+              <p style="font-size: 0.95rem; color: #b91c1c; margin-top: 6px;">*(Missed explicit partial derivative chain rule breakdown: dL/dw = dL/da * da/dz * dz/dw)*</p>
+            </div>
+          </div>
+
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; margin-bottom: 8px;">🦅 AI Vision Partial Mark Feedback</div>
+            <div style="font-size: 0.82rem; color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 6px;">
+              <strong>Partial Award (+3.25 / 5.0):</strong> Student correctly defined gradient descent concept, but omitted explicit chain rule derivative factors.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tab Panel 4: Class Gradebook -->
+      <div class="showcase-tab-panel" id="tab-gradebook">
+        <div class="screenshot-paper-frame">
+          <div class="paper-header-strip">
+            <div class="paper-title-text">Class Roster Gradebook & Summary Analytics</div>
+            <div style="display: flex; gap: 8px;">
+              <span style="background: #e0f2fe; color: #0369a1; font-weight: 800; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem;">Class Avg: 81.2%</span>
+              <span style="background: #d1fae5; color: #065f46; font-weight: 800; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem;">Pass Rate: 100%</span>
+            </div>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; text-align: left; color: #475569;">
+                <th style="padding: 10px 12px;">Student Name</th>
+                <th style="padding: 10px 12px;">Roll No</th>
+                <th style="padding: 10px 12px;">Score</th>
+                <th style="padding: 10px 12px;">Percentage</th>
+                <th style="padding: 10px 12px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 10px 12px; font-weight: 700;">Aarav Patel</td>
+                <td style="padding: 10px 12px; color: #64748b;">CS-2026-001</td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #047857;">24.25 / 25.0</td>
+                <td style="padding: 10px 12px; font-weight: 700;">97.0%</td>
+                <td style="padding: 10px 12px;"><span style="background: #d1fae5; color: #065f46; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">PASSED (A+)</span></td>
+              </tr>
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 10px 12px; font-weight: 700;">Priya Nair</td>
+                <td style="padding: 10px 12px; color: #64748b;">CS-2026-002</td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #b45309;">16.50 / 25.0</td>
+                <td style="padding: 10px 12px; font-weight: 700;">66.0%</td>
+                <td style="padding: 10px 12px;"><span style="background: #fef3c7; color: #92400e; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">PASSED (B)</span></td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 12px; font-weight: 700;">Anya Sharma</td>
+                <td style="padding: 10px 12px; color: #64748b;">MED-2024-001</td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #047857;">9.25 / 10.0</td>
+                <td style="padding: 10px 12px; font-weight: 700;">92.5%</td>
+                <td style="padding: 10px 12px;"><span style="background: #d1fae5; color: #065f46; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">PASSED (A+)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Key Features Section -->
+  <section class="section-wrapper" id="features">
+    <div class="section-header">
+      <span class="section-eyebrow">Powerful Capabilities</span>
+      <h2 class="section-title">Why Educators Love GradeCrow AI</h2>
+      <p class="section-desc">
+        Built specifically for physical exam sheets, university tests, and classroom assignments.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      
+      <div class="feature-card">
+        <div class="feature-icon-box">🦅</div>
+        <h3 class="feature-title">Multimodal AI Vision</h3>
+        <p class="feature-desc">
+          Powered by Gemini Vision to transcribe challenging cursive, medical terminology, and science scribbles with sharp precision.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">⚖️</div>
+        <h3 class="feature-title">Objective Rubric Marking</h3>
+        <p class="feature-desc">
+          Anchors every point strictly to your predefined marking key—eliminating late-night grading fatigue and subconscious bias.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🎛️</div>
+        <h3 class="feature-title">1-Tap Teacher Overrides</h3>
+        <p class="feature-desc">
+          You are always in total control. Override any score instantly using quick step chips (<code style="background: #e0f2fe; padding: 1px 4px; color: #0369a1; font-weight: 700;">-1.0</code> to <code style="background: #e0f2fe; padding: 1px 4px; color: #0369a1; font-weight: 700;">+1.0</code>) or criteria toggles.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📐</div>
+        <h3 class="feature-title">Math & LaTeX Equations</h3>
+        <p class="feature-desc">
+          Reads mathematical proofs, quadratic derivations, chemical structures, and physical formulas seamlessly.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📱</div>
+        <h3 class="feature-title">Zero App Store Install</h3>
+        <p class="feature-desc">
+          Mobile-first Progressive Web App. Works directly in Safari or Chrome on iPhone, iPad, Android, or laptop.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📥</div>
+        <h3 class="feature-title">1-Click Gradebook Export</h3>
+        <p class="feature-desc">
+          Download formatted CSV marksheets instantly for Excel, Google Sheets, Canvas, or Google Classroom LMS.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Pricing Summary Section -->
+  <section class="section-wrapper" id="pricing" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+    <div class="section-header">
+      <span class="section-eyebrow">Transparent Pricing</span>
+      <h2 class="section-title">Simple Scans for Every Teacher</h2>
+      <p class="section-desc">
+        Start free with 5 daily scans, or unlock unlimited papers with your free Gemini key.
+      </p>
+    </div>
+
+    <div class="pricing-section-container">
+      
+      <!-- Free Tier -->
+      <div class="landing-pricing-card">
+        <div>
+          <div class="pricing-plan-name">Daily Free</div>
+          <div class="pricing-plan-price">₹0 <span>/ forever</span></div>
+          <ul class="pricing-features-list">
+            <li><span class="check-icon">✓</span> 5 Free AI Scans Every Day</li>
+            <li><span class="check-icon">✓</span> Gemini Vision OCR Engine</li>
+            <li><span class="check-icon">✓</span> 1-Tap Teacher Overrides</li>
+            <li><span class="check-icon">✓</span> CSV Marksheet Export</li>
+          </ul>
+        </div>
+        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
+          Start Free Scanning
+        </a>
+      </div>
+
+      <!-- Teacher Pack (Popular) -->
+      <div class="landing-pricing-card featured">
+        <span class="pricing-popular-ribbon">Most Popular</span>
+        <div>
+          <div class="pricing-plan-name">Teacher Pack</div>
+          <div class="pricing-plan-price">₹199 <span>/ 250 scans</span></div>
+          <ul class="pricing-features-list">
+            <li><span class="check-icon">✓</span> 250 AI Exam Paper Scans</li>
+            <li><span class="check-icon">✓</span> ₹0.80 per paper scan rate</li>
+            <li><span class="check-icon">✓</span> Multi-Page Answer Sheet Support</li>
+            <li><span class="check-icon">✓</span> Priority Server AI Queue</li>
+            <li><span class="check-icon">✓</span> Instant UPI / GPay Activation</li>
+          </ul>
+        </div>
+        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
+          Get 250 Scans (₹199)
+        </a>
+      </div>
+
+      <!-- Unlimited BYO Key -->
+      <div class="landing-pricing-card">
+        <div>
+          <div class="pricing-plan-name">Unlimited BYO Key</div>
+          <div class="pricing-plan-price">Free <span>/ custom key</span></div>
+          <ul class="pricing-features-list">
+            <li><span class="check-icon">✓</span> Unlimited Instant Paper Scans</li>
+            <li><span class="check-icon">✓</span> Use your free Google Gemini API key</li>
+            <li><span class="check-icon">✓</span> Zero monthly subscription fees</li>
+            <li><span class="check-icon">✓</span> Direct client-to-API speed</li>
+          </ul>
+        </div>
+        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center; background: #0f172a;">
+          Configure API Key
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FAQ Accordion Section -->
+  <section class="section-wrapper" id="faq">
+    <div class="section-header">
+      <span class="section-eyebrow">Got Questions?</span>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+    </div>
+
+    <div class="faq-grid">
+      
+      <div class="faq-item open">
+        <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>How does GradeCrow handle messy or cursive handwriting?</span>
+          <span>▾</span>
+        </button>
+        <div class="faq-answer-panel">
+          GradeCrow uses Google's latest Gemini Vision AI multimodal model, which has been trained on millions of real-world handwritten documents, medical scripts, and handwritten math formulas. It transcribes cursive and sloppy ink with acute precision.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>Can I override or adjust the marks given by the AI?</span>
+          <span>▾</span>
+        </button>
+        <div class="faq-answer-panel">
+          Yes! GradeCrow is designed with a strict teacher-in-the-loop philosophy. You retain 100% control. You can adjust scores with quick step chips (-1.0 to +1.0), toggle point criteria ticks, or edit OCR text directly.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>Does GradeCrow support multi-page answer sheets?</span>
+          <span>▾</span>
+        </button>
+        <div class="faq-answer-panel">
+          Yes. You can capture multiple pages of a student's answer sheet or upload multi-page PDFs. GradeCrow compresses and analyzes all pages together in a single pass to generate an aggregated total score.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>Do I need to download an app from the App Store?</span>
+          <span>▾</span>
+        </button>
+        <div class="faq-answer-panel">
+          No! GradeCrow is a mobile-first Progressive Web App (PWA). You can use it directly in Safari on iOS, Chrome on Android, or any desktop browser. You can also save it to your phone home screen in 1 tap.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Final CTA Banner -->
+  <div class="cta-banner-section">
+    <h2 class="cta-title">Stop Spending Weekends Grading Papers by Hand</h2>
+    <p class="cta-desc">
+      Join hundreds of teachers using GradeCrow AI for sharp eyes, fair marks, and zero grading fatigue.
+    </p>
+    <a href="index.html" class="btn-cta-banner">
+      <span>🦅</span> Start Scanning Free Papers Now ➔
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div>
+        <div class="footer-brand-title">🦅 GradeCrow AI</div>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: #94a3b8; max-width: 380px;">
+          The world's cleverest AI companion for grading handwritten exams. Empowering educators with sharp vision, rubric fairness, and instant speed.
+        </p>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Quick Links</div>
+        <ul class="footer-links-list">
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#screenshots">Screenshots</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Legal & Contact</div>
+        <ul class="footer-links-list">
+          <li><a href="index.html">Terms of Service</a></li>
+          <li><a href="index.html">Privacy Policy</a></li>
+          <li><a href="index.html">Cancellation & Refund</a></li>
+          <li><a href="index.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2026 GradeCrow. All rights reserved. Powered by Multimodal AI Vision & Google Cloud.
+    </div>
+  </footer>
+
+  <!-- Simple Tab & Accordion Script -->
+  <script>
+    function switchShowcaseTab(event, panelId) {
+      document.querySelectorAll('.showcase-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.showcase-tab-panel').forEach(panel => panel.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      item.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
