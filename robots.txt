@@ -55,4 +55,3 @@ Disallow: /api/verify-payment
 
 # Sitemaps
 Sitemap: https://gradecrow.com/sitemap.xml
-Sitemap: https://gradecrow.vercel.app/sitemap.xml
