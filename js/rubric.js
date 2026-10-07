@@ -2,6 +2,86 @@
 
 export const PRESET_RUBRICS = [
   {
+    id: 'preset-cbse-science-10',
+    subject: 'CBSE Class 10 Science (Physics & Chemistry)',
+    question: 'CBSE Science Mid-Term Examination (Physics & Chemistry - 3 Questions)',
+    examTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+    maxMarks: 15.0,
+    isMultiQuestion: true,
+    questions: [
+      {
+        id: 'q1-ohms-law',
+        number: 1,
+        title: "Q1 (Physics): State Ohm's Law and explain the factors on which the resistance of a cylindrical conductor depends.",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'ol-1', text: "Ohm's Law: At constant temperature, current I is directly proportional to potential difference V (V = IR).", weight: 2.5, keywords: ["ohm's law", "v=ir", "potential difference", "current", "constant temperature", "directly proportional"] },
+          { id: 'ol-2', text: "Resistance Factors: Directly proportional to length (R ∝ L), inversely proportional to area (R ∝ 1/A), and depends on material resistivity (R = ρL/A).", weight: 2.5, keywords: ["length", "area", "resistivity", "rho", "nature of material", "r=rho*l/a"] }
+        ]
+      },
+      {
+        id: 'q2-rusting-iron',
+        number: 2,
+        title: "Q2 (Chemistry): Explain the process of Rusting of Iron (Corrosion) with chemical equation and give two methods to prevent it.",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'ri-1', text: "Rusting Definition & Equation: Iron reacts with oxygen and moisture/water to form hydrated iron(III) oxide (4Fe + 3O2 + 2xH2O -> 2Fe2O3.xH2O).", weight: 2.5, keywords: ["hydrated ferric oxide", "fe2o3", "oxygen", "moisture", "water", "corrosion"] },
+          { id: 'ri-2', text: "Prevention Methods: Galvanization (coating with zinc), painting, applying oil/grease, or alloying (making stainless steel).", weight: 2.5, keywords: ["galvanization", "zinc", "painting", "alloying", "greasing", "oil"] }
+        ]
+      },
+      {
+        id: 'q3-neutralization',
+        number: 3,
+        title: "Q3 (Chemistry): What is a Neutralization Reaction? Give one balanced equation and explain why antacids are taken during acidity.",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'nr-1', text: "Definition & Equation: Reaction between an acid and a base to form salt and water (e.g., HCl + NaOH -> NaCl + H2O).", weight: 2.5, keywords: ["neutralization", "acid", "base", "salt", "water", "hcl", "naoh", "nacl"] },
+          { id: 'nr-2', text: "Antacid Action: Mild basic substances like Magnesium Hydroxide (Milk of Magnesia) neutralize excess hydrochloric acid in the stomach.", weight: 2.5, keywords: ["antacid", "magnesium hydroxide", "milk of magnesia", "excess acid", "stomach", "neutralize"] }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'preset-cbse-humanities-10',
+    subject: 'CBSE Social Science: Indian History & Civics',
+    question: 'CBSE Social Science: Indian Constitution & 1857 Revolt (3 Questions)',
+    examTitle: 'CBSE Class 10 Social Science: History & Civics (15 Marks)',
+    maxMarks: 15.0,
+    isMultiQuestion: true,
+    questions: [
+      {
+        id: 'q1-revolt-1857',
+        number: 1,
+        title: "Q1 (History): Describe the major political, economic, and immediate causes of the Revolt of 1857.",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'rev-1', text: "Political & Economic Causes: Doctrine of Lapse by Lord Dalhousie, heavy land revenue, and ruin of traditional Indian handicrafts.", weight: 2.5, keywords: ["doctrine of lapse", "dalhousie", "land revenue", "annexation", "handicrafts", "economic"] },
+          { id: 'rev-2', text: "Immediate & Military Causes: Introduction of Enfield rifle with greased cartridges suspected of having cow and pig fat, and discontent among Indian sepoys.", weight: 2.5, keywords: ["greased cartridges", "enfield rifle", "sepoys", "mangal pandey", "immediate cause"] }
+        ]
+      },
+      {
+        id: 'q2-fundamental-rights',
+        number: 2,
+        title: "Q2 (Civics): Explain the Fundamental Rights guaranteed to Indian citizens by the Constitution of India.",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'fr-1', text: "Core Rights: Right to Equality (Articles 14-18), Right to Freedom (Articles 19-22), and Right against Exploitation (Articles 23-24).", weight: 2.5, keywords: ["right to equality", "right to freedom", "exploitation", "article 14", "article 19"] },
+          { id: 'fr-2', text: "Remedies & Protections: Right to Freedom of Religion, Cultural & Educational Rights, and Right to Constitutional Remedies (Article 32 - Heart and Soul of Constitution).", weight: 2.5, keywords: ["freedom of religion", "cultural", "constitutional remedies", "article 32", "dr ambedkar"] }
+        ]
+      },
+      {
+        id: 'q3-credit-sources',
+        number: 3,
+        title: "Q3 (Economics): Differentiate between formal and informal sources of credit in India. Why do rural households depend on informal sources?",
+        maxMarks: 5.0,
+        keyPoints: [
+          { id: 'cr-1', text: "Formal vs Informal: Formal (Banks/Cooperatives, monitored by RBI, low interest) vs Informal (Moneylenders/Traders, unregulated, high interest).", weight: 2.5, keywords: ["formal credit", "informal credit", "rbi", "banks", "moneylenders", "interest"] },
+          { id: 'cr-2', text: "Reasons for Rural Dependence: Lack of collateral/security, absence of banks in rural areas, and easy informal documentation.", weight: 2.5, keywords: ["collateral", "security", "rural", "documentation", "moneylender"] }
+        ]
+      }
+    ]
+  },
+  {
     id: 'preset-multi-med-exam',
     subject: 'Medical Sciences Master Paper',
     question: 'Comprehensive Anatomy & Physiology Final Examination (3 Questions)',

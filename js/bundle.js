@@ -540,6 +540,115 @@ RSA is security algorithm used in HTTPS and internet passwords.
 It generates public and private key pairs.
 Messages are encrypted with key so hackers cannot read packets.`,
       inkColor: '#334155'
+    },
+    {
+      id: 'sample-9',
+      studentName: 'Aarav Sharma',
+      rollNo: 'CBSE-10-101',
+      subject: 'CBSE Class 10 Science: Physics & Chemistry',
+      questionId: 'preset-cbse-science-10',
+      questionTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+      maxScore: 15.0,
+      expectedScore: 14.25,
+      description: 'High-Scoring Paper (14.25/15): Clear Ohm\'s law derivation, balanced corrosion equation, and accurate antacid action.',
+      rawText: `Ans Sheet: Class 10 Mid-Term Science - Aarav Sharma (Roll: CBSE-10-101)
+
+Q1: Ohm's Law and Resistance of a Conductor
+Ohm's Law states that at constant temperature, the electric current (I) flowing through a metallic conductor is directly proportional to the potential difference (V) across its ends:
+V ∝ I => V = I * R (where R is Resistance).
+Factors affecting resistance of a cylindrical conductor:
+1. Length: Resistance is directly proportional to length of wire (R ∝ L).
+2. Area of cross-section: Resistance is inversely proportional to cross-sectional area (R ∝ 1/A).
+3. Nature of material: R = ρ * (L / A), where ρ (rho) is electrical resistivity.
+4. Temperature: Resistance increases with increase in temperature for metallic conductors.
+
+Q2: Rusting of Iron (Corrosion)
+When iron is exposed to moist air containing oxygen and moisture/water, a reddish-brown coating called rust is formed.
+Chemical Reaction:
+4Fe(s) + 3O2(g) + 2xH2O(l) -> 2Fe2O3.xH2O(s) (Hydrated Iron(III) Oxide / Rust)
+Prevention Methods:
+1. Galvanization: Coating iron articles with a thin protective layer of zinc metal.
+2. Painting / Greasing: Applying a coat of paint or grease on iron surface to prevent contact with air and moisture.
+
+Q3: Neutralization Reaction & Antacids
+A chemical reaction between an acid and a base to form salt and water is known as a neutralization reaction.
+Example:
+HCl(aq) + NaOH(aq) -> NaCl(aq) + H2O(l)
+Antacids:
+During indigestion, the stomach produces excess hydrochloric acid (HCl) causing pain and irritation. Antacids are mild basic substances like Milk of Magnesia [Mg(OH)2 - Magnesium Hydroxide] that neutralize this excess acid, giving relief.`,
+      inkColor: '#1d4ed8'
+    },
+    {
+      id: 'sample-10',
+      studentName: 'Priya Patel',
+      rollNo: 'CBSE-10-102',
+      subject: 'CBSE Class 10 Science: Physics & Chemistry',
+      questionId: 'preset-cbse-science-10',
+      questionTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+      maxScore: 15.0,
+      expectedScore: 9.50,
+      description: 'Average Paper (9.50/15): Correct Ohm\'s law statement, but omitted resistivity formula and incomplete rusting equation.',
+      rawText: `Ans Sheet: Class 10 Science - Priya Patel (Roll: CBSE-10-102)
+
+Q1: Ohm's Law
+Current passing through a wire is proportional to voltage.
+V = I * R.
+Resistance depends on:
+- Length of wire (longer wire has more resistance)
+- Thickness of wire (thick wire has less resistance)
+- Temperature.
+
+Q2: Rusting of Iron
+Rusting happens when iron is kept in open air with rain. It gets orange rust coating.
+Iron + Oxygen + Water -> Rust.
+Prevention:
+- Painting windows and gates.
+- Putting oil.
+
+Q3: Neutralization Reaction
+When acid and base mix together they cancel each other and make salt and water.
+HCl + NaOH -> NaCl + H2O.
+Antacids are taken for acidity because they are basic and stop stomach burning.`,
+      inkColor: '#0f172a'
+    },
+    {
+      id: 'sample-11',
+      studentName: 'Ananya Sen',
+      rollNo: 'CBSE-10-201',
+      subject: 'CBSE Social Science: History & Civics',
+      questionId: 'preset-cbse-humanities-10',
+      questionTitle: 'CBSE Class 10 Social Science: History & Civics (15 Marks)',
+      maxScore: 15.0,
+      expectedScore: 13.75,
+      description: 'High-Scoring Humanities Paper (13.75/15): Well structured causes of 1857 Revolt and comprehensive 6 Fundamental Rights.',
+      rawText: `Ans Sheet: Class 10 Social Science - Ananya Sen (Roll: CBSE-10-201)
+
+Q1: Causes of the Revolt of 1857 (First War of Indian Independence)
+1. Political Causes:
+- Lord Dalhousie's aggressive 'Doctrine of Lapse' annexed Indian kingdoms like Jhansi, Satara, and Nagpur without natural heirs.
+- Annexation of Awadh on grounds of misgovernance insulted the Nawab and outraged local soldiers.
+2. Economic Causes:
+- British introduced heavy land revenue systems (Zamindari/Ryotwari) ruining Indian peasants.
+- Cheap British machine goods destroyed traditional Indian weavers and handicraftsmen.
+3. Immediate Cause:
+- Introduction of the new Enfield rifle. Sepoys believed the cartridge grease contained cow and pig fat, offending Hindu and Muslim religious beliefs. Mangal Pandey revolted at Barrackpore in March 1857.
+
+Q2: Six Fundamental Rights of Indian Citizens (Constitution of India)
+Guaranteed under Part III of the Constitution:
+1. Right to Equality (Articles 14-18): Equality before law and prohibition of discrimination on grounds of religion, race, caste, sex.
+2. Right to Freedom (Articles 19-22): Freedom of speech, peaceful assembly, forming associations, and movement.
+3. Right against Exploitation (Articles 23-24): Prohibits human trafficking, forced labor (begar), and child labor in hazardous factories.
+4. Right to Freedom of Religion (Articles 25-28): Freedom of conscience and practice/propagation of any religion.
+5. Cultural and Educational Rights (Articles 29-30): Protection of minority language and script.
+6. Right to Constitutional Remedies (Article 32): Allows citizens to move Supreme Court/High Court through writs if rights are violated. Dr. B.R. Ambedkar called Article 32 the 'Heart and Soul of the Constitution'.
+
+Q3: Formal vs Informal Sources of Credit in India
+- Formal Sources: Commercial banks and cooperative societies. Supervised strictly by Reserve Bank of India (RBI), charging lower reasonable interest rates.
+- Informal Sources: Local moneylenders, traders, landlords, and relatives. Unregulated with zero supervision, charging exorbitant interest rates.
+Why rural poor depend on informal lenders:
+- Commercial banks demand collateral (land papers, jewelry) and formal documents which poor rural farmers do not possess.
+- Banks are scarce in remote rural villages, while local moneylenders are approachable anytime without paperwork.`,
+      inkColor: '#1d4ed8'
     }
   ];
 
@@ -558,6 +667,86 @@ Messages are encrypted with key so hackers cannot read packets.`,
 
   // --- 3. PRESETS & RUBRIC MANAGER ---
   const PRESET_RUBRICS = [
+    {
+      id: 'preset-cbse-science-10',
+      subject: 'CBSE Class 10 Science (Physics & Chemistry)',
+      question: 'CBSE Science Mid-Term Examination (Physics & Chemistry - 3 Questions)',
+      examTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+      maxMarks: 15.0,
+      isMultiQuestion: true,
+      questions: [
+        {
+          id: 'q1-ohms-law',
+          number: 1,
+          title: "Q1 (Physics): State Ohm's Law and explain the factors on which the resistance of a cylindrical conductor depends.",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'ol-1', text: "Ohm's Law: At constant temperature, current I is directly proportional to potential difference V (V = IR).", weight: 2.5, keywords: ["ohm's law", "v=ir", "potential difference", "current", "constant temperature", "directly proportional"] },
+            { id: 'ol-2', text: "Resistance Factors: Directly proportional to length (R ∝ L), inversely proportional to area (R ∝ 1/A), and depends on material resistivity (R = ρL/A).", weight: 2.5, keywords: ["length", "area", "resistivity", "rho", "nature of material", "r=rho*l/a"] }
+          ]
+        },
+        {
+          id: 'q2-rusting-iron',
+          number: 2,
+          title: "Q2 (Chemistry): Explain the process of Rusting of Iron (Corrosion) with chemical equation and give two methods to prevent it.",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'ri-1', text: "Rusting Definition & Equation: Iron reacts with oxygen and moisture/water to form hydrated iron(III) oxide (4Fe + 3O2 + 2xH2O -> 2Fe2O3.xH2O).", weight: 2.5, keywords: ["hydrated ferric oxide", "fe2o3", "oxygen", "moisture", "water", "corrosion"] },
+            { id: 'ri-2', text: "Prevention Methods: Galvanization (coating with zinc), painting, applying oil/grease, or alloying (making stainless steel).", weight: 2.5, keywords: ["galvanization", "zinc", "painting", "alloying", "greasing", "oil"] }
+          ]
+        },
+        {
+          id: 'q3-neutralization',
+          number: 3,
+          title: "Q3 (Chemistry): What is a Neutralization Reaction? Give one balanced equation and explain why antacids are taken during acidity.",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'nr-1', text: "Definition & Equation: Reaction between an acid and a base to form salt and water (e.g., HCl + NaOH -> NaCl + H2O).", weight: 2.5, keywords: ["neutralization", "acid", "base", "salt", "water", "hcl", "naoh", "nacl"] },
+            { id: 'nr-2', text: "Antacid Action: Mild basic substances like Magnesium Hydroxide (Milk of Magnesia) neutralize excess hydrochloric acid in the stomach.", weight: 2.5, keywords: ["antacid", "magnesium hydroxide", "milk of magnesia", "excess acid", "stomach", "neutralize"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'preset-cbse-humanities-10',
+      subject: 'CBSE Social Science: Indian History & Civics',
+      question: 'CBSE Social Science: Indian Constitution & 1857 Revolt (3 Questions)',
+      examTitle: 'CBSE Class 10 Social Science: History & Civics (15 Marks)',
+      maxMarks: 15.0,
+      isMultiQuestion: true,
+      questions: [
+        {
+          id: 'q1-revolt-1857',
+          number: 1,
+          title: "Q1 (History): Describe the major political, economic, and immediate causes of the Revolt of 1857.",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'rev-1', text: "Political & Economic Causes: Doctrine of Lapse by Lord Dalhousie, heavy land revenue, and ruin of traditional Indian handicrafts.", weight: 2.5, keywords: ["doctrine of lapse", "dalhousie", "land revenue", "annexation", "handicrafts", "economic"] },
+            { id: 'rev-2', text: "Immediate & Military Causes: Introduction of Enfield rifle with greased cartridges suspected of having cow and pig fat, and discontent among Indian sepoys.", weight: 2.5, keywords: ["greased cartridges", "enfield rifle", "sepoys", "mangal pandey", "immediate cause"] }
+          ]
+        },
+        {
+          id: 'q2-fundamental-rights',
+          number: 2,
+          title: "Q2 (Civics): Explain the Fundamental Rights guaranteed to Indian citizens by the Constitution of India.",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'fr-1', text: "Core Rights: Right to Equality (Articles 14-18), Right to Freedom (Articles 19-22), and Right against Exploitation (Articles 23-24).", weight: 2.5, keywords: ["right to equality", "right to freedom", "exploitation", "article 14", "article 19"] },
+            { id: 'fr-2', text: "Remedies & Protections: Right to Freedom of Religion, Cultural & Educational Rights, and Right to Constitutional Remedies (Article 32 - Heart and Soul of Constitution).", weight: 2.5, keywords: ["freedom of religion", "cultural", "constitutional remedies", "article 32", "dr ambedkar"] }
+          ]
+        },
+        {
+          id: 'q3-credit-sources',
+          number: 3,
+          title: "Q3 (Economics): Differentiate between formal and informal sources of credit in India. Why do rural households depend on informal sources?",
+          maxMarks: 5.0,
+          keyPoints: [
+            { id: 'cr-1', text: "Formal vs Informal: Formal (Banks/Cooperatives, monitored by RBI, low interest) vs Informal (Moneylenders/Traders, unregulated, high interest).", weight: 2.5, keywords: ["formal credit", "informal credit", "rbi", "banks", "moneylenders", "interest"] },
+            { id: 'cr-2', text: "Reasons for Rural Dependence: Lack of collateral/security, absence of banks in rural areas, and easy informal documentation.", weight: 2.5, keywords: ["collateral", "security", "rural", "documentation", "moneylender"] }
+          ]
+        }
+      ]
+    },
     {
       id: 'preset-6-question-master',
       subject: 'Human Physiology & Clinical Science Paper',
