@@ -677,6 +677,102 @@ body {
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.88rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Showcase Question Grid & Cards */
+.scheme-questions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.scheme-question-card {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.scheme-question-card.span-full {
+  grid-column: span 2;
+}
+
+.scheme-question-card h4 {
+  color: #00a991;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.scheme-question-card p {
+  font-size: 0.82rem;
+  color: #475569;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.scheme-question-card .marking-key-box {
+  font-size: 0.78rem;
+  background: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 3px solid #00a991;
+  line-height: 1.45;
+}
+
+.handwriting-sheet-card {
+  background: #fffdfa;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.eval-breakdown-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.eval-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  gap: 0.75rem;
+}
+
+.eval-breakdown-row:last-child {
+  border-bottom: none;
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.showcase-gradebook-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.85rem;
+}
+
+.showcase-gradebook-table th,
+.showcase-gradebook-table td {
+  padding: 10px 12px;
+  white-space: nowrap;
 }
 
 /* ==========================================================================
@@ -1004,6 +1100,7 @@ body {
 }
 
 @media (max-width: 640px) {
+  /* Header */
   .header-container {
     padding: 0.55rem 0.85rem;
     gap: 0.5rem;
@@ -1036,8 +1133,186 @@ body {
   .landing-header .cta-text-mobile {
     display: inline;
   }
-  .hero-headline { font-size: 2.2rem; }
-  .section-title { font-size: 1.8rem; }
-  .features-grid { grid-template-columns: 1fr; }
-  .nav-links { display: none; }
+  .nav-links {
+    display: none;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 3rem 1rem 3.5rem;
+  }
+  .hero-headline {
+    font-size: 2.1rem;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  .hero-subheadline {
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 0.85rem 1.25rem;
+  }
+  .hero-trust-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  /* Section Wrappers & Headings */
+  .section-wrapper {
+    padding: 3rem 1rem;
+  }
+  .section-header {
+    margin-bottom: 2rem;
+  }
+  .section-title {
+    font-size: 1.75rem;
+    line-height: 1.25;
+  }
+  .section-desc {
+    font-size: 0.95rem;
+  }
+
+  /* 3-Step "How It Works" */
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .step-timeline-card {
+    padding: 1.5rem 1.25rem;
+  }
+  .step-card-number {
+    font-size: 2.75rem;
+    right: 12px;
+    top: 8px;
+  }
+  .step-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .step-card-title {
+    font-size: 1.15rem;
+  }
+  .step-card-desc {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Showcase Tabs & Screenshots Preview (Mobile Fix) */
+  .showcase-container {
+    border-radius: 16px;
+  }
+  .showcase-tabs-nav {
+    padding: 0.4rem 0.4rem 0;
+    gap: 0.3rem;
+  }
+  .showcase-tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.76rem;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .showcase-tab-panel {
+    padding: 0.65rem;
+  }
+  .screenshot-paper-frame {
+    padding: 0.65rem;
+    border-radius: 12px;
+  }
+  .paper-header-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 0.85rem;
+  }
+  .paper-title-text {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+  .paper-score-pill {
+    font-size: 0.74rem;
+    padding: 3px 9px;
+    align-self: flex-start;
+  }
+  .scheme-questions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+  .scheme-question-card.span-full {
+    grid-column: span 1 !important;
+  }
+  .scheme-question-card {
+    padding: 0.9rem;
+  }
+  .scheme-question-card h4 {
+    font-size: 0.88rem;
+  }
+  .scheme-question-card p {
+    font-size: 0.8rem;
+  }
+  .handwriting-sheet-card {
+    padding: 0.85rem;
+  }
+  .handwriting-sheet-card .cursive-text {
+    font-size: 1.05rem !important;
+    line-height: 1.45 !important;
+  }
+  .eval-breakdown-card {
+    padding: 0.75rem;
+  }
+  .eval-breakdown-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 6px 0;
+  }
+  .eval-breakdown-row span:last-child {
+    align-self: flex-start;
+  }
+
+  /* Features Grid */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .feature-card {
+    padding: 1.25rem;
+  }
+
+  /* Pricing Cards */
+  .pricing-section-container {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .landing-pricing-card {
+    padding: 1.5rem 1.25rem;
+  }
+  .pricing-plan-price {
+    font-size: 2.1rem;
+  }
+
+  /* FAQ Items */
+  .faq-question {
+    padding: 1rem 1.1rem;
+    font-size: 0.92rem;
+  }
+  .faq-answer {
+    padding: 0 1.1rem 1rem;
+    font-size: 0.85rem;
+  }
 }
