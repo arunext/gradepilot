@@ -2,6 +2,10 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/landing", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

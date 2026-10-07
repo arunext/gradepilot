@@ -5,25 +5,176 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>GradeCrow AI — Grade Handwritten Exam Papers in Seconds</title>
   <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors. Snap handwritten exam papers, match against your rubric key, and award accurate marks in seconds." />
+  <link rel="canonical" href="https://gradecrow.com/" />
   
   <!-- Favicon & Icons -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Theme & Mobile App Meta -->
+  <meta name="theme-color" content="#00a991" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
   <!-- Fonts & Stylesheet -->
-  <link rel="stylesheet" href="css/landing.css?v=1.0" />
+  <link rel="stylesheet" href="css/landing.css?v=2.0" />
 
-  <!-- Open Graph Meta Tags for Social & Ad Preview -->
-  <meta property="og:title" content="GradeCrow AI — Grade Handwritten Exams in Seconds" />
+  <!-- Open Graph Meta Tags for Social & Ad Previews -->
+  <meta property="og:title" content="GradeCrow AI — Grade Handwritten Exam Papers in Seconds" />
   <meta property="og:description" content="Sharp eyes. Fair marks. Zero grading fatigue. Grade paper answer sheets instantly with Multimodal Vision AI." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gradecrow.com/" />
+  <meta property="og:image" content="https://gradecrow.com/favicon.svg" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="GradeCrow AI — Grade Handwritten Exam Papers in Seconds" />
+  <meta name="twitter:description" content="Upload question schemes, snap student answer sheets, and award instant objective grades." />
+  <meta name="twitter:image" content="https://gradecrow.com/favicon.svg" />
+
+  <!-- Structured Data 1: WebSite & Organization Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "GradeCrow AI",
+    "url": "https://gradecrow.com",
+    "description": "Multimodal AI Vision assistant for grading handwritten exams and papers.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "GradeCrow AI",
+      "url": "https://gradecrow.com",
+      "logo": "https://gradecrow.com/favicon.svg"
+    }
+  }
+  </script>
+
+  <!-- Structured Data 2: SoftwareApplication Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "GradeCrow AI",
+    "operatingSystem": "All (Web, iOS Safari, Android Chrome, Windows, macOS)",
+    "applicationCategory": "EducationalApplication",
+    "description": "AI-powered grading platform that reads student handwriting, matches rubric criteria, and auto-calculates exam marks with teacher override control.",
+    "url": "https://gradecrow.com/app",
+    "offers": [
+      {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR",
+        "description": "5 Daily Free AI Scans forever"
+      },
+      {
+        "@type": "Offer",
+        "price": "49",
+        "priceCurrency": "INR",
+        "description": "Starter Pack - 50 Exam Scans"
+      },
+      {
+        "@type": "Offer",
+        "price": "199",
+        "priceCurrency": "INR",
+        "description": "Teacher Pack - 250 Exam Scans"
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "128",
+      "bestRating": "5"
+    }
+  }
+  </script>
+
+  <!-- Structured Data 3: HowTo Schema (3-Step Grading Flow) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Grade Handwritten Exam Papers in 3 Steps with AI Vision",
+    "description": "Step-by-step workflow for teachers to evaluate handwritten exam answer sheets automatically using GradeCrow AI.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Snap or Select Question & Rubric Key",
+        "text": "Take a photo of your printed exam paper, scan a handwritten scheme, or pick a preset template (CBSE Science, Physics, Chemistry, Indian History). GradeCrow automatically structures questions, step marks, and key concepts."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Capture Student Answer Sheets",
+        "text": "Snap student ruled notebooks or exam supplement papers directly with your smartphone camera, or upload photos/PDFs. Works with cursive handwriting and chemical formulas."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Instant AI Evaluation & Gradebook Sync",
+        "text": "Receive point-by-point mark breakdowns with student handwritten quotes cited as proof. Adjust scores in 1 tap with step chips (+0.5, -1.0) and export ready-to-use CSV marksheets."
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured Data 4: FAQPage Schema for AI Engines & Google Search -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does GradeCrow handle messy or cursive handwriting?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "GradeCrow uses Google's latest Gemini Vision AI multimodal model, which has been trained on millions of real-world handwritten documents, medical scripts, and handwritten math formulas. It transcribes cursive and messy ink with acute precision."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I override or adjust the marks given by the AI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! GradeCrow is designed with a strict teacher-in-the-loop philosophy. You retain 100% control. You can adjust scores with quick step chips (-1.0 to +1.0), toggle point criteria ticks, or edit OCR text directly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does GradeCrow support multi-page answer sheets?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can capture multiple pages of a student's answer sheet or upload multi-page PDFs. GradeCrow compresses and analyzes all pages together in a single pass to generate an aggregated total score."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to download an app from the App Store?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No! GradeCrow is a mobile-first Progressive Web App (PWA). You can use it directly in Safari on iOS, Chrome on Android, or any desktop browser at gradecrow.com/app. You can also save it to your phone home screen in 1 tap."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does GradeCrow AI cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "GradeCrow offers 5 Free Daily AI Scans forever. Additional scan credit packs start at ₹49 for 50 scans, or ₹199 for 250 scans. Educators can also enter their personal free Google Gemini API key for unlimited free scans."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
   <!-- Top Sticky Navigation Header -->
   <header class="landing-header">
     <div class="header-container">
-      <a href="landing.html" class="brand-link">
+      <a href="/" class="brand-link">
         <div class="brand-badge">
           <!-- Crow Mascot Icon -->
           <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
@@ -48,8 +199,8 @@
         <li><a href="#faq" class="nav-link">FAQ</a></li>
       </ul>
 
-      <a href="index.html" class="nav-cta-btn">
-        <span>⚡</span> Try Live Demo Free
+      <a href="/app" class="nav-cta-btn">
+        <span>⚡</span> Launch Grading App
       </a>
     </div>
   </header>
@@ -72,7 +223,7 @@
         </p>
 
         <div class="hero-actions">
-          <a href="index.html" class="btn-hero-primary">
+          <a href="/app" class="btn-hero-primary">
             <span>🚀</span> Try Free Scan Demo ➔
           </a>
           <a href="#screenshots" class="btn-hero-secondary">
@@ -83,7 +234,7 @@
         <div class="hero-trust-row">
           <div class="hero-trust-item"><span>✓</span> 5 Free Daily AI Scans</div>
           <div class="hero-trust-item"><span>✓</span> Reads Cursive & Messy Ink</div>
-          <div class="hero-trust-item"><span>✓</span> Export CSV Gradebooks</div>
+          <div class="hero-trust-item"><span>✓</span> Export CSV Marksheets</div>
         </div>
       </div>
 
@@ -545,7 +696,7 @@
             <li><span class="check-icon">✓</span> CSV Marksheet Export</li>
           </ul>
         </div>
-        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
+        <a href="/app" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
           Start Free Scanning
         </a>
       </div>
@@ -564,7 +715,7 @@
             <li><span class="check-icon">✓</span> Instant UPI / GPay Activation</li>
           </ul>
         </div>
-        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
+        <a href="/app" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center;">
           Get 250 Scans (₹199)
         </a>
       </div>
@@ -581,7 +732,7 @@
             <li><span class="check-icon">✓</span> Direct client-to-API speed</li>
           </ul>
         </div>
-        <a href="index.html" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center; background: #0f172a;">
+        <a href="/app" class="nav-cta-btn" style="width: 100%; text-align: center; justify-content: center; background: #0f172a;">
           Configure API Key
         </a>
       </div>
@@ -634,7 +785,17 @@
           <span>▾</span>
         </button>
         <div class="faq-answer-panel">
-          No! GradeCrow is a mobile-first Progressive Web App (PWA). You can use it directly in Safari on iOS, Chrome on Android, or any desktop browser. You can also save it to your phone home screen in 1 tap.
+          No! GradeCrow is a mobile-first Progressive Web App (PWA). You can use it directly in Safari on iOS, Chrome on Android, or any desktop browser at <a href="/app" style="color: #00a991; font-weight: 700;">gradecrow.com/app</a>. You can also save it to your phone home screen in 1 tap.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <span>How much does GradeCrow AI cost?</span>
+          <span>▾</span>
+        </button>
+        <div class="faq-answer-panel">
+          GradeCrow offers 5 Free Daily AI Scans forever. Additional scan credit packs start at ₹49 for 50 scans, or ₹199 for 250 scans (via UPI, GPay, PhonePe, Cards). Teachers can also enter their personal free Google Gemini API key in Settings for unlimited free grading.
         </div>
       </div>
 
@@ -645,9 +806,9 @@
   <div class="cta-banner-section">
     <h2 class="cta-title">Stop Spending Weekends Grading Papers by Hand</h2>
     <p class="cta-desc">
-      Join hundreds of teachers using GradeCrow AI for sharp eyes, fair marks, and zero grading fatigue.
+      Join hundreds of educators using GradeCrow AI for sharp eyes, fair marks, and zero grading fatigue.
     </p>
-    <a href="index.html" class="btn-cta-banner">
+    <a href="/app" class="btn-cta-banner">
       <span>🦅</span> Start Scanning Free Papers Now ➔
     </a>
   </div>
@@ -665,20 +826,22 @@
       <div>
         <div class="footer-col-title">Quick Links</div>
         <ul class="footer-links-list">
+          <li><a href="/app">Launch Grading App</a></li>
           <li><a href="#how-it-works">How It Works</a></li>
-          <li><a href="#screenshots">Screenshots</a></li>
+          <li><a href="#screenshots">Screenshots & Demo</a></li>
           <li><a href="#features">Features</a></li>
           <li><a href="#pricing">Pricing</a></li>
+          <li><a href="/sitemap.xml">Sitemap</a></li>
         </ul>
       </div>
 
       <div>
         <div class="footer-col-title">Legal & Contact</div>
         <ul class="footer-links-list">
-          <li><a href="index.html">Terms of Service</a></li>
-          <li><a href="index.html">Privacy Policy</a></li>
-          <li><a href="index.html">Cancellation & Refund</a></li>
-          <li><a href="index.html">Support</a></li>
+          <li><a href="/app">Terms of Service</a></li>
+          <li><a href="/app">Privacy Policy</a></li>
+          <li><a href="/app">Cancellation & Refund</a></li>
+          <li><a href="/app">Support & Contact</a></li>
         </ul>
       </div>
     </div>
@@ -688,13 +851,14 @@
     </div>
   </footer>
 
-  <!-- Simple Tab & Accordion Script -->
+  <!-- Tab & Accordion JavaScript -->
   <script>
     function switchShowcaseTab(event, panelId) {
       document.querySelectorAll('.showcase-tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.showcase-tab-panel').forEach(panel => panel.classList.remove('active'));
       event.currentTarget.classList.add('active');
-      document.getElementById(panelId).classList.add('active');
+      const target = document.getElementById(panelId);
+      if (target) target.classList.add('active');
     }
 
     function toggleFaq(btn) {

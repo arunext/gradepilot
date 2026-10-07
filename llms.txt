@@ -1,0 +1,25 @@
+# GradeCrow AI
+
+> Sharp eyes. Fair marks. Zero grading fatigue. The world's cleverest AI companion for grading handwritten exams.
+
+## Overview
+GradeCrow AI (https://gradecrow.com) is an educational AI application designed for school teachers, university professors, and coaching faculties (especially in India and globally) to evaluate handwritten student answer sheets and question papers in seconds using Multimodal AI Vision (Google Gemini).
+
+## Core Capabilities
+- **Handwritten OCR & Vision Analysis**: Reads cursive handwriting, messy ink, scientific diagrams, and formulas.
+- **Strict Rubric Anchoring**: Grades step-wise according to professor-defined marking criteria and keyword weightings.
+- **1-Tap Teacher Overrides**: Teachers maintain full control with +/- step chips and criteria toggles.
+- **Multi-Subject Support**: Physics, Chemistry, Mathematics, Medicine, Anatomy, and Humanities (Indian History & Civics).
+- **Class Gradebook Export**: Auto-calculates percentages, class averages, and downloads CSV marksheets.
+- **Zero App Install**: Progressive Web App running directly in mobile Safari and Chrome.
+
+## Key Links
+- Home / Landing Page: https://gradecrow.com/
+- Web App Tool: https://gradecrow.com/app
+- Sitemap: https://gradecrow.com/sitemap.xml
+
+## Pricing (INR)
+- Daily Free Tier: 5 free AI scans every day (No credit card required).
+- Starter Pack: ₹49 for 50 scans.
+- Teacher Pack: ₹199 for 250 scans (₹0.80 per paper).
+- Unlimited Mode: Free by entering your own Google Gemini API key in Settings.

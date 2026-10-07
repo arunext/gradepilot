@@ -2,7 +2,7 @@
   "name": "GradeCrow - Handwritten Exam Grading",
   "short_name": "GradeCrow",
   "description": "The Cleverest Handwritten Exam Grading Platform for Teachers & Professors",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#F8FAFC",
   "theme_color": "#00a991",

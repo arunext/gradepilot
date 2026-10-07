@@ -1,0 +1,58 @@
+# robots.txt for GradeCrow AI (https://gradecrow.com)
+
+# Search Engine Crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# AI Crawlers & Large Language Model Search Engines
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# Default Rule
+User-agent: *
+Allow: /
+Disallow: /api/create-order
+Disallow: /api/verify-payment
+
+# Sitemaps
+Sitemap: https://gradecrow.com/sitemap.xml
+Sitemap: https://gradecrow.vercel.app/sitemap.xml
