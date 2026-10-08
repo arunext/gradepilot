@@ -49,15 +49,61 @@ export class GradebookManager {
     ];
   }
 
+  setAuthManager(authManager) {
+    this.authManager = authManager;
+    if (this.authManager?.user) {
+      this.syncWithSupabase();
+    }
+  }
+
+  async syncWithSupabase() {
+    if (!this.authManager?.client || !this.authManager?.user) return;
+    try {
+      const { data, error } = await this.authManager.client
+        .from('gradebook_records')
+        .select('*')
+        .eq('user_id', this.authManager.user.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        const cloudRecords = data.map(row => ({
+          id: row.id,
+          studentName: row.student_name,
+          rollNo: row.roll_no,
+          subject: row.subject,
+          question: row.question,
+          finalScore: Number(row.final_score),
+          aiScore: Number(row.ai_score),
+          maxMarks: Number(row.max_marks),
+          isOverridden: !!row.is_overridden,
+          professorRemarks: row.professor_remarks || '',
+          breakdown: row.breakdown || null,
+          timestamp: row.timestamp || '',
+          date: row.date || ''
+        }));
+
+        const localMap = new Map();
+        this.records.forEach(r => localMap.set(r.id, r));
+        cloudRecords.forEach(r => localMap.set(r.id, r));
+        this.records = Array.from(localMap.values());
+        this.saveRecords();
+        this.render();
+      }
+    } catch (e) {
+      console.warn('Sync gradebook with Supabase error:', e);
+    }
+  }
+
   saveRecords() {
     try {
+      localStorage.setItem('gradecrow_gradebook_records', JSON.stringify(this.records));
       localStorage.setItem('anatomigrade_gradebook_records', JSON.stringify(this.records));
     } catch (e) {
       console.warn('Failed to persist gradebook', e);
     }
   }
 
-  addRecord(record) {
+  async addRecord(record) {
     // Check if rollNo already exists, update if so, else prepend
     const existingIndex = this.records.findIndex(r => r.rollNo === record.rollNo && r.question === record.question);
     if (existingIndex >= 0) {
@@ -67,19 +113,65 @@ export class GradebookManager {
     }
     this.saveRecords();
     this.render();
+
+    if (this.authManager?.client && this.authManager?.user) {
+      try {
+        await this.authManager.client.from('gradebook_records').upsert({
+          id: record.id,
+          user_id: this.authManager.user.id,
+          student_name: record.studentName || 'Student',
+          roll_no: record.rollNo || '',
+          subject: record.subject || 'Exam',
+          question: record.question || '',
+          final_score: record.finalScore || 0,
+          ai_score: record.aiScore || 0,
+          max_marks: record.maxMarks || 0,
+          is_overridden: !!record.isOverridden,
+          professor_remarks: record.professorRemarks || '',
+          breakdown: record.breakdown || null,
+          timestamp: record.timestamp || '',
+          date: record.date || new Date().toISOString().split('T')[0]
+        });
+      } catch (e) {
+        console.warn('Cloud save gradebook record error:', e);
+      }
+    }
   }
 
-  deleteRecord(id) {
+  async deleteRecord(id) {
     this.records = this.records.filter(r => r.id !== id);
     this.saveRecords();
     this.render();
+
+    if (this.authManager?.client && this.authManager?.user) {
+      try {
+        await this.authManager.client
+          .from('gradebook_records')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', this.authManager.user.id);
+      } catch (e) {
+        console.warn('Cloud delete gradebook record error:', e);
+      }
+    }
   }
 
-  clearAll() {
+  async clearAll() {
     if (confirm('Are you sure you want to clear all gradebook records for this session?')) {
       this.records = [];
       this.saveRecords();
       this.render();
+
+      if (this.authManager?.client && this.authManager?.user) {
+        try {
+          await this.authManager.client
+            .from('gradebook_records')
+            .delete()
+            .eq('user_id', this.authManager.user.id);
+        } catch (e) {
+          console.warn('Cloud clear gradebook records error:', e);
+        }
+      }
     }
   }
 

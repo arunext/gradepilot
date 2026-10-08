@@ -1124,6 +1124,66 @@ Why rural poor depend on informal lenders:
       return this.currentRubric;
     }
 
+    setAuthManager(authManager) {
+      this.authManager = authManager;
+      if (this.authManager?.user) {
+        this.syncWithSupabase();
+      }
+    }
+
+    async syncWithSupabase() {
+      if (!this.authManager?.client || !this.authManager?.user) return;
+      try {
+        const { data, error } = await this.authManager.client
+          .from('rubrics')
+          .select('*')
+          .eq('user_id', this.authManager.user.id)
+          .order('updated_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          data.forEach(row => {
+            const r = {
+              id: row.id,
+              subject: row.subject || 'General',
+              question: row.exam_title || row.subject || 'Custom Marking Scheme',
+              examTitle: row.exam_title || row.subject,
+              maxMarks: Number(row.max_marks) || 5.0,
+              isMultiQuestion: !!row.is_multi_question,
+              isCustom: true,
+              questions: row.questions || [],
+              keyPoints: row.key_points || []
+            };
+            const idx = this.customRubrics.findIndex(cr => cr.id === r.id);
+            if (idx >= 0) this.customRubrics[idx] = r;
+            else this.customRubrics.push(r);
+          });
+          this.saveCustomRubrics();
+          this.notify();
+        }
+      } catch (e) {
+        console.warn('Sync rubrics with Supabase error:', e);
+      }
+    }
+
+    async saveRubricToCloud(rubric) {
+      if (!this.authManager?.client || !this.authManager?.user || !rubric.isCustom) return;
+      try {
+        await this.authManager.client.from('rubrics').upsert({
+          id: rubric.id,
+          user_id: this.authManager.user.id,
+          subject: rubric.subject || 'General',
+          exam_title: rubric.examTitle || rubric.question || '',
+          max_marks: rubric.maxMarks || 5.0,
+          is_multi_question: !!rubric.isMultiQuestion,
+          questions: rubric.questions || [],
+          key_points: rubric.keyPoints || [],
+          updated_at: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Save rubric to cloud error:', e);
+      }
+    }
+
     saveCurrentAsPreset() {
       const existingIdx = this.customRubrics.findIndex(r => r.id === this.currentRubric.id);
       const copy = JSON.parse(JSON.stringify(this.currentRubric));
@@ -1133,6 +1193,7 @@ Why rural poor depend on informal lenders:
       else this.customRubrics.push(copy);
 
       this.saveCustomRubrics();
+      this.saveRubricToCloud(copy);
       this.notify();
       return true;
     }
@@ -2823,29 +2884,116 @@ Respond ONLY with a JSON object in this exact schema:
       ];
     }
 
-    saveRecords() {
-      try { localStorage.setItem('gradecrow_gradebook_records', JSON.stringify(this.records)); } catch (e) {}
+    setAuthManager(authManager) {
+      this.authManager = authManager;
+      if (this.authManager?.user) {
+        this.syncWithSupabase();
+      }
     }
 
-    addRecord(rec) {
+    async syncWithSupabase() {
+      if (!this.authManager?.client || !this.authManager?.user) return;
+      try {
+        const { data, error } = await this.authManager.client
+          .from('gradebook_records')
+          .select('*')
+          .eq('user_id', this.authManager.user.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          const cloudRecords = data.map(row => ({
+            id: row.id,
+            studentName: row.student_name,
+            rollNo: row.roll_no,
+            subject: row.subject,
+            question: row.question,
+            finalScore: Number(row.final_score),
+            aiScore: Number(row.ai_score),
+            maxMarks: Number(row.max_marks),
+            isOverridden: !!row.is_overridden,
+            professorRemarks: row.professor_remarks || '',
+            breakdown: row.breakdown || null,
+            timestamp: row.timestamp || '',
+            date: row.date || ''
+          }));
+
+          const localMap = new Map();
+          this.records.forEach(r => localMap.set(r.id, r));
+          cloudRecords.forEach(r => localMap.set(r.id, r));
+          this.records = Array.from(localMap.values());
+          this.saveRecords();
+          this.render();
+        }
+      } catch (e) {
+        console.warn('Sync gradebook with Supabase error:', e);
+      }
+    }
+
+    async addRecord(rec) {
       const idx = this.records.findIndex(r => r.rollNo === rec.rollNo && r.question === rec.question);
       if (idx >= 0) this.records[idx] = rec;
       else this.records.unshift(rec);
       this.saveRecords();
       this.render();
+
+      if (this.authManager?.client && this.authManager?.user) {
+        try {
+          await this.authManager.client.from('gradebook_records').upsert({
+            id: rec.id,
+            user_id: this.authManager.user.id,
+            student_name: rec.studentName || 'Student',
+            roll_no: rec.rollNo || '',
+            subject: rec.subject || 'Exam',
+            question: rec.question || '',
+            final_score: rec.finalScore || 0,
+            ai_score: rec.aiScore || 0,
+            max_marks: rec.maxMarks || 0,
+            is_overridden: !!rec.isOverridden,
+            professor_remarks: rec.professorRemarks || '',
+            breakdown: rec.breakdown || null,
+            timestamp: rec.timestamp || '',
+            date: rec.date || new Date().toISOString().split('T')[0]
+          });
+        } catch (e) {
+          console.warn('Cloud save gradebook record error:', e);
+        }
+      }
     }
 
-    deleteRecord(id) {
+    async deleteRecord(id) {
       this.records = this.records.filter(r => r.id !== id);
       this.saveRecords();
       this.render();
+
+      if (this.authManager?.client && this.authManager?.user) {
+        try {
+          await this.authManager.client
+            .from('gradebook_records')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', this.authManager.user.id);
+        } catch (e) {
+          console.warn('Cloud delete gradebook record error:', e);
+        }
+      }
     }
 
-    clearAll() {
+    async clearAll() {
       if (confirm('Clear all session gradebook records?')) {
         this.records = [];
         this.saveRecords();
         this.render();
+
+        if (this.authManager?.client && this.authManager?.user) {
+          try {
+            await this.authManager.client
+              .from('gradebook_records')
+              .delete()
+              .eq('user_id', this.authManager.user.id);
+          } catch (e) {
+            console.warn('Cloud clear gradebook records error:', e);
+          }
+        }
       }
     }
 
@@ -3234,15 +3382,24 @@ Respond ONLY with a JSON object in this exact schema:
         container: document.getElementById('gradebook-container')
       });
 
+      this.rubricManager.setAuthManager(this.authManager);
+      this.gradebook.setAuthManager(this.authManager);
+
       this.rubricManager.onChange(() => {
         this.renderRubricUI();
         this.updateQuickRubricSelect();
         this.updateCriteriaPreview();
       });
 
-      this.authManager.onAuthChange(() => {
+      this.authManager.onAuthChange(async ({ user }) => {
         this.updateAuthUI();
         this.updateHeaderStats();
+        if (user) {
+          await Promise.all([
+            this.rubricManager.syncWithSupabase(),
+            this.gradebook.syncWithSupabase()
+          ]);
+        }
       });
 
       this.bindGlobalEvents();

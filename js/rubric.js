@@ -290,6 +290,66 @@ export class RubricManager {
     } catch (e) {}
   }
 
+  setAuthManager(authManager) {
+    this.authManager = authManager;
+    if (this.authManager?.user) {
+      this.syncWithSupabase();
+    }
+  }
+
+  async syncWithSupabase() {
+    if (!this.authManager?.client || !this.authManager?.user) return;
+    try {
+      const { data, error } = await this.authManager.client
+        .from('rubrics')
+        .select('*')
+        .eq('user_id', this.authManager.user.id)
+        .order('updated_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        data.forEach(row => {
+          const r = {
+            id: row.id,
+            subject: row.subject || 'General',
+            question: row.exam_title || row.subject || 'Custom Marking Scheme',
+            examTitle: row.exam_title || row.subject,
+            maxMarks: Number(row.max_marks) || 5.0,
+            isMultiQuestion: !!row.is_multi_question,
+            isCustom: true,
+            questions: row.questions || [],
+            keyPoints: row.key_points || []
+          };
+          const idx = this.customRubrics.findIndex(cr => cr.id === r.id);
+          if (idx >= 0) this.customRubrics[idx] = r;
+          else this.customRubrics.push(r);
+        });
+        this.saveCustomRubrics();
+        this.notify();
+      }
+    } catch (e) {
+      console.warn('Sync rubrics with Supabase error:', e);
+    }
+  }
+
+  async saveRubricToCloud(rubric) {
+    if (!this.authManager?.client || !this.authManager?.user || !rubric.isCustom) return;
+    try {
+      await this.authManager.client.from('rubrics').upsert({
+        id: rubric.id,
+        user_id: this.authManager.user.id,
+        subject: rubric.subject || 'General',
+        exam_title: rubric.examTitle || rubric.question || '',
+        max_marks: rubric.maxMarks || 5.0,
+        is_multi_question: !!rubric.isMultiQuestion,
+        questions: rubric.questions || [],
+        key_points: rubric.keyPoints || [],
+        updated_at: new Date().toISOString()
+      });
+    } catch (e) {
+      console.warn('Save rubric to cloud error:', e);
+    }
+  }
+
   saveToStorage() {
     try {
       localStorage.setItem('gradecrow_active_rubric', JSON.stringify(this.currentRubric));
