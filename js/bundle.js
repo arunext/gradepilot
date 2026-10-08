@@ -1968,22 +1968,26 @@ Why rural poor depend on informal lenders:
             .map(m => m.name.replace(/^models\//, ''))
             .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
 
-          // Sort: Flash models first (fastest, cheapest), then Pro models
-          const flash = valid.filter(m => m.includes('flash'));
-          const pro = valid.filter(m => m.includes('pro') && !m.includes('flash'));
-          const rest = valid.filter(m => !m.includes('flash') && !m.includes('pro'));
+          const PRIORITY = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash-8b', 'gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-2.5-pro'];
+          valid.sort((a, b) => {
+            const idxA = PRIORITY.indexOf(a);
+            const idxB = PRIORITY.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return 0;
+          });
 
-          const sorted = [...flash, ...pro, ...rest];
-          if (sorted.length > 0) {
-            this.cachedModels = sorted;
-            return sorted;
+          if (valid.length > 0) {
+            this.cachedModels = valid;
+            return valid;
           }
         }
       } catch (e) {
         console.warn('Model list query failed:', e);
       }
 
-      return ['gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+      return ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview', 'gemini-1.5-pro'];
     }
 
     async evaluatePaper({ imageSrc, pages = [], pagesBase64 = [], rawText, rubric, sampleMeta, progressCallback = () => {} }) {
@@ -2161,7 +2165,10 @@ Respond ONLY with a valid JSON object matching this exact schema:
                     ...imageParts
                   ]
                 }],
-                generationConfig: { temperature: 0.1 }
+                generationConfig: {
+                  temperature: 0.1,
+                  ...(model.includes('2.5') || model.includes('thinking') ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+                }
               })
             });
 
@@ -2316,7 +2323,8 @@ Respond ONLY with a JSON object in this exact schema:
                 ]
               }],
               generationConfig: {
-                temperature: 0.1
+                temperature: 0.1,
+                ...(model.includes('2.5') || model.includes('thinking') ? { thinkingConfig: { thinkingBudget: 0 } } : {})
               }
             })
           });

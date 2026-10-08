@@ -3,6 +3,17 @@
 
 let cachedServerModels = null;
 
+const PRIORITY_ORDER = [
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash-8b',
+  'gemini-2.5-flash-preview',
+  'gemini-2.0-flash-exp',
+  'gemini-1.5-pro',
+  'gemini-2.5-pro'
+];
+
 async function getServerModels(serverApiKey) {
   if (cachedServerModels && cachedServerModels.length > 0) return cachedServerModels;
   try {
@@ -14,20 +25,24 @@ async function getServerModels(serverApiKey) {
         .map(m => m.name.replace(/^models\//, ''))
         .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
 
-      const flash = valid.filter(m => m.includes('flash'));
-      const pro = valid.filter(m => m.includes('pro') && !m.includes('flash'));
-      const rest = valid.filter(m => !m.includes('flash') && !m.includes('pro'));
+      valid.sort((a, b) => {
+        const idxA = PRIORITY_ORDER.indexOf(a);
+        const idxB = PRIORITY_ORDER.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return 0;
+      });
 
-      const sorted = [...flash, ...pro, ...rest];
-      if (sorted.length > 0) {
-        cachedServerModels = sorted;
-        return sorted;
+      if (valid.length > 0) {
+        cachedServerModels = valid;
+        return valid;
       }
     }
   } catch (e) {
     console.warn('Server model discovery failed:', e);
   }
-  return ['gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  return ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview', 'gemini-1.5-pro'];
 }
 
 export default async function handler(req, res) {
@@ -128,7 +143,8 @@ Respond ONLY with a valid JSON object matching this exact schema:
               ]
             }],
             generationConfig: {
-              temperature: 0.1
+              temperature: 0.1,
+              ...(model.includes('2.5') || model.includes('thinking') ? { thinkingConfig: { thinkingBudget: 0 } } : {})
             }
           })
         });
