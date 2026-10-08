@@ -1968,26 +1968,24 @@ Why rural poor depend on informal lenders:
             .map(m => m.name.replace(/^models\//, ''))
             .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
 
-          const PRIORITY = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash-8b', 'gemini-2.5-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-2.5-pro'];
+          const PRIORITY = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-3-flash-preview', 'gemini-3.5-flash'];
+          valid = valid.filter(m => PRIORITY.includes(m));
           valid.sort((a, b) => {
             const idxA = PRIORITY.indexOf(a);
             const idxB = PRIORITY.indexOf(b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            return 0;
+            return idxA - idxB;
           });
 
           if (valid.length > 0) {
-            this.cachedModels = valid;
-            return valid;
+            this.cachedModels = valid.slice(0, 3);
+            return this.cachedModels;
           }
         }
       } catch (e) {
         console.warn('Model list query failed:', e);
       }
 
-      return ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview', 'gemini-1.5-pro'];
+      return ['gemini-flash-latest', 'gemini-2.5-flash'];
     }
 
     async evaluatePaper({ imageSrc, pages = [], pagesBase64 = [], rawText, rubric, sampleMeta, progressCallback = () => {} }) {
