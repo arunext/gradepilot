@@ -51,6 +51,18 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const serverApiKey = process.env.GEMINI_API_KEY;
+
+  if (req.method === 'GET' && req.query?.debug === 'models') {
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${serverApiKey}`);
+      const listData = await listRes.json();
+      return res.status(200).json(listData);
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
@@ -152,6 +164,8 @@ Respond ONLY with a JSON object matching this schema:
       };
     });
 
+    const modelErrors = [];
+
     for (const model of modelsToTry) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${serverApiKey}`;
@@ -175,6 +189,7 @@ Respond ONLY with a JSON object matching this schema:
 
         if (!response.ok) {
           const errText = await response.text();
+          modelErrors.push(`${model} (${response.status}): ${errText}`);
           lastError = new Error(`${model} (${response.status}): ${errText}`);
           continue;
         }
@@ -259,7 +274,7 @@ Respond ONLY with a JSON object matching this schema:
 
     return res.status(500).json({ 
       error: 'EVALUATION_FAILED', 
-      message: lastError ? lastError.message : 'All model endpoints failed.' 
+      message: modelErrors.length > 0 ? modelErrors.join(' | ') : (lastError ? lastError.message : 'All model endpoints failed.') 
     });
 
   } catch (globalErr) {
