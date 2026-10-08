@@ -2456,7 +2456,15 @@ Respond ONLY with a JSON object in this exact schema:
       let totalScore = 0;
       const studentLines = studentText.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
 
-      rubric.keyPoints.forEach(kp => {
+      const keyPointsList = (rubric?.keyPoints && rubric.keyPoints.length > 0)
+        ? rubric.keyPoints
+        : (rubric?.questions || []).flatMap(q => q.keyPoints || []);
+
+      if (keyPointsList.length === 0) {
+        keyPointsList.push({ id: 'kp-default-1', text: 'Core concept explanation', weight: Number(rubric?.maxMarks || 5.0), keywords: [] });
+      }
+
+      keyPointsList.forEach(kp => {
         const weight = Number(parseFloat(kp.weight || 1.0).toFixed(2));
         const rawCriteria = (kp.text || '').toLowerCase();
 
@@ -2856,35 +2864,42 @@ Respond ONLY with a JSON object in this exact schema:
     }
 
     confirmAndProceed() {
-      const meta = this.currentPaperMeta || {};
-      const evalData = this.currentEvaluation || {};
-      const rubric = this.currentRubric || {};
+      try {
+        const meta = this.currentPaperMeta || {};
+        const evalData = this.currentEvaluation || {};
+        const rubric = this.currentRubric || {};
 
-      const score = typeof this.finalScore === 'number' && !isNaN(this.finalScore)
-        ? Number(this.finalScore.toFixed(2))
-        : (typeof evalData.suggestedScore === 'number' ? Number(evalData.suggestedScore.toFixed(2)) : 0);
+        const score = typeof this.finalScore === 'number' && !isNaN(this.finalScore)
+          ? Number(this.finalScore.toFixed(2))
+          : (typeof evalData.suggestedScore === 'number' ? Number(evalData.suggestedScore.toFixed(2)) : 0);
 
-      const aiScore = typeof evalData.suggestedScore === 'number'
-        ? Number(evalData.suggestedScore.toFixed(2))
-        : score;
+        const aiScore = typeof evalData.suggestedScore === 'number'
+          ? Number(evalData.suggestedScore.toFixed(2))
+          : score;
 
-      const maxMarks = Number(rubric.maxMarks || evalData.maxMarks || 5.0);
+        const maxMarks = Number(rubric.maxMarks || evalData.maxMarks || 5.0);
 
-      this.onAcceptAndNext({
-        id: 'grade-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-        studentName: meta.studentName || 'Student',
-        rollNo: meta.rollNo || ('STU-' + Math.floor(1000 + Math.random() * 9000)),
-        subject: rubric.subject || rubric.examTitle || 'Exam',
-        question: rubric.question || rubric.examTitle || 'Exam Question',
-        finalScore: score,
-        aiScore: aiScore,
-        maxMarks: maxMarks,
-        isOverridden: !!this.isOverridden,
-        professorRemarks: this.professorRemarks || '',
-        breakdown: evalData.points || [],
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().split('T')[0]
-      });
+        this.onAcceptAndNext({
+          id: 'grade-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+          studentName: meta.studentName || 'Student',
+          rollNo: meta.rollNo || ('STU-' + Math.floor(1000 + Math.random() * 9000)),
+          subject: rubric.subject || rubric.examTitle || 'Exam',
+          question: rubric.question || rubric.examTitle || 'Exam Question',
+          finalScore: score,
+          aiScore: aiScore,
+          maxMarks: maxMarks,
+          isOverridden: !!this.isOverridden,
+          professorRemarks: this.professorRemarks || '',
+          breakdown: evalData.points || [],
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toISOString().split('T')[0]
+        });
+      } catch (err) {
+        console.error('Error confirming paper record:', err);
+        if (window.gradeCrowApp?.showNotification) {
+          window.gradeCrowApp.showNotification(`Could not save record: ${err.message}`, 'error');
+        }
+      }
     }
   }
 
@@ -3053,8 +3068,10 @@ Respond ONLY with a JSON object in this exact schema:
 
       let sumScores = 0, sumPct = 0, pass = 0;
       this.records.forEach(r => {
-        sumScores += r.finalScore;
-        const pct = (r.finalScore / r.maxMarks) * 100;
+        const score = Number(r.finalScore) || 0;
+        const max = Number(r.maxMarks) || 5.0;
+        sumScores += score;
+        const pct = max > 0 ? (score / max) * 100 : 0;
         sumPct += pct;
         if (pct >= 50) pass++;
       });
@@ -3127,7 +3144,7 @@ Respond ONLY with a JSON object in this exact schema:
                     <td><strong>${r.rollNo}</strong></td>
                     <td>${r.studentName}</td>
                     <td class="text-truncate" style="max-width: 160px;">${r.subject}</td>
-                    <td><span class="score-pill ${(r.finalScore/r.maxMarks)>=0.5 ? 'score-pass':'score-fail'}">${r.finalScore.toFixed(2)} / ${r.maxMarks.toFixed(1)}</span></td>
+                    <td><span class="score-pill ${(((Number(r.finalScore) || 0) / (Number(r.maxMarks) || 5.0)) >= 0.5) ? 'score-pass':'score-fail'}">${(Number(r.finalScore) || 0).toFixed(2)} / ${(Number(r.maxMarks) || 5.0).toFixed(1)}</span></td>
                     <td><span class="badge-tag ${r.isOverridden ? 'badge-amber':'badge-green'}">${r.isOverridden ? 'Overridden' : 'AI Match'}</span></td>
                     <td class="text-truncate text-muted" style="max-width: 180px;">${r.professorRemarks || '—'}</td>
                     <td class="text-sm text-muted">${r.timestamp}</td>

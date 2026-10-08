@@ -3,15 +3,12 @@
 
 let cachedServerModels = null;
 
-const PRIORITY_ORDER = [
+const ALLOWED_MODELS = [
   'gemini-2.0-flash',
   'gemini-1.5-flash',
   'gemini-2.0-flash-lite',
   'gemini-1.5-flash-8b',
-  'gemini-2.5-flash-preview',
-  'gemini-2.0-flash-exp',
-  'gemini-1.5-pro',
-  'gemini-2.5-pro'
+  'gemini-2.5-flash-preview'
 ];
 
 async function getServerModels(serverApiKey) {
@@ -23,26 +20,24 @@ async function getServerModels(serverApiKey) {
       const valid = (listData.models || [])
         .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
         .map(m => m.name.replace(/^models\//, ''))
-        .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('tts') && !m.includes('text-bison'));
+        .filter(m => ALLOWED_MODELS.includes(m));
 
       valid.sort((a, b) => {
-        const idxA = PRIORITY_ORDER.indexOf(a);
-        const idxB = PRIORITY_ORDER.indexOf(b);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return 0;
+        const idxA = ALLOWED_MODELS.indexOf(a);
+        const idxB = ALLOWED_MODELS.indexOf(b);
+        return idxA - idxB;
       });
 
       if (valid.length > 0) {
-        cachedServerModels = valid;
-        return valid;
+        const candidates = valid.slice(0, 3);
+        cachedServerModels = candidates;
+        return candidates;
       }
     }
   } catch (e) {
     console.warn('Server model discovery failed:', e);
   }
-  return ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview', 'gemini-1.5-pro'];
+  return ['gemini-2.0-flash', 'gemini-1.5-flash'];
 }
 
 export default async function handler(req, res) {
