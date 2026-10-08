@@ -7,6 +7,17 @@
   <meta name="description" content="GradeCrow AI is the sharp-eyed grading companion for teachers and professors. Snap handwritten exam papers, match against your rubric key, and award accurate marks in seconds." />
   <link rel="canonical" href="https://gradecrow.com/" />
   
+  <!-- OAuth Post-Signup/Login Redirect Catch: Forward Supabase auth tokens/code to /app -->
+  <script>
+    (function() {
+      var h = window.location.hash || '';
+      var s = window.location.search || '';
+      if (h.indexOf('access_token=') !== -1 || s.indexOf('code=') !== -1 || h.indexOf('error=') !== -1) {
+        window.location.replace('/app' + s + h);
+      }
+    })();
+  </script>
+  
   <!-- Google Search Console Verification -->
   <meta name="google-site-verification" content="tNTKWzJZwk6l9-92NYulm6TEbY4jsVEvkLZwotYo-U4" />
   

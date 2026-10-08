@@ -142,7 +142,7 @@
 
     async signInWithGoogle() {
       if (!this.client) return alert('Authentication service initializing. Please refresh.');
-      const redirectTo = window.location.origin + window.location.pathname;
+      const redirectTo = window.location.origin + '/app';
       const { error } = await this.client.auth.signInWithOAuth({
         provider: 'google',
         options: {
