@@ -2965,6 +2965,16 @@ Respond ONLY with a JSON object in this exact schema:
       }
     }
 
+    saveRecords() {
+      try {
+        localStorage.setItem('gradecrow_gradebook_records', JSON.stringify(this.records));
+        localStorage.setItem('gradepilot_gradebook_records', JSON.stringify(this.records));
+        localStorage.setItem('anatomigrade_gradebook_records', JSON.stringify(this.records));
+      } catch (e) {
+        console.warn('Failed to persist gradebook to storage:', e);
+      }
+    }
+
     async addRecord(rec) {
       const idx = this.records.findIndex(r => (r.rollNo === rec.rollNo && r.question === rec.question) || (r.id && r.id === rec.id));
       if (idx >= 0) this.records[idx] = rec;
