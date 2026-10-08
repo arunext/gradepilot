@@ -67,7 +67,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
-  const serverApiKey = process.env.GEMINI_API_KEY;
   if (!serverApiKey) {
     return res.status(503).json({ 
       error: 'NO_SERVER_KEY', 
