@@ -3344,6 +3344,31 @@ Respond ONLY with a JSON object in this exact schema:
       return { success: true, message: msg };
     }
 
+    async renderPdfFile(file) {
+      if (this.capture && typeof this.capture.renderPdfFile === 'function') {
+        return await this.capture.renderPdfFile(file);
+      }
+      if (!window.pdfjsLib) {
+        console.warn('PDF.js not available');
+        return [];
+      }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pageImages = [];
+      for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        pageImages.push(canvas.toDataURL('image/jpeg', 0.92));
+      }
+      return pageImages;
+    }
+
     init() {
       // Detect Coupon or Referral Code in URL
       const urlParams = new URLSearchParams(window.location.search);
