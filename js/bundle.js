@@ -2856,17 +2856,32 @@ Respond ONLY with a JSON object in this exact schema:
     }
 
     confirmAndProceed() {
+      const meta = this.currentPaperMeta || {};
+      const evalData = this.currentEvaluation || {};
+      const rubric = this.currentRubric || {};
+
+      const score = typeof this.finalScore === 'number' && !isNaN(this.finalScore)
+        ? Number(this.finalScore.toFixed(2))
+        : (typeof evalData.suggestedScore === 'number' ? Number(evalData.suggestedScore.toFixed(2)) : 0);
+
+      const aiScore = typeof evalData.suggestedScore === 'number'
+        ? Number(evalData.suggestedScore.toFixed(2))
+        : score;
+
+      const maxMarks = Number(rubric.maxMarks || evalData.maxMarks || 5.0);
+
       this.onAcceptAndNext({
-        id: 'grade-' + Date.now(),
-        studentName: this.currentPaperMeta.studentName,
-        rollNo: this.currentPaperMeta.rollNo,
-        subject: this.currentRubric?.subject || 'Anatomy',
-        question: this.currentRubric?.question || 'Exam Question',
-        finalScore: this.finalScore,
-        aiScore: this.currentEvaluation.suggestedScore,
-        maxMarks: this.currentRubric?.maxMarks || 5.0,
-        isOverridden: this.isOverridden,
-        professorRemarks: this.professorRemarks,
+        id: 'grade-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+        studentName: meta.studentName || 'Student',
+        rollNo: meta.rollNo || ('STU-' + Math.floor(1000 + Math.random() * 9000)),
+        subject: rubric.subject || rubric.examTitle || 'Exam',
+        question: rubric.question || rubric.examTitle || 'Exam Question',
+        finalScore: score,
+        aiScore: aiScore,
+        maxMarks: maxMarks,
+        isOverridden: !!this.isOverridden,
+        professorRemarks: this.professorRemarks || '',
+        breakdown: evalData.points || [],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         date: new Date().toISOString().split('T')[0]
       });
@@ -2938,33 +2953,60 @@ Respond ONLY with a JSON object in this exact schema:
     }
 
     async addRecord(rec) {
-      const idx = this.records.findIndex(r => r.rollNo === rec.rollNo && r.question === rec.question);
+      const idx = this.records.findIndex(r => (r.rollNo === rec.rollNo && r.question === rec.question) || (r.id && r.id === rec.id));
       if (idx >= 0) this.records[idx] = rec;
       else this.records.unshift(rec);
       this.saveRecords();
       this.render();
 
-      if (this.authManager?.client && this.authManager?.user) {
+      let client = this.authManager?.client;
+      let user = this.authManager?.user;
+
+      if (client && !user) {
         try {
-          await this.authManager.client.from('gradebook_records').upsert({
+          const { data: { session } } = await client.auth.getSession();
+          if (session?.user) {
+            user = session.user;
+            if (this.authManager) this.authManager.user = user;
+          }
+        } catch (authErr) {
+          console.warn('Could not retrieve current Supabase session:', authErr);
+        }
+      }
+
+      if (client && user) {
+        try {
+          const rowData = {
             id: rec.id,
-            user_id: this.authManager.user.id,
+            user_id: user.id,
             student_name: rec.studentName || 'Student',
             roll_no: rec.rollNo || '',
             subject: rec.subject || 'Exam',
             question: rec.question || '',
-            final_score: rec.finalScore || 0,
-            ai_score: rec.aiScore || 0,
-            max_marks: rec.maxMarks || 0,
+            final_score: Number(rec.finalScore) || 0,
+            ai_score: Number(rec.aiScore) || 0,
+            max_marks: Number(rec.maxMarks) || 0,
             is_overridden: !!rec.isOverridden,
             professor_remarks: rec.professorRemarks || '',
-            breakdown: rec.breakdown || null,
+            breakdown: rec.breakdown || [],
             timestamp: rec.timestamp || '',
             date: rec.date || new Date().toISOString().split('T')[0]
-          });
+          };
+
+          const { data, error } = await client.from('gradebook_records').upsert(rowData);
+          if (error) {
+            console.error('Supabase gradebook_records upsert error:', error);
+            if (window.gradeCrowApp?.showNotification) {
+              window.gradeCrowApp.showNotification(`Cloud sync warning: ${error.message}`, 'error');
+            }
+          } else {
+            console.log('✓ Gradebook record successfully saved to Supabase:', rec.id);
+          }
         } catch (e) {
-          console.warn('Cloud save gradebook record error:', e);
+          console.error('Cloud save gradebook record exception:', e);
         }
+      } else {
+        console.warn('Gradebook record saved locally only (not authenticated in Supabase).');
       }
     }
 
@@ -4365,8 +4407,8 @@ Respond ONLY with a JSON object in this exact schema:
       `;
     }
 
-    handleAcceptAndNext(record) {
-      this.gradebook.addRecord(record);
+    async handleAcceptAndNext(record) {
+      await this.gradebook.addRecord(record);
       this.showNotification(`✓ Score logged: ${record.studentName} (${record.finalScore}/${record.maxMarks})`, 'success');
 
       // Check if we have an active Batch Queue

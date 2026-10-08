@@ -114,26 +114,48 @@ export class GradebookManager {
     this.saveRecords();
     this.render();
 
-    if (this.authManager?.client && this.authManager?.user) {
+    let client = this.authManager?.client;
+    let user = this.authManager?.user;
+
+    if (client && !user) {
       try {
-        await this.authManager.client.from('gradebook_records').upsert({
+        const { data: { session } } = await client.auth.getSession();
+        if (session?.user) {
+          user = session.user;
+          if (this.authManager) this.authManager.user = user;
+        }
+      } catch (authErr) {
+        console.warn('Could not retrieve current Supabase session:', authErr);
+      }
+    }
+
+    if (client && user) {
+      try {
+        const rowData = {
           id: record.id,
-          user_id: this.authManager.user.id,
+          user_id: user.id,
           student_name: record.studentName || 'Student',
           roll_no: record.rollNo || '',
           subject: record.subject || 'Exam',
           question: record.question || '',
-          final_score: record.finalScore || 0,
-          ai_score: record.aiScore || 0,
-          max_marks: record.maxMarks || 0,
+          final_score: Number(record.finalScore) || 0,
+          ai_score: Number(record.aiScore) || 0,
+          max_marks: Number(record.maxMarks) || 0,
           is_overridden: !!record.isOverridden,
           professor_remarks: record.professorRemarks || '',
-          breakdown: record.breakdown || null,
+          breakdown: record.breakdown || [],
           timestamp: record.timestamp || '',
           date: record.date || new Date().toISOString().split('T')[0]
-        });
+        };
+
+        const { data, error } = await client.from('gradebook_records').upsert(rowData);
+        if (error) {
+          console.error('Supabase gradebook_records upsert error:', error);
+        } else {
+          console.log('✓ Gradebook record saved to Supabase:', record.id);
+        }
       } catch (e) {
-        console.warn('Cloud save gradebook record error:', e);
+        console.error('Cloud save gradebook record error:', e);
       }
     }
   }
