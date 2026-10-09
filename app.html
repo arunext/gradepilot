@@ -21,8 +21,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="GradeCrow" />
 
+  <!-- Authentic Google Handwriting Fonts for Multi-Student Exam Papers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Reenie+Beanie&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="css/main.css?v=9.2" />
+  <link rel="stylesheet" href="css/main.css?v=9.3" />
   <link rel="stylesheet" href="css/capture.css?v=9.2" />
   <link rel="stylesheet" href="css/review.css?v=9.2" />
   <link rel="stylesheet" href="css/rubric.css?v=9.2" />
@@ -483,17 +488,98 @@
     </div>
   </div>
 
+  <!-- Modal: Hands-Free Continuous Live Camera Scanner -->
+  <div class="modal-backdrop hidden" id="modal-live-camera-scanner" style="z-index: 9999;">
+    <div class="camera-scanner-modal-card">
+      <!-- Camera Header Bar -->
+      <div class="camera-scanner-header">
+        <div class="camera-scanner-branding">
+          <span class="live-pulse-dot"></span>
+          <span class="camera-scanner-title">⚡ Hands-Free Auto-Scan</span>
+        </div>
+        <div class="camera-scanner-top-actions">
+          <button type="button" class="btn-autoscan-toggle active" id="btn-toggle-autoscan" title="Toggle Auto-Scan on/off">
+            <span class="autoscan-icon">⚡</span>
+            <span class="autoscan-state-label" id="autoscan-state-label">Auto-Scan: <strong>ON</strong></span>
+          </button>
+          <button type="button" class="btn-cam-tool" id="btn-switch-live-camera" title="Switch Front/Back Camera">🔄</button>
+          <button type="button" class="btn-cam-tool" id="btn-close-live-camera" title="Close Scanner">✕</button>
+        </div>
+      </div>
+
+      <!-- Live Viewfinder with Document Frame & HUD -->
+      <div class="camera-scanner-viewfinder" id="camera-scanner-viewfinder">
+        <video id="live-scanner-video" playsinline autoplay muted></video>
+        <canvas id="live-motion-canvas" class="hidden"></canvas>
+        <canvas id="live-snap-canvas" class="hidden"></canvas>
+
+        <!-- Document Framing Guide -->
+        <div class="scanner-doc-guide">
+          <span class="bracket top-left"></span>
+          <span class="bracket top-right"></span>
+          <span class="bracket bottom-left"></span>
+          <span class="bracket bottom-right"></span>
+          <div class="scanner-sweep-laser" id="scanner-sweep-laser"></div>
+        </div>
+
+        <!-- Realtime Status HUD -->
+        <div class="scanner-hud-banner" id="scanner-hud-banner">
+          <span class="hud-emoji" id="hud-status-emoji">📖</span>
+          <div class="hud-status-text-wrap">
+            <span class="hud-status-text" id="hud-status-text">Hold paper steady within frame</span>
+            <div class="hud-progress-bar-container">
+              <div class="hud-progress-bar" id="hud-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flash Shutter Effect -->
+        <div class="camera-flash-overlay" id="camera-flash-overlay"></div>
+      </div>
+
+      <!-- Bottom Tray: Captured Pages + Controls -->
+      <div class="camera-scanner-tray">
+        <div class="scanner-tray-strip-wrap">
+          <div class="scanner-tray-strip" id="scanner-tray-strip">
+            <!-- Dynamic thumbnails of captured pages -->
+          </div>
+        </div>
+        <div class="scanner-tray-actions">
+          <button type="button" class="btn-manual-snap-shutter" id="btn-manual-live-snap" title="Manual Snap">
+            <div class="shutter-outer-ring">
+              <div class="shutter-inner-dot"></div>
+            </div>
+            <span>Manual Snap</span>
+          </button>
+          <button type="button" class="btn-finish-scanning-primary" id="btn-finish-scanning" style="display: none;">
+            <span>Done Scanning (<strong id="tray-page-count-badge">0</strong> Pages) ➔</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Sample Papers Picker -->
   <div class="modal-backdrop hidden" id="modal-sample-papers">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 740px;">
       <div class="modal-header">
-        <h3>Select a Demo Student Paper</h3>
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem;">Select a Demo Student Paper</h3>
+          <p class="text-secondary" style="font-size: 0.82rem; margin: 4px 0 0;">
+            Test GradeCrow's multimodal OCR on authentic messy term exams, strikethroughs, and standard papers:
+          </p>
+        </div>
         <button type="button" class="btn-icon-subtle" id="btn-close-samples-modal">✕</button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-          Pick a sample handwritten answer sheet to test GradeCrow's sharp AI evaluation:
-        </p>
+        <!-- Filter Tabs -->
+        <div class="sample-filter-tabs" id="sample-filter-tabs">
+          <button type="button" class="filter-chip active" data-filter="all">All Papers</button>
+          <button type="button" class="filter-chip chip-highlight" data-filter="messy">🔥 Rushed Term Exams (Messy)</button>
+          <button type="button" class="filter-chip" data-filter="cbse">CBSE 10 Science</button>
+          <button type="button" class="filter-chip" data-filter="cs">CS &amp; AI</button>
+          <button type="button" class="filter-chip" data-filter="med">Medicine</button>
+        </div>
         <div class="sample-papers-modal-grid" id="sample-papers-modal-grid"></div>
       </div>
     </div>
@@ -685,6 +771,6 @@
   <div id="app-toast" class="app-toast"></div>
 
   <!-- Zero-CORS Browser-Compatible Consolidated Bundle -->
-  <script src="js/bundle.js?v=10.3"></script>
+  <script src="js/bundle.js?v=11.0"></script>
 </body>
 </html>

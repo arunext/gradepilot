@@ -299,10 +299,20 @@
     });
   }
 
-  function generateHandwrittenPaperSvg({ studentName, rollNo, subject, lines, inkColor = '#1e3a8a' }) {
+  function generateHandwrittenPaperSvg({
+    studentName,
+    rollNo,
+    subject,
+    lines,
+    inkColor = '#1e3a8a',
+    fontFamily = null,
+    headerType = null,
+    slant = -2.5
+  }) {
+    const activeFont = fontFamily || "'Caveat', 'Comic Sans MS', cursive, sans-serif";
     const lineSpacing = 34;
-    const startY = 180;
-    const totalHeight = Math.max(900, startY + lines.length * lineSpacing + 220);
+    const startY = 190;
+    const totalHeight = Math.max(960, startY + lines.length * lineSpacing + 200);
 
     let ruledLinesSvg = '';
     for (let y = 140; y < totalHeight - 40; y += lineSpacing) {
@@ -310,40 +320,125 @@
     }
 
     let textSvg = '';
-    lines.forEach((line, idx) => {
+    lines.forEach((rawLine, idx) => {
       const y = startY + idx * lineSpacing;
-      const isHeader = line.startsWith('##') || line.startsWith('Q.') || line.startsWith('Ans:');
-      const cleanText = line.replace(/^##\s*/, '');
-      const xOffset = line.startsWith('  -') ? 140 : line.startsWith('  ') ? 120 : 100;
-      const fontSize = isHeader ? 17 : 15;
+      const isHeader = rawLine.startsWith('##') || rawLine.startsWith('Q.') || rawLine.startsWith('Ans') || rawLine.startsWith('Q1') || rawLine.startsWith('Q2') || rawLine.startsWith('Q3') || rawLine.startsWith('Q4') || rawLine.startsWith('Q5');
+      const isCaret = rawLine.trim().startsWith('^');
+      const cleanLine = rawLine.replace(/^##\s*/, '');
+      
+      const organicSlant = slant + Math.sin(idx * 0.9) * 0.8;
+      const randomDy = Math.sin(idx * 2.3) * 2.2;
+      const xBase = cleanLine.startsWith('  -') ? 140 : cleanLine.startsWith('  ') ? 120 : isCaret ? 130 : 100;
+      const fontSize = isHeader ? 18 : isCaret ? 14.5 : 16;
       const fontWeight = isHeader ? '700' : '500';
-      const randomRot = ((idx % 5) - 2) * 0.35 - 2;
 
-      textSvg += `
-        <g transform="rotate(${randomRot}, ${xOffset}, ${y})">
-          <text x="${xOffset}" y="${y}" font-family="'Caveat', 'Comic Sans MS', cursive, sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}">
-            ${escapeXml(cleanText)}
-          </text>
+      let lineContent = cleanLine;
+      let strikethroughSvg = '';
+
+      const strikeMatch = lineContent.match(/~~([^~]+)~~/);
+      if (strikeMatch) {
+        const strikeText = strikeMatch[1];
+        const strikeIndex = lineContent.indexOf('~~');
+        const textBefore = lineContent.substring(0, strikeIndex);
+        const approxXBefore = xBase + textBefore.length * 8.5;
+        const strikeWidth = Math.max(45, strikeText.length * 9.5);
+
+        strikethroughSvg = `
+          <g opacity="0.9">
+            <path d="M ${approxXBefore - 4} ${y + randomDy - 4} 
+                     Q ${approxXBefore + strikeWidth * 0.25} ${y + randomDy - 9}, ${approxXBefore + strikeWidth * 0.5} ${y + randomDy - 3} 
+                     T ${approxXBefore + strikeWidth + 6} ${y + randomDy - 6}" 
+                  stroke="${inkColor}" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path d="M ${approxXBefore + strikeWidth + 4} ${y + randomDy - 1} 
+                     Q ${approxXBefore + strikeWidth * 0.6} ${y + randomDy + 5}, ${approxXBefore - 2} ${y + randomDy + 2}" 
+                  stroke="${inkColor}" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+            <path d="M ${approxXBefore} ${y + randomDy - 2} L ${approxXBefore + strikeWidth} ${y + randomDy - 2}" 
+                  stroke="${inkColor}" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+          </g>
+        `;
+        lineContent = lineContent.replace(/~~([^~]+)~~/, '$1');
+      }
+
+      if (isCaret) {
+        const caretY = y + randomDy - 10;
+        textSvg += `
+          <g transform="rotate(${organicSlant}, ${xBase}, ${y})">
+            <path d="M ${xBase - 15} ${caretY + 8} L ${xBase - 8} ${caretY - 2} L ${xBase - 1} ${caretY + 8}" stroke="${inkColor}" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <text x="${xBase}" y="${caretY}" font-family="${activeFont}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}" letter-spacing="0.3">
+              ${escapeXml(lineContent.replace(/^\^\s*/, ''))}
+            </text>
+          </g>
+        `;
+      } else {
+        textSvg += `
+          <g transform="rotate(${organicSlant}, ${xBase}, ${y})">
+            <text x="${xBase}" y="${y + randomDy}" font-family="${activeFont}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}" letter-spacing="0.3">
+              ${escapeXml(lineContent)}
+            </text>
+            ${strikethroughSvg}
+          </g>
+        `;
+      }
+    });
+
+    let headerSvg = '';
+    if (headerType === 'cbse') {
+      headerSvg = `
+        <g transform="translate(100, 26)">
+          <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">CENTRAL BOARD OF SECONDARY EDUCATION (CBSE) — TERM II</text>
+          <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+          <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Exam Date: Term Finals 2026 | Max Time: 3 Hours</text>
+          <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+          <text x="528" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">TERM EXAM 2026</text>
+          <text x="532" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">VERIFIED COPY</text>
         </g>
       `;
-    });
+    } else if (headerType === 'cs_finals') {
+      headerSvg = `
+        <g transform="translate(100, 26)">
+          <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">DEPARTMENT OF COMPUTER SCIENCE &amp; ENGG — SEMESTER FINALS</text>
+          <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+          <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Course: CS-501 | Semester Final Examination</text>
+          <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+          <text x="532" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">SEMESTER 2026</text>
+          <text x="536" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">EVALUATED</text>
+        </g>
+      `;
+    } else {
+      headerSvg = `
+        <g transform="translate(100, 26)">
+          <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">FACULTY OF MEDICINE — UNIVERSITY PROFESSIONAL EXAM</text>
+          <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+          <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Batch: MBBS Professional Assessment</text>
+          <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+          <text x="528" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">DEPARTMENT OF</text>
+          <text x="534" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">ANATOMY</text>
+        </g>
+      `;
+    }
 
     return `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 ${totalHeight}" width="100%" height="100%">
+        <defs>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&amp;family=Kalam:wght@400;700&amp;family=Reenie+Beanie&amp;family=Shadows+Into+Light&amp;family=Inter:wght@400;600;700;800&amp;display=swap');
+          </style>
+          <linearGradient id="page-shadow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#000" stop-opacity="0.05"/>
+            <stop offset="2%" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="98%" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0.06"/>
+          </linearGradient>
+        </defs>
         <rect width="800" height="${totalHeight}" fill="#fffdfa"/>
+        <rect width="800" height="${totalHeight}" fill="url(#page-shadow)"/>
         <line x1="80" y1="0" x2="80" y2="${totalHeight}" stroke="#f87171" stroke-width="1.8"/>
-        <line x1="83" y1="0" x2="83" y2="${totalHeight}" stroke="#f87171" stroke-width="0.8"/>
+        <line x1="83" y1="0" x2="83" y2="${totalHeight}" stroke="#f87171" stroke-width="0.8" opacity="0.6"/>
         <line x1="0" y1="130" x2="800" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
-
-        <g transform="translate(100, 30)">
-          <text x="0" y="20" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#0f172a">FACULTY OF MEDICINE - INTERNAL ASSESSMENT</text>
-          <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
-          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
-          <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Date: 16-Aug-2026</text>
-          <circle cx="560" cy="40" r="30" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-12, 560, 40)"/>
-          <text x="532" y="38" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#dc2626" transform="rotate(-12, 560, 40)">DEPARTMENT OF</text>
-          <text x="536" y="49" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#dc2626" transform="rotate(-12, 560, 40)">ANATOMY</text>
-        </g>
+        ${headerSvg}
         ${ruledLinesSvg}
         ${textSvg}
       </svg>
@@ -664,6 +759,144 @@ Why rural poor depend on informal lenders:
 - Commercial banks demand collateral (land papers, jewelry) and formal documents which poor rural farmers do not possess.
 - Banks are scarce in remote rural villages, while local moneylenders are approachable anytime without paperwork.`,
       inkColor: '#1d4ed8'
+    },
+    {
+      id: 'sample-messy-cbse-vikram',
+      studentName: 'Vikram Malhotra',
+      rollNo: 'CBSE-10-103',
+      subject: 'CBSE Class 10 Science: Physics & Chemistry',
+      questionId: 'preset-cbse-science-10',
+      questionTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+      category: 'cbse',
+      isMessy: true,
+      tag: '🔥 Rushed Term Exam',
+      fontFamily: "'Kalam', cursive",
+      headerType: 'cbse',
+      slant: -3.0,
+      maxScore: 15.0,
+      expectedScore: 13.50,
+      description: '🔥 Rushed Mid-Term (CBSE 10): Authentic exam speed, strikethrough formula correction, caret insertions.',
+      rawText: `Ans Sheet: CBSE Class 10 Annual Exam - Vikram Malhotra (Roll: CBSE-10-103)
+
+Q1: Ohm's Law and Resistance of a Conductor
+Ohm's Law: At constant temp, current I is proportional to Voltage V (V = I * R).
+Factors affecting resistance:
+1. Length: Resistance increases with length of wire (R ∝ L).
+2. Area of cross section: ~~R ∝ A~~
+   ^ R ∝ 1/A (thick wire has LESS resistance, thin wire has more)
+3. Formula: ~~R = rho * (A / L)~~
+   ^ R = ρ * (L / A) where ρ = resistivity of material.
+4. Temperature: R increases with rise in temperature for metals.
+
+Q2: Rusting of Iron (Corrosion)
+Rusting is slow chemical reaction forming reddish brown powder.
+~~Rusting happens in dry air alone~~
+   ^ Rusting requires BOTH Oxygen (O2) and Water/moisture (H2O)!
+Chemical Reaction:
+4Fe(s) + 3O2(g) + 2xH2O(l) -> 2Fe2O3.xH2O (Hydrated ferric oxide / rust)
+Prevention:
+1. Galvanisation: Coating zinc layer on iron sheets.
+2. Painting: Applying oil paint to stop contact with air & rain.
+
+Q3: Neutralization Reaction & Antacids
+When acid reacts with base to form salt and water.
+HCl + NaOH -> NaCl + H2O
+Antacids: Stomach produces excess HCl causing burning pain & acidity.
+Antacids are mild basic substances like Milk of Magnesia [Mg(OH)2].
+They neutralize the extra acid giving fast relief.`,
+      inkColor: '#1e40af'
+    },
+    {
+      id: 'sample-messy-cs-devika',
+      studentName: 'Devika Sengupta',
+      rollNo: 'CS-2026-004',
+      subject: 'Computer Science & AI Master Paper',
+      questionId: 'preset-multi-cs-exam',
+      questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+      category: 'cs',
+      isMessy: true,
+      tag: '✏️ Hurried Pencil & Gel',
+      fontFamily: "'Reenie Beanie', cursive",
+      headerType: 'cs_finals',
+      slant: -1.2,
+      maxScore: 25.0,
+      expectedScore: 21.50,
+      description: '✏️ Hurried Pencil & Gel (CS Finals): Fast derivations, scratched-out complexity error, margin arrow.',
+      rawText: `Ans Sheet: CS & AI Master Exam - Devika Sengupta (Roll: CS-2026-004)
+
+Q1: Backpropagation in Deep Neural Networks
+Forward pass computes layer activations z = W*x + b and prediction y_hat.
+Loss L is computed against target y using MSE or Cross-Entropy loss.
+Backward pass computes gradients via calculus chain rule:
+dL/dW = (dL/da) * (da/dz) * (dz/dW) where dz/dW = x.
+Weight update: W = W - eta * (dL/dW). Gradients flow back layer by layer.
+
+Q2: Time & Space Complexity: QuickSort vs MergeSort
+1. MergeSort: Divide & conquer algorithm.
+   - Best/Avg/Worst Time: O(N log N) in all cases.
+   - Space: O(N) auxiliary buffer for merging subarrays.
+2. QuickSort: Partitioning around chosen pivot element.
+   - Average Time: O(N log N).
+   - ~~Worst Time: O(N log N)~~
+     ^ Worst Time: O(N^2) when array sorted and bad pivot chosen!
+   - Space: O(log N) recursion call stack (in-place).
+
+Q3: ACID Properties in RDBMS
+- Atomicity: All or nothing transaction. If query fails, rollback completely.
+- Consistency: Database transitions between valid states adhering to FK schema.
+- Isolation: Concurrent sessions run independently without dirty reads.
+- Durability: Committed updates written to non-volatile WAL log.
+
+Q4: Object-Oriented Programming (OOP) Principles
+1. Encapsulation: Bundling data and methods, private fields with getters/setters.
+2. Abstraction: Hiding implementation details via interfaces & abstract classes.
+3. Inheritance: Subclass inherits behavior and fields from superclass.
+4. Polymorphism: Method overriding at runtime and overloading at compile-time.
+
+Q5: RSA Public Key Cryptography
+Select large primes p, q. Modulus n = p*q. Euler phi(n) = (p-1)*(q-1).
+Public key exponent e coprime to phi(n).
+Private key d: ~~e * d = 0 mod phi~~
+   ^ e * d ≡ 1 mod phi(n).
+Encryption: c = m^e mod n (using public key (e,n)).
+Decryption: m = c^d mod n (using private key (d,n)).`,
+      inkColor: '#374151'
+    },
+    {
+      id: 'sample-messy-anatomy-arjun',
+      studentName: 'Arjun Ramaswamy',
+      rollNo: 'MED-2024-006',
+      subject: 'Human Anatomy - Upper Limb & Axilla',
+      questionId: 'preset-brachial-plexus',
+      questionTitle: 'Describe the formation, relations, branches, and applied anatomy of the Brachial Plexus.',
+      category: 'med',
+      isMessy: true,
+      tag: '⚠️ Last 15-Min Rush',
+      fontFamily: "'Shadows Into Light', cursive",
+      headerType: 'medical',
+      slant: -3.8,
+      maxScore: 5.0,
+      expectedScore: 4.50,
+      description: '⚠️ Last 15-Min Rush: Fast angular handwriting, heavy scribbles over wrong nerve roots, hurried abbreviations.',
+      rawText: `Ans Sheet: Anatomy Paper I - Arjun Ramaswamy (Roll: MED-2024-006)
+
+Q: Describe Boundaries of Axilla & Nerve Relations
+Axilla is a pyramid shaped space between upper thorax and arm.
+Boundaries:
+1. Anterior wall: Pectoralis major, Pectoralis minor, Subclavius muscle.
+2. Posterior wall: Subscapularis, Latissimus dorsi, Teres major.
+   ~~Posterior cord gives ulnar nerve~~
+   ^ Post cord gives Radial & Axillary nerves! (Ulnar is medial cord)
+3. Medial wall: Upper 4 ribs with intercostal muscles, Serratus anterior.
+4. Lateral wall: Very narrow! Intertubercular sulcus of humerus,
+   Coracobrachialis, Short head of biceps brachii.
+5. Apex (Cervico-axillary canal): Clavicle ant., 1st rib medially, Scapula post.
+   Base: Axillary fascia and skin of armpit concavity.
+
+Applied Anatomy:
+- Axillary abscess: Drain by incision through floor/base avoiding axillary vessels.
+- Axillary lymph node dissection in breast cancer clearance.`,
+      inkColor: '#111827'
     }
   ];
 
@@ -675,7 +908,10 @@ Why rural poor depend on informal lenders:
       rollNo: sample.rollNo,
       subject: sample.subject,
       lines: lines,
-      inkColor: sample.inkColor || '#1e3a8a'
+      inkColor: sample.inkColor || '#1e3a8a',
+      fontFamily: sample.fontFamily,
+      headerType: sample.headerType,
+      slant: sample.slant || -2.5
     });
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
   }
@@ -1422,7 +1658,17 @@ Why rural poor depend on informal lenders:
       this.batchQueue = []; // [{ meta, pages }, ...]
       this.activeBatchIndex = 0;
 
-      this.stream = null;
+      // Hands-Free Auto-Scan state
+      this.scannerStream = null;
+      this.motionCheckTimer = null;
+      this.sessionCapturedPages = [];
+      this.autoScanEnabled = true;
+      this.facingMode = 'environment';
+      this.waitingForPageTurn = false;
+      this.stillnessStartTime = null;
+      this.lastCaptureTime = 0;
+      this.prevLuminanceData = null;
+
       this.zoom = 1;
       this.rotation = 0;
       this.panX = 0;
@@ -1441,10 +1687,10 @@ Why rural poor depend on informal lenders:
       if (!this.container) return;
 
       if (!this.currentImageSrc) {
-        // STATE 1: Ready to Upload / Take Photo / Drop PDFs
+        // STATE 1: Ready to Auto-Scan / Upload / Drop PDFs
         this.container.innerHTML = `
           <div class="capture-container-inner">
-            <!-- Batch Queue Control Bar (Hidden unless multiple student papers loaded) -->
+            <!-- Batch Queue Control Bar -->
             <div class="batch-queue-bar hidden" id="batch-queue-bar">
               <div class="batch-info">
                 <span class="batch-icon">📦</span>
@@ -1459,19 +1705,26 @@ Why rural poor depend on informal lenders:
             <div class="capture-actions-grid">
               <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="file-input-hidden" />
               <input type="file" id="gallery-file-input" accept="image/*,.pdf" multiple class="file-input-hidden" />
-                      <!-- Take Photo / Scan Document Card -->
-              <div class="action-card-camera" id="btn-take-photo-direct">
-                <div class="action-card-icon">📸</div>
-                <div class="action-card-title">Scan Document / Take Photo</div>
-                <div class="action-card-subtitle">Launch mobile document camera or pick PDF / image</div>
+
+              <!-- Primary Card: Hands-Free Auto-Scan -->
+              <div class="action-card-camera action-card-autoscan" id="btn-start-autoscan">
+                <div class="badge-card-recommend">⚡ Recommended</div>
+                <div class="action-card-icon">⚡📷</div>
+                <div class="action-card-title">Hands-Free Auto-Scan</div>
+                <div class="action-card-subtitle">Continuous camera: auto-snaps each page when still. Zero tapping needed.</div>
               </div>
 
-              <!-- Upload File Card -->
+              <!-- Secondary Card: Upload Image / PDF -->
               <div class="action-card-upload" id="btn-browse-file">
                 <div class="action-card-icon">📁</div>
                 <div class="action-card-title">Upload Image / PDF</div>
-                <div class="action-card-subtitle">Supports multi-page PDFs, JPG, PNG</div>
+                <div class="action-card-subtitle">Supports multi-page PDFs, JPG, PNG from device gallery or single snap</div>
               </div>
+            </div>
+
+            <div class="demo-paper-prompt-bar">
+              <span>💡 Want to test first?</span>
+              <button type="button" class="link-demo-paper" id="btn-quick-samples-link">Select Demo Paper (Messy &amp; Standard)</button>
             </div>
           </div>
         `;
@@ -1539,7 +1792,7 @@ Why rural poor depend on informal lenders:
                   <span>✨</span> Grade with AI ➔
                 </button>
                 <button type="button" class="btn-change-photo" id="btn-retake-photo">
-                  📸 Change / Add File
+                  ⚡ Auto-Scan / Add File
                 </button>
               </div>
             </div>
@@ -1551,14 +1804,19 @@ Why rural poor depend on informal lenders:
     attachEvents() {
       const cameraInput = this.container.querySelector('#camera-file-input');
       const galleryInput = this.container.querySelector('#gallery-file-input');
-      const btnTakePhoto = this.container.querySelector('#btn-take-photo-direct');
+      const btnStartAutoscan = this.container.querySelector('#btn-start-autoscan');
       const btnBrowse = this.container.querySelector('#btn-browse-file');
+      const btnQuickSamples = this.container.querySelector('#btn-quick-samples-link');
       const btnRetake = this.container.querySelector('#btn-retake-photo');
       const btnGradeNow = this.container.querySelector('#btn-grade-now');
 
-      if (btnTakePhoto && cameraInput) {
-        btnTakePhoto.addEventListener('click', () => {
-          cameraInput.click();
+      if (btnStartAutoscan) {
+        btnStartAutoscan.addEventListener('click', () => this.openLiveScanner());
+      }
+
+      if (btnQuickSamples) {
+        btnQuickSamples.addEventListener('click', () => {
+          document.getElementById('modal-sample-papers')?.classList.remove('hidden');
         });
       }
 
@@ -1571,7 +1829,7 @@ Why rural poor depend on informal lenders:
 
       if (btnRetake) {
         btnRetake.addEventListener('click', () => {
-          if (galleryInput) galleryInput.click();
+          this.openLiveScanner();
         });
       }
 
@@ -1586,8 +1844,8 @@ Why rural poor depend on informal lenders:
 
       if (btnPrevPage) btnPrevPage.addEventListener('click', () => this.switchPage(this.activePageIndex - 1));
       if (btnNextPage) btnNextPage.addEventListener('click', () => this.switchPage(this.activePageIndex + 1));
-      if (btnAddPage && galleryInput) {
-        btnAddPage.addEventListener('click', () => galleryInput.click());
+      if (btnAddPage) {
+        btnAddPage.addEventListener('click', () => this.openLiveScanner());
       }
 
       // Batch Queue Events
@@ -1603,12 +1861,6 @@ Why rural poor depend on informal lenders:
           this.switchPage(idx);
         });
       });
-
-      // Camera Viewfinder Events
-      const btnSnap = this.container.querySelector('#btn-snap-photo');
-      const btnCloseCam = this.container.querySelector('#btn-close-camera');
-      if (btnSnap) btnSnap.addEventListener('click', () => this.snapPhoto());
-      if (btnCloseCam) btnCloseCam.addEventListener('click', () => this.stopCamera());
 
       // Stage Transform Events
       const btnZoomIn = this.container.querySelector('#btn-zoom-in');
@@ -1641,55 +1893,334 @@ Why rural poor depend on informal lenders:
           this.updateTransform();
         });
       }
+
+      // Attach global live camera modal controls once
+      if (!this._cameraModalAttached) {
+        this.attachCameraModalEvents();
+        this._cameraModalAttached = true;
+      }
     }
 
-    async startCamera() {
+    attachCameraModalEvents() {
+      const btnClose = document.getElementById('btn-close-live-camera');
+      const btnSwitch = document.getElementById('btn-switch-live-camera');
+      const btnToggle = document.getElementById('btn-toggle-autoscan');
+      const btnManualSnap = document.getElementById('btn-manual-live-snap');
+      const btnFinish = document.getElementById('btn-finish-scanning');
+
+      btnClose?.addEventListener('click', () => this.closeLiveScanner());
+      btnSwitch?.addEventListener('click', () => this.switchLiveCamera());
+      btnToggle?.addEventListener('click', () => this.toggleAutoScan());
+      btnManualSnap?.addEventListener('click', () => this.snapSessionPhoto());
+      btnFinish?.addEventListener('click', () => this.finishScanningSession());
+    }
+
+    // --- HANDS-FREE LIVE CAMERA SCANNER SYSTEM ---
+    playShutterSound() {
       try {
-        this.stopCamera();
-        const videoBox = this.container.querySelector('#camera-viewport-box');
-        const video = this.container.querySelector('#camera-video');
-        if (!videoBox || !video) return;
-
-        videoBox.classList.remove('hidden');
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
-        });
-        video.srcObject = this.stream;
-      } catch (err) {
-        this.container.querySelector('#gallery-file-input')?.click();
-      }
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(130, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.35, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.09);
+      } catch (e) {}
     }
 
-    stopCamera() {
-      if (this.stream) {
-        this.stream.getTracks().forEach(t => t.stop());
-        this.stream = null;
-      }
-      this.container.querySelector('#camera-viewport-box')?.classList.add('hidden');
+    async openLiveScanner() {
+      const modal = document.getElementById('modal-live-camera-scanner');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      this.sessionCapturedPages = [];
+      this.waitingForPageTurn = false;
+      this.stillnessStartTime = null;
+      this.lastCaptureTime = 0;
+      this.autoScanEnabled = true;
+      this.facingMode = 'environment';
+
+      this.updateTrayUI();
+      this.updateHUD('Hold paper steady within frame', 'normal', 0);
+
+      const toggleBtn = document.getElementById('btn-toggle-autoscan');
+      const label = document.getElementById('autoscan-state-label');
+      if (toggleBtn) toggleBtn.classList.add('active');
+      if (label) label.innerHTML = 'Auto-Scan: <strong>ON</strong>';
+
+      await this.startLiveStream();
     }
 
-    snapPhoto() {
-      const video = this.container.querySelector('#camera-video');
-      const canvas = this.container.querySelector('#camera-canvas');
-      if (!video || !canvas) return;
+    closeLiveScanner() {
+      this.stopLiveStream();
+      document.getElementById('modal-live-camera-scanner')?.classList.add('hidden');
+    }
 
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-      this.stopCamera();
-
-      if (this.pages && this.pages.length > 0 && confirm('Append captured photo as Page ' + (this.pages.length + 1) + '?')) {
-        this.addPageToPaper(dataUrl);
+    toggleAutoScan() {
+      this.autoScanEnabled = !this.autoScanEnabled;
+      const toggleBtn = document.getElementById('btn-toggle-autoscan');
+      const label = document.getElementById('autoscan-state-label');
+      if (toggleBtn) toggleBtn.classList.toggle('active', this.autoScanEnabled);
+      if (label) {
+        label.innerHTML = this.autoScanEnabled 
+          ? 'Auto-Scan: <strong>ON</strong>' 
+          : 'Auto-Scan: <strong>OFF</strong>';
+      }
+      this.stillnessStartTime = null;
+      if (!this.autoScanEnabled) {
+        this.updateHUD('Manual Mode: Tap shutter to snap page', 'manual', 0);
       } else {
-        this.setPaperImage(dataUrl, {
-          id: 'custom-photo-' + Date.now(),
-          studentName: 'Student (Camera Scan)',
-          rollNo: 'STU-' + Math.floor(1000 + Math.random() * 9000),
-          isCustom: true
+        this.updateHUD('Hold paper steady within frame', 'normal', 0);
+      }
+    }
+
+    async switchLiveCamera() {
+      this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
+      await this.startLiveStream();
+    }
+
+    async startLiveStream() {
+      try {
+        this.stopLiveStream();
+        const video = document.getElementById('live-scanner-video');
+        if (!video) return;
+
+        const constraints = {
+          video: {
+            facingMode: { ideal: this.facingMode },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        };
+        this.scannerStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = this.scannerStream;
+        video.setAttribute('playsinline', '');
+        video.muted = true;
+        await video.play();
+
+        this.startMotionDetection();
+      } catch (err) {
+        console.error('Camera stream access failed:', err);
+        alert('Could not access live camera. Please check camera permissions or upload an image file.');
+        this.closeLiveScanner();
+      }
+    }
+
+    stopLiveStream() {
+      this.stopMotionDetection();
+      if (this.scannerStream) {
+        this.scannerStream.getTracks().forEach(t => t.stop());
+        this.scannerStream = null;
+      }
+    }
+
+    startMotionDetection() {
+      this.stopMotionDetection();
+      const motionCanvas = document.getElementById('live-motion-canvas');
+      if (!motionCanvas) return;
+      motionCanvas.width = 160;
+      motionCanvas.height = 120;
+      this.motionCtx = motionCanvas.getContext('2d', { willReadFrequently: true });
+      this.prevLuminanceData = null;
+
+      this.motionCheckTimer = setInterval(() => {
+        this.checkMotionFrame();
+      }, 100);
+    }
+
+    stopMotionDetection() {
+      if (this.motionCheckTimer) {
+        clearInterval(this.motionCheckTimer);
+        this.motionCheckTimer = null;
+      }
+      this.prevLuminanceData = null;
+    }
+
+    checkMotionFrame() {
+      if (!this.autoScanEnabled) return;
+
+      const video = document.getElementById('live-scanner-video');
+      if (!video || video.readyState < 2 || !this.motionCtx) return;
+
+      this.motionCtx.drawImage(video, 0, 0, 160, 120);
+      const frame = this.motionCtx.getImageData(0, 0, 160, 120);
+      const data = frame.data;
+      const numPixels = 160 * 120;
+
+      const sampleStep = 4;
+      const sampleCount = Math.floor(numPixels / sampleStep);
+      const currentLum = new Uint8Array(sampleCount);
+
+      let sampleIdx = 0;
+      for (let i = 0; i < data.length; i += 4 * sampleStep) {
+        currentLum[sampleIdx++] = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+      }
+
+      if (!this.prevLuminanceData) {
+        this.prevLuminanceData = currentLum;
+        return;
+      }
+
+      let changedPixels = 0;
+      for (let j = 0; j < sampleCount; j++) {
+        if (Math.abs(currentLum[j] - this.prevLuminanceData[j]) > 26) {
+          changedPixels++;
+        }
+      }
+      const deltaRatio = changedPixels / sampleCount;
+      this.prevLuminanceData = currentLum;
+
+      const now = Date.now();
+
+      // If waiting for page turn after previous snap:
+      if (this.waitingForPageTurn) {
+        if (deltaRatio > 0.18) {
+          this.waitingForPageTurn = false;
+          this.stillnessStartTime = null;
+          this.updateHUD('📖 Page flip detected... hold steady', 'turning', 0);
+        } else {
+          this.updateHUD(`✅ Page ${this.sessionCapturedPages.length} captured! Turn to next page...`, 'normal', 0);
+        }
+        return;
+      }
+
+      // Normal scanning stillness detection
+      if (deltaRatio > 0.12) {
+        this.stillnessStartTime = null;
+        this.updateHUD('📖 Aligning page... keep steady', 'turning', 0);
+      } else {
+        if (!this.stillnessStartTime) {
+          this.stillnessStartTime = now;
+        }
+        const elapsed = now - this.stillnessStartTime;
+        const progress = Math.min(100, Math.round((elapsed / 650) * 100));
+
+        this.updateHUD('🎯 Document locked! Snapping...', 'locking', progress);
+
+        if (elapsed >= 650 && (now - this.lastCaptureTime) >= 1500) {
+          this.snapSessionPhoto();
+        }
+      }
+    }
+
+    updateHUD(text, statusType, progressPct) {
+      const banner = document.getElementById('scanner-hud-banner');
+      const textEl = document.getElementById('hud-status-text');
+      const emojiEl = document.getElementById('hud-status-emoji');
+      const barEl = document.getElementById('hud-progress-bar');
+
+      if (textEl) textEl.textContent = text;
+      if (barEl) barEl.style.width = `${progressPct}%`;
+
+      if (banner) {
+        banner.classList.remove('status-locking', 'status-turning');
+        if (statusType === 'locking') {
+          banner.classList.add('status-locking');
+          if (emojiEl) emojiEl.textContent = '🎯';
+        } else if (statusType === 'turning') {
+          banner.classList.add('status-turning');
+          if (emojiEl) emojiEl.textContent = '📖';
+        } else {
+          if (emojiEl) emojiEl.textContent = statusType === 'manual' ? '📸' : '✨';
+        }
+      }
+    }
+
+    snapSessionPhoto() {
+      const video = document.getElementById('live-scanner-video');
+      const snapCanvas = document.getElementById('live-snap-canvas');
+      if (!video || !snapCanvas) return;
+
+      const flash = document.getElementById('camera-flash-overlay');
+      if (flash) {
+        flash.classList.add('flash-active');
+        setTimeout(() => flash.classList.remove('flash-active'), 140);
+      }
+
+      this.playShutterSound();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([40, 50, 40]); } catch (e) {}
+      }
+
+      snapCanvas.width = video.videoWidth || 1920;
+      snapCanvas.height = video.videoHeight || 1080;
+      const ctx = snapCanvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+      const dataUrl = snapCanvas.toDataURL('image/jpeg', 0.92);
+
+      this.sessionCapturedPages.push(dataUrl);
+      this.lastCaptureTime = Date.now();
+      this.waitingForPageTurn = true;
+      this.stillnessStartTime = null;
+
+      this.updateTrayUI();
+      this.updateHUD(`✅ Page ${this.sessionCapturedPages.length} Captured! Turn to next page...`, 'normal', 0);
+    }
+
+    updateTrayUI() {
+      const trayStrip = document.getElementById('scanner-tray-strip');
+      const finishBtn = document.getElementById('btn-finish-scanning');
+      const countBadge = document.getElementById('tray-page-count-badge');
+
+      if (!trayStrip) return;
+
+      if (this.sessionCapturedPages.length === 0) {
+        trayStrip.innerHTML = `<span class="tray-empty-hint">📷 Snapped pages will appear here</span>`;
+        if (finishBtn) finishBtn.style.display = 'none';
+      } else {
+        trayStrip.innerHTML = this.sessionCapturedPages.map((dataUrl, idx) => `
+          <div class="tray-thumb-card" data-idx="${idx}">
+            <img src="${dataUrl}" alt="Page ${idx + 1}" />
+            <span class="tray-thumb-label">P${idx + 1}</span>
+            <button type="button" class="tray-thumb-del" data-del-idx="${idx}" title="Remove this page">✕</button>
+          </div>
+        `).join('');
+
+        trayStrip.querySelectorAll('.tray-thumb-del').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const delIdx = parseInt(btn.dataset.delIdx, 10);
+            this.sessionCapturedPages.splice(delIdx, 1);
+            this.updateTrayUI();
+          });
         });
+
+        if (finishBtn) {
+          finishBtn.style.display = 'flex';
+          if (countBadge) countBadge.textContent = this.sessionCapturedPages.length;
+        }
+      }
+    }
+
+    finishScanningSession() {
+      if (this.sessionCapturedPages.length === 0) {
+        this.closeLiveScanner();
+        return;
+      }
+
+      const pagesToLoad = [...this.sessionCapturedPages];
+      this.closeLiveScanner();
+
+      if (this.pages && this.pages.length > 0) {
+        pagesToLoad.forEach(dataUrl => this.addPageToPaper(dataUrl));
+        this.switchPage(this.pages.length - 1);
+      } else {
+        const rollNo = 'ROLL-' + Math.floor(1000 + Math.random() * 9000);
+        const meta = {
+          id: 'handsfree-' + Date.now(),
+          studentName: 'Student (Hands-Free Scan)',
+          rollNo: rollNo,
+          isCustom: true
+        };
+        this.setMultiPagePaper(pagesToLoad, meta);
       }
     }
 
@@ -4264,15 +4795,43 @@ Respond ONLY with a JSON object in this exact schema:
 
     renderSamplePapersModal() {
       const grid = document.getElementById('sample-papers-modal-grid');
+      const tabs = document.querySelectorAll('#sample-filter-tabs .filter-chip');
       if (!grid) return;
 
-      grid.innerHTML = SAMPLE_PAPERS.map(s => `
-        <div class="sample-modal-card" data-sample-id="${s.id}">
+      if (!this._sampleFilterAttached && tabs.length > 0) {
+        tabs.forEach(chip => {
+          chip.addEventListener('click', () => {
+            tabs.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            this.activeSampleFilter = chip.dataset.filter || 'all';
+            this.renderSamplePapersModal();
+          });
+        });
+        this._sampleFilterAttached = true;
+      }
+
+      const activeFilter = this.activeSampleFilter || 'all';
+      let filtered = SAMPLE_PAPERS;
+      if (activeFilter === 'messy') {
+        filtered = SAMPLE_PAPERS.filter(s => s.isMessy);
+      } else if (activeFilter === 'cbse') {
+        filtered = SAMPLE_PAPERS.filter(s => s.category === 'cbse' || s.id.includes('cbse'));
+      } else if (activeFilter === 'cs') {
+        filtered = SAMPLE_PAPERS.filter(s => s.category === 'cs' || s.id.includes('cs'));
+      } else if (activeFilter === 'med') {
+        filtered = SAMPLE_PAPERS.filter(s => s.category === 'med' || s.id.includes('axilla') || s.id.includes('bp') || s.id.includes('cardiac'));
+      }
+
+      grid.innerHTML = filtered.map(s => `
+        <div class="sample-modal-card ${s.isMessy ? 'card-messy-highlight' : ''}" data-sample-id="${s.id}">
           <div class="sample-card-top">
             <span class="sample-card-roll">${s.rollNo}</span>
             <span class="sample-card-score">${s.expectedScore}/${s.maxScore}M</span>
           </div>
-          <div class="sample-card-name">${s.studentName}</div>
+          <div class="sample-card-name">
+            ${s.studentName}
+            ${s.tag ? `<span class="sample-badge-messy">${s.tag}</span>` : ''}
+          </div>
           <div class="sample-card-desc">${s.description}</div>
         </div>
       `).join('');

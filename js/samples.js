@@ -10,11 +10,14 @@ function generateHandwrittenPaperSvg({
   diagramType = null,
   inkColor = '#1e3a8a', // classic blue ballpoint
   paperColor = '#fffdfa',
-  slant = -2
+  fontFamily = null,
+  headerType = null,
+  slant = -2.5
 }) {
+  const activeFont = fontFamily || "'Caveat', 'Comic Sans MS', 'Patrick Hand', cursive, sans-serif";
   const lineSpacing = 34;
-  const startY = 180;
-  const totalHeight = Math.max(900, startY + lines.length * lineSpacing + 220);
+  const startY = 190;
+  const totalHeight = Math.max(960, startY + lines.length * lineSpacing + 200);
 
   // Generate ruled horizontal lines
   let ruledLinesSvg = '';
@@ -22,67 +25,139 @@ function generateHandwrittenPaperSvg({
     ruledLinesSvg += `<line x1="80" y1="${y}" x2="740" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="none"/>`;
   }
 
-  // Handwritten text rendering with slight organic rotations/offsets
+  // Handwritten text rendering with realistic uneven slants, strikethroughs, and caret insertions
   let textSvg = '';
-  lines.forEach((line, idx) => {
+  lines.forEach((rawLine, idx) => {
     const y = startY + idx * lineSpacing;
-    const isHeader = line.startsWith('##') || line.startsWith('Q.') || line.startsWith('Ans:');
-    const cleanText = line.replace(/^##\s*/, '');
-    const xOffset = line.startsWith('  -') ? 140 : line.startsWith('  ') ? 120 : 100;
-    const fontSize = isHeader ? 17 : 15;
+    const isHeader = rawLine.startsWith('##') || rawLine.startsWith('Q.') || rawLine.startsWith('Ans') || rawLine.startsWith('Q1') || rawLine.startsWith('Q2') || rawLine.startsWith('Q3') || rawLine.startsWith('Q4') || rawLine.startsWith('Q5');
+    const isCaret = rawLine.trim().startsWith('^');
+    const cleanLine = rawLine.replace(/^##\s*/, '');
+    
+    const organicSlant = slant + Math.sin(idx * 0.9) * 0.8;
+    const randomDy = Math.sin(idx * 2.3) * 2.2;
+    const xBase = cleanLine.startsWith('  -') ? 140 : cleanLine.startsWith('  ') ? 120 : isCaret ? 130 : 100;
+    const fontSize = isHeader ? 18 : isCaret ? 14.5 : 16;
     const fontWeight = isHeader ? '700' : '500';
-    const randomRot = ((idx % 5) - 2) * 0.35 + slant;
-    const randomDy = ((idx % 3) - 1) * 1.2;
 
-    textSvg += `
-      <g transform="rotate(${randomRot}, ${xOffset}, ${y})">
-        <text x="${xOffset}" y="${y + randomDy}" font-family="'Caveat', 'Comic Sans MS', 'Patrick Hand', cursive, sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}" letter-spacing="0.5">
-          ${escapeXml(cleanText)}
-        </text>
-      </g>
-    `;
+    let lineContent = cleanLine;
+    let strikethroughSvg = '';
+
+    const strikeMatch = lineContent.match(/~~([^~]+)~~/);
+    if (strikeMatch) {
+      const strikeText = strikeMatch[1];
+      const strikeIndex = lineContent.indexOf('~~');
+      const textBefore = lineContent.substring(0, strikeIndex);
+      const approxXBefore = xBase + textBefore.length * 8.5;
+      const strikeWidth = Math.max(45, strikeText.length * 9.5);
+
+      strikethroughSvg = `
+        <g opacity="0.9">
+          <path d="M ${approxXBefore - 4} ${y + randomDy - 4} 
+                   Q ${approxXBefore + strikeWidth * 0.25} ${y + randomDy - 9}, ${approxXBefore + strikeWidth * 0.5} ${y + randomDy - 3} 
+                   T ${approxXBefore + strikeWidth + 6} ${y + randomDy - 6}" 
+                stroke="${inkColor}" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M ${approxXBefore + strikeWidth + 4} ${y + randomDy - 1} 
+                   Q ${approxXBefore + strikeWidth * 0.6} ${y + randomDy + 5}, ${approxXBefore - 2} ${y + randomDy + 2}" 
+                stroke="${inkColor}" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M ${approxXBefore} ${y + randomDy - 2} L ${approxXBefore + strikeWidth} ${y + randomDy - 2}" 
+                stroke="${inkColor}" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        </g>
+      `;
+      lineContent = lineContent.replace(/~~([^~]+)~~/, '$1');
+    }
+
+    if (isCaret) {
+      const caretY = y + randomDy - 10;
+      textSvg += `
+        <g transform="rotate(${organicSlant}, ${xBase}, ${y})">
+          <path d="M ${xBase - 15} ${caretY + 8} L ${xBase - 8} ${caretY - 2} L ${xBase - 1} ${caretY + 8}" stroke="${inkColor}" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <text x="${xBase}" y="${caretY}" font-family="${activeFont}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}" letter-spacing="0.3">
+            ${escapeXml(lineContent.replace(/^\^\s*/, ''))}
+          </text>
+        </g>
+      `;
+    } else {
+      textSvg += `
+        <g transform="rotate(${organicSlant}, ${xBase}, ${y})">
+          <text x="${xBase}" y="${y + randomDy}" font-family="${activeFont}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${inkColor}" letter-spacing="0.3">
+            ${escapeXml(lineContent)}
+          </text>
+          ${strikethroughSvg}
+        </g>
+      `;
+    }
   });
 
-  // Optional rough anatomical diagram sketch
+  // Dynamic header block
+  let headerSvg = '';
+  if (headerType === 'cbse') {
+    headerSvg = `
+      <g transform="translate(100, 26)">
+        <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">CENTRAL BOARD OF SECONDARY EDUCATION (CBSE) — TERM II</text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+        <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+        <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Exam Date: Term Finals 2026 | Max Time: 3 Hours</text>
+        <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+        <text x="528" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">TERM EXAM 2026</text>
+        <text x="532" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">VERIFIED COPY</text>
+      </g>
+    `;
+  } else if (headerType === 'cs_finals') {
+    headerSvg = `
+      <g transform="translate(100, 26)">
+        <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">DEPARTMENT OF COMPUTER SCIENCE &amp; ENGG — SEMESTER FINALS</text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+        <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+        <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Course: CS-501 | Semester Final Examination</text>
+        <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+        <text x="532" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">SEMESTER 2026</text>
+        <text x="536" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">EVALUATED</text>
+      </g>
+    `;
+  } else {
+    headerSvg = `
+      <g transform="translate(100, 26)">
+        <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">FACULTY OF MEDICINE — UNIVERSITY PROFESSIONAL EXAM</text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
+        <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll: <tspan font-weight="700" fill="#00a991">${escapeXml(rollNo)}</tspan></text>
+        <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Batch: MBBS Professional Assessment</text>
+        <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+        <text x="528" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">DEPARTMENT OF</text>
+        <text x="534" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">ANATOMY</text>
+      </g>
+    `;
+  }
+
+  // Diagram rendering
   let diagramSvg = '';
   if (diagramType === 'brachial_plexus') {
     const diagY = totalHeight - 200;
     diagramSvg = `
       <g transform="translate(140, ${diagY})" stroke="${inkColor}" stroke-width="1.8" fill="none" stroke-linecap="round">
         <rect x="0" y="0" width="500" height="130" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,4" fill="#f8fafc" fill-opacity="0.5" rx="6"/>
-        <text x="15" y="22" font-family="'Caveat', cursive" font-size="14" font-weight="bold" fill="${inkColor}">Fig: Schematic Diagram of Brachial Plexus</text>
-        
-        <!-- Roots C5-T1 -->
-        <text x="15" y="45" font-family="'Caveat', cursive" font-size="12" fill="${inkColor}">C5</text>
-        <text x="15" y="60" font-family="'Caveat', cursive" font-size="12" fill="${inkColor}">C6</text>
-        <text x="15" y="75" font-family="'Caveat', cursive" font-size="12" fill="${inkColor}">C7</text>
-        <text x="15" y="90" font-family="'Caveat', cursive" font-size="12" fill="${inkColor}">C8</text>
-        <text x="15" y="105" font-family="'Caveat', cursive" font-size="12" fill="${inkColor}">T1</text>
-
-        <!-- Root lines -->
+        <text x="15" y="22" font-family="${activeFont}" font-size="14" font-weight="bold" fill="${inkColor}">Fig: Schematic Diagram of Brachial Plexus</text>
+        <text x="15" y="45" font-family="${activeFont}" font-size="12" fill="${inkColor}">C5</text>
+        <text x="15" y="60" font-family="${activeFont}" font-size="12" fill="${inkColor}">C6</text>
+        <text x="15" y="75" font-family="${activeFont}" font-size="12" fill="${inkColor}">C7</text>
+        <text x="15" y="90" font-family="${activeFont}" font-size="12" fill="${inkColor}">C8</text>
+        <text x="15" y="105" font-family="${activeFont}" font-size="12" fill="${inkColor}">T1</text>
         <path d="M35 42 Q 60 48, 90 52"/>
         <path d="M35 57 Q 60 54, 90 52"/>
         <path d="M35 72 L 90 72"/>
         <path d="M35 87 Q 60 92, 90 98"/>
         <path d="M35 102 Q 60 100, 90 98"/>
-
-        <!-- Trunks -->
-        <path d="M90 52 L 170 52"/> <text x="100" y="46" font-family="'Caveat', cursive" font-size="11" fill="#475569">Upper</text>
-        <path d="M90 72 L 170 72"/> <text x="100" y="66" font-family="'Caveat', cursive" font-size="11" fill="#475569">Middle</text>
-        <path d="M90 98 L 170 98"/> <text x="100" y="94" font-family="'Caveat', cursive" font-size="11" fill="#475569">Lower</text>
-
-        <!-- Divisions & Cords -->
-        <path d="M170 52 L 250 45"/> <!-- Ant to Lateral -->
-        <path d="M170 72 L 250 45"/> <!-- Ant to Lateral -->
-        <path d="M170 52 L 250 72" stroke-dasharray="3,3"/> <!-- Post to Post -->
+        <path d="M90 52 L 170 52"/>
+        <path d="M90 72 L 170 72"/>
+        <path d="M90 98 L 170 98"/>
+        <path d="M170 52 L 250 45"/>
+        <path d="M170 72 L 250 45"/>
+        <path d="M170 52 L 250 72" stroke-dasharray="3,3"/>
         <path d="M170 72 L 250 72" stroke-dasharray="3,3"/>
         <path d="M170 98 L 250 72" stroke-dasharray="3,3"/>
-        <path d="M170 98 L 250 100"/> <!-- Ant to Medial -->
-
-        <!-- Cords labels -->
-        <text x="260" y="47" font-family="'Caveat', cursive" font-size="11" fill="${inkColor}">Lat. Cord -> Musculocutaneous, Median(L)</text>
-        <text x="260" y="74" font-family="'Caveat', cursive" font-size="11" fill="${inkColor}">Post. Cord -> Radial, Axillary</text>
-        <text x="260" y="103" font-family="'Caveat', cursive" font-size="11" fill="${inkColor}">Med. Cord -> Ulnar, Median(M)</text>
+        <path d="M170 98 L 250 100"/>
+        <text x="260" y="47" font-family="${activeFont}" font-size="11" fill="${inkColor}">Lat. Cord -> Musculocutaneous, Median(L)</text>
+        <text x="260" y="74" font-family="${activeFont}" font-size="11" fill="${inkColor}">Post. Cord -> Radial, Axillary</text>
+        <text x="260" y="103" font-family="${activeFont}" font-size="11" fill="${inkColor}">Med. Cord -> Ulnar, Median(M)</text>
       </g>
     `;
   } else if (diagramType === 'cardiac_cycle') {
@@ -90,12 +165,11 @@ function generateHandwrittenPaperSvg({
     diagramSvg = `
       <g transform="translate(140, ${diagY})" stroke="${inkColor}" stroke-width="1.6" fill="none">
         <rect x="0" y="0" width="500" height="120" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,4" fill="#f8fafc" fill-opacity="0.5" rx="6"/>
-        <text x="15" y="20" font-family="'Caveat', cursive" font-size="14" font-weight="bold" fill="${inkColor}">Fig: Wiggers / Ventricular Pressure Curve Outline</text>
-        <!-- Pressure pulse curve -->
+        <text x="15" y="20" font-family="${activeFont}" font-size="14" font-weight="bold" fill="${inkColor}">Fig: Wiggers / Ventricular Pressure Curve Outline</text>
         <path d="M30 90 L 100 90 Q 140 20, 200 20 Q 260 20, 300 80 Q 320 75, 330 85 L 470 90" stroke-width="2.2"/>
-        <text x="160" y="40" font-family="'Caveat', cursive" font-size="12" fill="#047857">Max Systolic (120 mmHg)</text>
-        <text x="50" y="105" font-family="'Caveat', cursive" font-size="11" fill="#475569">Isovolumetric Contraction</text>
-        <text x="310" y="105" font-family="'Caveat', cursive" font-size="11" fill="#475569">Semilunar Closure (S2)</text>
+        <text x="160" y="40" font-family="${activeFont}" font-size="12" fill="#047857">Max Systolic (120 mmHg)</text>
+        <text x="50" y="105" font-family="${activeFont}" font-size="11" fill="#475569">Isovolumetric Contraction</text>
+        <text x="310" y="105" font-family="${activeFont}" font-size="11" fill="#475569">Semilunar Closure (S2)</text>
       </g>
     `;
   }
@@ -103,51 +177,24 @@ function generateHandwrittenPaperSvg({
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 ${totalHeight}" width="100%" height="100%">
       <defs>
-        <!-- Soft paper grain filter -->
-        <filter id="paper-texture" x="0%" y="0%" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/>
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.04 0"/>
-          <feComposite in2="SourceGraphic" in="gl" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
-        </filter>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&amp;family=Kalam:wght@400;700&amp;family=Reenie+Beanie&amp;family=Shadows+Into+Light&amp;family=Inter:wght@400;600;700;800&amp;display=swap');
+        </style>
         <linearGradient id="page-shadow" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#000" stop-opacity="0.06"/>
+          <stop offset="0%" stop-color="#000" stop-opacity="0.05"/>
           <stop offset="2%" stop-color="#fff" stop-opacity="0"/>
           <stop offset="98%" stop-color="#fff" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#000" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#000" stop-opacity="0.06"/>
         </linearGradient>
       </defs>
-
-      <!-- Paper background -->
       <rect width="800" height="${totalHeight}" fill="${paperColor}"/>
       <rect width="800" height="${totalHeight}" fill="url(#page-shadow)"/>
-
-      <!-- Red vertical margin line -->
-      <line x1="80" y1="0" x2="80" y2="${totalHeight}" stroke="#f87171" stroke-width="1.8" stroke-opacity="0.85"/>
-      <line x1="83" y1="0" x2="83" y2="${totalHeight}" stroke="#f87171" stroke-width="0.8" stroke-opacity="0.45"/>
-
-      <!-- Top Header Ruled Lines -->
+      <line x1="80" y1="0" x2="80" y2="${totalHeight}" stroke="#f87171" stroke-width="1.8"/>
+      <line x1="83" y1="0" x2="83" y2="${totalHeight}" stroke="#f87171" stroke-width="0.8" opacity="0.6"/>
       <line x1="0" y1="130" x2="800" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
-
-      <!-- University Exam Header Stamp -->
-      <g transform="translate(100, 30)">
-        <text x="0" y="20" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#0f172a" letter-spacing="1">FACULTY OF MEDICINE - INTERNAL ASSESSMENT I</text>
-        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">${escapeXml(subject)}</tspan></text>
-        <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">${escapeXml(studentName)}</tspan> | Roll No: <tspan font-weight="700" fill="#0f766e">${escapeXml(rollNo)}</tspan></text>
-        <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Date: 16-Aug-2026 | Max Time: 45 Mins</text>
-        
-        <!-- Stamp circle -->
-        <circle cx="560" cy="40" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-12, 560, 40)"/>
-        <text x="532" y="38" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#dc2626" transform="rotate(-12, 560, 40)">DEPARTMENT OF</text>
-        <text x="536" y="49" font-family="'Inter', sans-serif" font-size="9" font-weight="bold" fill="#dc2626" transform="rotate(-12, 560, 40)">ANATOMY</text>
-      </g>
-
-      <!-- Ruled horizontal notebook lines -->
+      ${headerSvg}
       ${ruledLinesSvg}
-
-      <!-- Handwritten text -->
       ${textSvg}
-
-      <!-- Diagram -->
       ${diagramSvg}
     </svg>
   `;
@@ -559,6 +606,144 @@ Why rural poor depend on informal lenders:
     diagramType: null,
     inkColor: '#1d4ed8',
     slant: -1.0
+  },
+  {
+    id: 'sample-messy-cbse-vikram',
+    studentName: 'Vikram Malhotra',
+    rollNo: 'CBSE-10-103',
+    subject: 'CBSE Class 10 Science: Physics & Chemistry',
+    questionId: 'preset-cbse-science-10',
+    questionTitle: 'CBSE Class 10 Science: Physics & Chemistry (15 Marks)',
+    category: 'cbse',
+    isMessy: true,
+    tag: '🔥 Rushed Term Exam',
+    fontFamily: "'Kalam', cursive",
+    headerType: 'cbse',
+    slant: -3.0,
+    maxScore: 15.0,
+    expectedScore: 13.50,
+    description: '🔥 Rushed Mid-Term (CBSE 10): Authentic exam speed, strikethrough formula correction, caret insertions.',
+    rawText: `Ans Sheet: CBSE Class 10 Annual Exam - Vikram Malhotra (Roll: CBSE-10-103)
+
+Q1: Ohm's Law and Resistance of a Conductor
+Ohm's Law: At constant temp, current I is proportional to Voltage V (V = I * R).
+Factors affecting resistance:
+1. Length: Resistance increases with length of wire (R ∝ L).
+2. Area of cross section: ~~R ∝ A~~
+   ^ R ∝ 1/A (thick wire has LESS resistance, thin wire has more)
+3. Formula: ~~R = rho * (A / L)~~
+   ^ R = ρ * (L / A) where ρ = resistivity of material.
+4. Temperature: R increases with rise in temperature for metals.
+
+Q2: Rusting of Iron (Corrosion)
+Rusting is slow chemical reaction forming reddish brown powder.
+~~Rusting happens in dry air alone~~
+   ^ Rusting requires BOTH Oxygen (O2) and Water/moisture (H2O)!
+Chemical Reaction:
+4Fe(s) + 3O2(g) + 2xH2O(l) -> 2Fe2O3.xH2O (Hydrated ferric oxide / rust)
+Prevention:
+1. Galvanisation: Coating zinc layer on iron sheets.
+2. Painting: Applying oil paint to stop contact with air & rain.
+
+Q3: Neutralization Reaction & Antacids
+When acid reacts with base to form salt and water.
+HCl + NaOH -> NaCl + H2O
+Antacids: Stomach produces excess HCl causing burning pain & acidity.
+Antacids are mild basic substances like Milk of Magnesia [Mg(OH)2].
+They neutralize the extra acid giving fast relief.`,
+    inkColor: '#1e40af'
+  },
+  {
+    id: 'sample-messy-cs-devika',
+    studentName: 'Devika Sengupta',
+    rollNo: 'CS-2026-004',
+    subject: 'Computer Science & AI Master Paper',
+    questionId: 'preset-multi-cs-exam',
+    questionTitle: 'CS & AI Master Examination (5 Questions, 25 Marks)',
+    category: 'cs',
+    isMessy: true,
+    tag: '✏️ Hurried Pencil & Gel',
+    fontFamily: "'Reenie Beanie', cursive",
+    headerType: 'cs_finals',
+    slant: -1.2,
+    maxScore: 25.0,
+    expectedScore: 21.50,
+    description: '✏️ Hurried Pencil & Gel (CS Finals): Fast derivations, scratched-out complexity error, margin arrow.',
+    rawText: `Ans Sheet: CS & AI Master Exam - Devika Sengupta (Roll: CS-2026-004)
+
+Q1: Backpropagation in Deep Neural Networks
+Forward pass computes layer activations z = W*x + b and prediction y_hat.
+Loss L is computed against target y using MSE or Cross-Entropy loss.
+Backward pass computes gradients via calculus chain rule:
+dL/dW = (dL/da) * (da/dz) * (dz/dW) where dz/dW = x.
+Weight update: W = W - eta * (dL/dW). Gradients flow back layer by layer.
+
+Q2: Time & Space Complexity: QuickSort vs MergeSort
+1. MergeSort: Divide & conquer algorithm.
+   - Best/Avg/Worst Time: O(N log N) in all cases.
+   - Space: O(N) auxiliary buffer for merging subarrays.
+2. QuickSort: Partitioning around chosen pivot element.
+   - Average Time: O(N log N).
+   - ~~Worst Time: O(N log N)~~
+     ^ Worst Time: O(N^2) when array sorted and bad pivot chosen!
+   - Space: O(log N) recursion call stack (in-place).
+
+Q3: ACID Properties in RDBMS
+- Atomicity: All or nothing transaction. If query fails, rollback completely.
+- Consistency: Database transitions between valid states adhering to FK schema.
+- Isolation: Concurrent sessions run independently without dirty reads.
+- Durability: Committed updates written to non-volatile WAL log.
+
+Q4: Object-Oriented Programming (OOP) Principles
+1. Encapsulation: Bundling data and methods, private fields with getters/setters.
+2. Abstraction: Hiding implementation details via interfaces & abstract classes.
+3. Inheritance: Subclass inherits behavior and fields from superclass.
+4. Polymorphism: Method overriding at runtime and overloading at compile-time.
+
+Q5: RSA Public Key Cryptography
+Select large primes p, q. Modulus n = p*q. Euler phi(n) = (p-1)*(q-1).
+Public key exponent e coprime to phi(n).
+Private key d: ~~e * d = 0 mod phi~~
+   ^ e * d ≡ 1 mod phi(n).
+Encryption: c = m^e mod n (using public key (e,n)).
+Decryption: m = c^d mod n (using private key (d,n)).`,
+    inkColor: '#374151'
+  },
+  {
+    id: 'sample-messy-anatomy-arjun',
+    studentName: 'Arjun Ramaswamy',
+    rollNo: 'MED-2024-006',
+    subject: 'Human Anatomy - Upper Limb & Axilla',
+    questionId: 'preset-brachial-plexus',
+    questionTitle: 'Describe the formation, relations, branches, and applied anatomy of the Brachial Plexus.',
+    category: 'med',
+    isMessy: true,
+    tag: '⚠️ Last 15-Min Rush',
+    fontFamily: "'Shadows Into Light', cursive",
+    headerType: 'medical',
+    slant: -3.8,
+    maxScore: 5.0,
+    expectedScore: 4.50,
+    description: '⚠️ Last 15-Min Rush: Fast angular handwriting, heavy scribbles over wrong nerve roots, hurried abbreviations.',
+    rawText: `Ans Sheet: Anatomy Paper I - Arjun Ramaswamy (Roll: MED-2024-006)
+
+Q: Describe Boundaries of Axilla & Nerve Relations
+Axilla is a pyramid shaped space between upper thorax and arm.
+Boundaries:
+1. Anterior wall: Pectoralis major, Pectoralis minor, Subclavius muscle.
+2. Posterior wall: Subscapularis, Latissimus dorsi, Teres major.
+   ~~Posterior cord gives ulnar nerve~~
+   ^ Post cord gives Radial & Axillary nerves! (Ulnar is medial cord)
+3. Medial wall: Upper 4 ribs with intercostal muscles, Serratus anterior.
+4. Lateral wall: Very narrow! Intertubercular sulcus of humerus,
+   Coracobrachialis, Short head of biceps brachii.
+5. Apex (Cervico-axillary canal): Clavicle ant., 1st rib medially, Scapula post.
+   Base: Axillary fascia and skin of armpit concavity.
+
+Applied Anatomy:
+- Axillary abscess: Drain by incision through floor/base avoiding axillary vessels.
+- Axillary lymph node dissection in breast cancer clearance.`,
+    inkColor: '#111827'
   }
 ];
 
@@ -574,7 +759,9 @@ export function getSampleSvgDataUrl(sampleId) {
     lines: lines,
     diagramType: sample.diagramType,
     inkColor: sample.inkColor || '#1e3a8a',
-    slant: sample.slant || -2
+    fontFamily: sample.fontFamily,
+    headerType: sample.headerType,
+    slant: sample.slant || -2.5
   });
   
   const encoded = encodeURIComponent(svgString);

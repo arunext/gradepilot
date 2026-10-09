@@ -1,0 +1,337 @@
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1662" width="100%" height="100%">
+      <defs>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&amp;family=Kalam:wght@400;700&amp;family=Reenie+Beanie&amp;family=Shadows+Into+Light&amp;family=Inter:wght@400;600;700;800&amp;display=swap');
+        </style>
+        <linearGradient id="paper-shadow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#000" stop-opacity="0.05"/>
+          <stop offset="2%" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="98%" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#000" stop-opacity="0.06"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Paper background -->
+      <rect width="800" height="1662" fill="#fffdfa"/>
+      <rect width="800" height="1662" fill="url(#paper-shadow)"/>
+
+      <!-- Red vertical margin line -->
+      <line x1="80" y1="0" x2="80" y2="1662" stroke="#f87171" stroke-width="1.8"/>
+      <line x1="83" y1="0" x2="83" y2="1662" stroke="#f87171" stroke-width="0.8" opacity="0.6"/>
+
+      <!-- Top Header Ruled Line -->
+      <line x1="0" y1="130" x2="800" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+
+      <!-- Exam Header Block -->
+      <g transform="translate(100, 26)">
+        <text x="0" y="20" font-family="'Inter', sans-serif" font-size="12" font-weight="800" fill="#0f172a" letter-spacing="1">DEPARTMENT OF COMPUTER SCIENCE &amp; ENGG — SEMESTER FINALS</text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Subject: <tspan font-weight="600" fill="#1e293b">Computer Science &amp; AI Master Paper</tspan></text>
+        <text x="0" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#475569">Student: <tspan font-weight="600" fill="#1e293b">Devika Sengupta</tspan> | Roll: <tspan font-weight="700" fill="#00a991">CS-2026-004</tspan></text>
+        <text x="0" y="86" font-family="'Inter', sans-serif" font-size="12" fill="#64748b">Exam Date: Term Finals 2026 | Max Time: 3 Hours</text>
+
+        <!-- Official Stamp -->
+        <circle cx="560" cy="42" r="32" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="3,2" transform="rotate(-10, 560, 42)"/>
+        <text x="528" y="39" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">TERM EXAM 2026</text>
+        <text x="532" y="50" font-family="'Inter', sans-serif" font-size="8.5" font-weight="bold" fill="#dc2626" transform="rotate(-10, 560, 42)">VERIFIED COPY</text>
+      </g>
+
+      <!-- Ruled horizontal notebook lines -->
+      <line x1="80" y1="140" x2="740" y2="140" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="174" x2="740" y2="174" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="208" x2="740" y2="208" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="242" x2="740" y2="242" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="276" x2="740" y2="276" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="310" x2="740" y2="310" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="344" x2="740" y2="344" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="378" x2="740" y2="378" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="412" x2="740" y2="412" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="446" x2="740" y2="446" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="480" x2="740" y2="480" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="514" x2="740" y2="514" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="548" x2="740" y2="548" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="582" x2="740" y2="582" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="616" x2="740" y2="616" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="650" x2="740" y2="650" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="684" x2="740" y2="684" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="718" x2="740" y2="718" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="752" x2="740" y2="752" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="786" x2="740" y2="786" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="820" x2="740" y2="820" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="854" x2="740" y2="854" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="888" x2="740" y2="888" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="922" x2="740" y2="922" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="956" x2="740" y2="956" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="990" x2="740" y2="990" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1024" x2="740" y2="1024" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1058" x2="740" y2="1058" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1092" x2="740" y2="1092" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1126" x2="740" y2="1126" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1160" x2="740" y2="1160" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1194" x2="740" y2="1194" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1228" x2="740" y2="1228" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1262" x2="740" y2="1262" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1296" x2="740" y2="1296" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1330" x2="740" y2="1330" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1364" x2="740" y2="1364" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1398" x2="740" y2="1398" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1432" x2="740" y2="1432" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1466" x2="740" y2="1466" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1500" x2="740" y2="1500" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1534" x2="740" y2="1534" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1568" x2="740" y2="1568" stroke="#cbd5e1" stroke-width="1"/><line x1="80" y1="1602" x2="740" y2="1602" stroke="#cbd5e1" stroke-width="1"/>
+
+      <!-- Handwritten text with strikethroughs & insertions -->
+      
+        <g transform="rotate(-1.2, 100, 190)">
+          <text x="100" y="190" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Ans Sheet: CS &amp; AI Master Exam - Devika Sengupta (Roll: CS-2026-004)
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.5733384722980132, 100, 224)">
+          <text x="100" y="225.6405514667888" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.42092189529744384, 100, 258)">
+          <text x="100" y="255.8138797920064" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Q1: Backpropagation in Deep Neural Networks
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.8580960958129361, 100, 292)">
+          <text x="100" y="293.27256748165405" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Forward pass computes layer activations z = W*x + b and prediction y_hat.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.5540163546358818, 100, 326)">
+          <text x="100" y="326.49035781102054" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Loss L is computed against target y using MSE or Cross-Entropy loss.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.9820240941320777, 100, 360)">
+          <text x="100" y="358.0740052156855" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Backward pass computes gradients via calculus chain rule:
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.8182115900447897, 100, 394)">
+          <text x="100" y="396.07613047277704" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            dL/dW = (dL/da) * (da/dz) * (dz/dW) where dz/dW = x.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.18654887961252, 100, 428)">
+          <text x="100" y="427.1594428821952" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Weight update: W = W - eta * (dL/dW). Gradients flow back layer by layer.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.5650657089206773, 100, 462)">
+          <text x="100" y="461.0439556314418" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.42408815132393085, 100, 496)">
+          <text x="100" y="498.11453599390467" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Q2: Time &amp; Space Complexity: QuickSort vs MergeSort
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.8703052118065946, 100, 530)">
+          <text x="100" y="528.1383151108146" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            1. MergeSort: Divide &amp; conquer algorithm.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.566028715020257, 120, 564)">
+          <text x="120" y="564.3662560077818" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+               - Best/Avg/Worst Time: O(N log N) in all cases.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.9847489840531933, 120, 598)">
+          <text x="120" y="599.373629697916" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+               - Space: O(N) auxiliary buffer for merging subarrays.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.8095868671352258, 100, 632)">
+          <text x="100" y="629.8033109325396" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            2. QuickSort: Partitioning around chosen pivot element.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.1731015622230907, 120, 666)">
+          <text x="120" y="667.5535728057968" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+               - Average Time: O(N log N).
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.5569724587587032, 120, 700)">
+          <text x="120" y="700.1264724518309" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+               - Worst Time: O(N log N)
+          </text>
+          
+        <g opacity="0.9">
+          <!-- Heavy wavy scratch lines -->
+          <path d="M 158.5 696.1264724518309 
+                   Q 214.75 691.1264724518309, 267 697.1264724518309 
+                   T 377.5 694.1264724518309" 
+                stroke="#374151" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M 375.5 699.1264724518309 
+                   Q 287.9 705.1264724518309, 160.5 702.1264724518309" 
+                stroke="#374151" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M 162.5 698.1264724518309 L 371.5 698.1264724518309" 
+                stroke="#374151" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        </g>
+      
+        </g>
+      
+        <g transform="rotate(-0.427473778760578, 120, 734)">
+          <path d="M 105 730.2778960701886 L 112 720.2778960701886 L 119 730.2778960701886" stroke="#374151" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <text x="120" y="722.2778960701886" font-family="'Reenie Beanie', cursive" font-size="14.5" font-weight="500" fill="#374151" letter-spacing="0.3">
+                 ^ Worst Time: O(N^2) when array sorted and bad pivot chosen!
+          </text>
+        </g>
+      
+        <g transform="rotate(-0.8826075414955104, 120, 768)">
+          <text x="120" y="770.1683206573393" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+               - Space: O(log N) recursion call stack (in-place).
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.5779375891187728, 100, 802)">
+          <text x="100" y="800.8327038089495" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.9872520040653148, 100, 836)">
+          <text x="100" y="835.387162266317" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Q3: ACID Properties in RDBMS
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.800789797417341, 100, 870)">
+          <text x="100" y="871.9839343648274" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            - Atomicity: All or nothing transaction. If query fails, rollback completely.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.1596618497545481, 100, 904)">
+          <text x="100" y="901.969141943528" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            - Consistency: Database transitions between valid states adhering to FK schema.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.5490610099943156, 100, 938)">
+          <text x="100" y="938.7222896864731" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            - Isolation: Concurrent sessions run independently without dirty reads.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.43107782039830667, 100, 972)">
+          <text x="100" y="973.0683694594425" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            - Durability: Committed updates written to non-volatile WAL log.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.8949996066760478, 100, 1006)">
+          <text x="100" y="1003.8540524081385" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.5897396099684076, 100, 1040)">
+          <text x="100" y="1041.7912173873185" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Q4: Object-Oriented Programming (OOP) Principles
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.9895324464965194, 100, 1074)">
+          <text x="100" y="1073.7590572037218" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            1. Encapsulation: Bundling data and methods, private fields with getters/setters.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.7918228680623147, 100, 1108)">
+          <text x="100" y="1106.5298514280018" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            2. Abstraction: Hiding implementation details via interfaces &amp; abstract classes.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.14623354197962, 100, 1142)">
+          <text x="100" y="1144.1999922787604" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            3. Inheritance: Subclass inherits behavior and fields from superclass.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.5413335994095346, 100, 1176)">
+          <text x="100" y="1174.5385443673206" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            4. Polymorphism: Method overriding at runtime and overloading at compile-time.
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.43489925727639744, 100, 1210)">
+          <text x="100" y="1209.747473409677" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.9074779037739056, 100, 1244)">
+          <text x="100" y="1245.797960456415" font-family="'Reenie Beanie', cursive" font-size="18" font-weight="700" fill="#374151" letter-spacing="0.3">
+            Q5: RSA Public Key Cryptography
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.6014314408164594, 100, 1278)">
+          <text x="100" y="1275.8566507116857" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Select large primes p, q. Modulus n = p*q. Euler phi(n) = (p-1)*(q-1).
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.9915896666036281, 100, 1312)">
+          <text x="100" y="1313.058164015647" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Public key exponent e coprime to phi(n).
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-1.7826886142652747, 100, 1346)">
+          <text x="100" y="1346.7332906679007" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Private key d: e * d = 0 mod phi
+          </text>
+          
+        <g opacity="0.9">
+          <!-- Heavy wavy scratch lines -->
+          <path d="M 223.5 1342.7332906679007 
+                   Q 267.875 1337.7332906679007, 308.25 1343.7332906679007 
+                   T 395 1340.7332906679007" 
+                stroke="#374151" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M 393 1345.7332906679007 
+                   Q 324.4 1351.7332906679007, 225.5 1348.7332906679007" 
+                stroke="#374151" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M 227.5 1344.7332906679007 L 389 1344.7332906679007" 
+                stroke="#374151" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        </g>
+      
+        </g>
+      
+        <g transform="rotate(-1.1328204354466025, 120, 1380)">
+          <path d="M 105 1375.9646880070518 L 112 1365.9646880070518 L 119 1375.9646880070518" stroke="#374151" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <text x="120" y="1367.9646880070518" font-family="'Reenie Beanie', cursive" font-size="14.5" font-weight="500" fill="#374151" letter-spacing="0.3">
+               ^ e * d ≡ 1 mod phi(n).
+          </text>
+        </g>
+      
+        <g transform="rotate(-0.5337924117537761, 100, 1414)">
+          <text x="100" y="1415.9788684855484" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Encryption: c = m^e mod n (using public key (e,n)).
+          </text>
+          
+        </g>
+      
+        <g transform="rotate(-0.4389370089705755, 100, 1448)">
+          <text x="100" y="1447.3983667505738" font-family="'Reenie Beanie', cursive" font-size="16" font-weight="500" fill="#374151" letter-spacing="0.3">
+            Decryption: m = c^d mod n (using private key (d,n)).
+          </text>
+          
+        </g>
+      
+    </svg>
+  
